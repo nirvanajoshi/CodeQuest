@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}CodeQuest — Learn, Solve, Compete{% endblock %}
+
+{% block content %}
+    <section class="hero">
+        <h1>Learn &bull; Solve &bull; Compete</h1>
+        <p>A gamified programming education platform for students and coding enthusiasts.</p>
+        {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn">Get started</a>
+        {% else %}
+            <a href="{% url 'profile' %}" class="btn">Go to your profile</a>
+        {% endif %}
+    </section>
+{% endblock %}

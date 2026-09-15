@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>{{ user.username }}'s profile</h1>
+    <dl class="profile-details">
+        <dt>Skill level</dt><dd>{{ profile.get_skill_level_display }}</dd>
+        <dt>College</dt><dd>{{ profile.college|default:"—" }}</dd>
+        <dt>Bio</dt><dd>{{ profile.bio|default:"—" }}</dd>
+        <dt>Total XP</dt><dd>{{ profile.total_xp }}</dd>
+        <dt>Current streak</dt><dd>{{ profile.current_streak }} day(s)</dd>
+        <dt>Joined</dt><dd>{{ profile.created_at|date:"M d, Y" }}</dd>
+    </dl>
+{% endblock %}

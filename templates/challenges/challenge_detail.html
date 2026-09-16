@@ -12,6 +12,12 @@
         <span>{{ challenge.lesson.course.title }} &middot; {{ challenge.lesson.title }}</span>
     </div>
 
+    {% if user.is_authenticated %}
+        <a href="{% url 'submit_solution' challenge.slug %}" class="btn">Submit a solution</a>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to submit a solution.</p>
+    {% endif %}
+
     <section>
         <h2>Description</h2>
         <p>{{ challenge.description|linebreaks }}</p>

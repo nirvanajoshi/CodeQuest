@@ -274,3 +274,60 @@ body {
     border-radius: 6px;
     overflow-x: auto;
 }
+
+.status-pending {
+    background: #e7f5ff;
+    color: #1971c2;
+}
+
+.status-accepted {
+    background: #ebfbee;
+    color: #2b8a3e;
+}
+
+.status-wrong_answer,
+.status-runtime_error {
+    background: #fff0f0;
+    color: #c92a2a;
+}
+
+.status-time_limit {
+    background: #fff9db;
+    color: #e67700;
+}
+
+.code-editor {
+    width: 100%;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+}
+
+.code-block {
+    background: #f1f3f5;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-family: "SFMono-Regular", Consolas, monospace;
+    font-size: 0.9rem;
+}
+
+.submission-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.submission-table th,
+.submission-table td {
+    text-align: left;
+    padding: 0.6rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.submission-table th {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+}

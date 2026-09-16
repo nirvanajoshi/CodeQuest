@@ -15,6 +15,7 @@
             <a href="{% url 'challenge_list' %}">Challenges</a>
             {% if user.is_authenticated %}
                 <span class="nav-user">{{ user.username }} · {{ user.profile.total_xp }} XP</span>
+                <a href="{% url 'submission_list' %}">My Submissions</a>
                 <a href="{% url 'profile' %}">Profile</a>
                 <form action="{% url 'logout' %}" method="post" class="inline-form">
                     {% csrf_token %}

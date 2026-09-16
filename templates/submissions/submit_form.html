@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Submit — {{ challenge.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'challenge_detail' challenge.slug %}">&larr; Back to {{ challenge.title }}</a>
+
+    <h1>Submit a solution</h1>
+    <p class="text-muted">{{ challenge.title }} &middot; {{ challenge.points }} pts</p>
+
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Submit</button>
+    </form>
+{% endblock %}

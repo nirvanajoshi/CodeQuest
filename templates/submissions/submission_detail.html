@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Submission #{{ submission.pk }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'submission_list' %}">&larr; Back to my submissions</a>
+
+    <h1>{{ submission.challenge.title }}</h1>
+    <div class="challenge-meta">
+        <span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span>
+        <span>{{ submission.get_language_display }}</span>
+        <span>Score: {{ submission.score }}</span>
+        {% if submission.execution_time %}
+            <span>{{ submission.execution_time }}s</span>
+        {% endif %}
+        <span>{{ submission.submitted_at|date:"M d, Y H:i" }}</span>
+    </div>
+
+    <h2>Source code</h2>
+    <pre class="code-block">{{ submission.source_code }}</pre>
+{% endblock %}

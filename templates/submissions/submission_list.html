@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}My Submissions — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>My submissions</h1>
+
+    {% if submissions %}
+        <table class="submission-table">
+            <thead>
+                <tr>
+                    <th>Challenge</th>
+                    <th>Language</th>
+                    <th>Status</th>
+                    <th>Score</th>
+                    <th>Submitted</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for submission in submissions %}
+                    <tr>
+                        <td><a href="{% url 'submission_detail' submission.pk %}">{{ submission.challenge.title }}</a></td>
+                        <td>{{ submission.get_language_display }}</td>
+                        <td><span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span></td>
+                        <td>{{ submission.score }}</td>
+                        <td>{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>You haven't submitted any solutions yet.</p>
+    {% endif %}
+{% endblock %}

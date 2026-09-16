@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'course_list' %}">&larr; Back to courses</a>
+
+    <h1>{{ course.title }}</h1>
+    <div class="challenge-meta">
+        <span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
+        {% if course.instructor %}
+            <span>by {{ course.instructor.username }}</span>
+        {% endif %}
+    </div>
+
+    {% if course.description %}
+        <p>{{ course.description|linebreaks }}</p>
+    {% endif %}
+
+    <h2>Lessons</h2>
+    {% if lessons %}
+        <ol class="lesson-list">
+            {% for lesson in lessons %}
+                <li class="lesson-item">
+                    <h3>{{ lesson.title }}</h3>
+                    <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
+
+                    {% if lesson.challenges.all %}
+                        <ul class="challenge-list">
+                            {% for challenge in lesson.challenges.all %}
+                                <li class="challenge-card">
+                                    <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
+                                        {{ challenge.title }}
+                                    </a>
+                                    <div class="challenge-meta">
+                                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                                        <span>{{ challenge.points }} pts</span>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No challenges in this lesson yet.</p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    {% else %}
+        <p>No lessons have been added to this course yet.</p>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ challenge.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'challenge_list' %}">&larr; Back to challenges</a>
+
+    <h1>{{ challenge.title }}</h1>
+    <div class="challenge-meta">
+        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+        <span>{{ challenge.points }} pts</span>
+        <span>{{ challenge.lesson.course.title }} &middot; {{ challenge.lesson.title }}</span>
+    </div>
+
+    <section>
+        <h2>Description</h2>
+        <p>{{ challenge.description|linebreaks }}</p>
+    </section>
+
+    {% if challenge.input_format %}
+        <section>
+            <h2>Input format</h2>
+            <p>{{ challenge.input_format|linebreaks }}</p>
+        </section>
+    {% endif %}
+
+    {% if challenge.output_format %}
+        <section>
+            <h2>Output format</h2>
+            <p>{{ challenge.output_format|linebreaks }}</p>
+        </section>
+    {% endif %}
+
+    {% if challenge.constraints %}
+        <section>
+            <h2>Constraints</h2>
+            <p>{{ challenge.constraints|linebreaks }}</p>
+        </section>
+    {% endif %}
+
+    {% if challenge.sample_input or challenge.sample_output %}
+        <section>
+            <h2>Sample</h2>
+            <div class="sample-io">
+                <div>
+                    <h3>Input</h3>
+                    <pre>{{ challenge.sample_input }}</pre>
+                </div>
+                <div>
+                    <h3>Output</h3>
+                    <pre>{{ challenge.sample_output }}</pre>
+                </div>
+            </div>
+        </section>
+    {% endif %}
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Challenges — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>Challenges</h1>
+
+    {% if challenges %}
+        <ul class="challenge-list">
+            {% for challenge in challenges %}
+                <li class="challenge-card">
+                    <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
+                        {{ challenge.title }}
+                    </a>
+                    <div class="challenge-meta">
+                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                        <span>{{ challenge.points }} pts</span>
+                        <span>{{ challenge.lesson.course.title }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No challenges are available yet.</p>
+    {% endif %}
+{% endblock %}

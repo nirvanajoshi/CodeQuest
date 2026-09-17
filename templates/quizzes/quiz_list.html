@@ -5,9 +5,9 @@
 {% block content %}
     <h1>Quizzes</h1>
 
-    {% if quizzes %}
+    {% if page_obj %}
         <ul class="challenge-list">
-            {% for quiz in quizzes %}
+            {% for quiz in page_obj %}
                 <li class="challenge-card">
                     <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
                     <div class="challenge-meta">
@@ -19,6 +19,7 @@
                 </li>
             {% endfor %}
         </ul>
+        {% include "partials/pagination.html" %}
     {% else %}
         <p>No quizzes are available yet.</p>
     {% endif %}

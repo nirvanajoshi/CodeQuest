@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}{{ lesson.title }} — {{ course.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
+
+    <h1>{{ lesson.title }}</h1>
+    <p class="text-muted">{{ lesson.estimated_minutes }} min</p>
+
+    {% if lesson.content %}
+        <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
+    {% else %}
+        <p class="text-muted">No content has been added to this lesson yet.</p>
+    {% endif %}
+
+    <h2>Challenges</h2>
+    {% if challenges %}
+        <ul class="challenge-list">
+            {% for challenge in challenges %}
+                <li class="challenge-card">
+                    <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
+                        {{ challenge.title }}
+                    </a>
+                    <div class="challenge-meta">
+                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                        <span>{{ challenge.points }} pts</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No challenges in this lesson yet.</p>
+    {% endif %}
+{% endblock %}

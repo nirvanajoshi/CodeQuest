@@ -4,6 +4,7 @@
 
 {% block content %}
     <h1>{{ user.username }}'s profile</h1>
+    <a href="{% url 'profile_edit' %}">Edit profile</a>
     <dl class="profile-details">
         <dt>Skill level</dt><dd>{{ profile.get_skill_level_display }}</dd>
         <dt>College</dt><dd>{{ profile.college|default:"—" }}</dd>

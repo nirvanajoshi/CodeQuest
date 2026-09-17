@@ -5,9 +5,20 @@
 {% block content %}
     <h1>Challenges</h1>
 
-    {% if challenges %}
+    <form method="get" class="filter-form">
+        <input type="text" name="q" placeholder="Search challenges…" value="{{ query }}">
+        <select name="difficulty">
+            <option value="">All difficulties</option>
+            {% for value, label in difficulty_choices %}
+                <option value="{{ value }}" {% if difficulty == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn">Filter</button>
+    </form>
+
+    {% if page_obj %}
         <ul class="challenge-list">
-            {% for challenge in challenges %}
+            {% for challenge in page_obj %}
                 <li class="challenge-card">
                     <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
                         {{ challenge.title }}
@@ -20,7 +31,8 @@
                 </li>
             {% endfor %}
         </ul>
+        {% include "partials/pagination.html" %}
     {% else %}
-        <p>No challenges are available yet.</p>
+        <p>No challenges match your search.</p>
     {% endif %}
 {% endblock %}

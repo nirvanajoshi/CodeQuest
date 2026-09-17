@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -10,7 +11,8 @@ from .models import Quiz, QuizAnswer, QuizAttempt
 
 def quiz_list(request):
     quizzes = Quiz.objects.filter(is_published=True).select_related("course")
-    return render(request, "quizzes/quiz_list.html", {"quizzes": quizzes})
+    page_obj = Paginator(quizzes, 10).get_page(request.GET.get("page"))
+    return render(request, "quizzes/quiz_list.html", {"page_obj": page_obj})
 
 
 def quiz_detail(request, pk):

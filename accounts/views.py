@@ -1,7 +1,10 @@
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import redirect, render
+
+from .forms import ProfileForm
 
 
 def register(request):
@@ -28,3 +31,17 @@ def profile(request):
         "xp_transactions": request.user.xp_transactions.all()[:10],
     }
     return render(request, "accounts/profile.html", context)
+
+
+@login_required
+def profile_edit(request):
+    if request.method == "POST":
+        form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Profile updated.")
+            return redirect("profile")
+    else:
+        form = ProfileForm(instance=request.user.profile)
+
+    return render(request, "accounts/profile_edit.html", {"form": form})

@@ -19,6 +19,9 @@
             {% if user.is_authenticated %}
                 <span class="nav-user">{{ user.username }} · {{ user.profile.total_xp }} XP</span>
                 <a href="{% url 'submission_list' %}">My Submissions</a>
+                <a href="{% url 'notification_list' %}">
+                    Notifications{% if unread_notification_count %} <span class="nav-badge">{{ unread_notification_count }}</span>{% endif %}
+                </a>
                 <a href="{% url 'profile' %}">Profile</a>
                 <form action="{% url 'logout' %}" method="post" class="inline-form">
                     {% csrf_token %}
@@ -42,5 +45,9 @@
     <main class="container">
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="site-footer">
+        <a href="{% url 'about' %}">About</a>
+    </footer>
 </body>
 </html>

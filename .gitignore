@@ -9,7 +9,8 @@ db.sqlite3
 media/*
 !media/.gitkeep
 
-staticfiles/
+staticfiles/*
+!staticfiles/.gitkeep
 
 *.log
 .DS_Store

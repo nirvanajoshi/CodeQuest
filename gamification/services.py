@@ -19,6 +19,7 @@ def _update_streak(profile, today):
 def _check_badges(user, profile):
     from quizzes.models import QuizAttempt
     from submissions.models import Submission
+    from notifications.services import notify
 
     solved_count = (
         Submission.objects.filter(user=user, status=Submission.Status.ACCEPTED)
@@ -47,7 +48,13 @@ def _check_badges(user, profile):
             qualifies = False
 
         if qualifies:
-            UserBadge.objects.get_or_create(user=user, badge=badge)
+            _, created = UserBadge.objects.get_or_create(user=user, badge=badge)
+            if created:
+                notify(
+                    user,
+                    f"You earned the '{badge.name}' badge! {badge.icon}",
+                    link="/accounts/profile/",
+                )
 
 
 @transaction.atomic
@@ -56,6 +63,7 @@ def record_solve(user, challenge):
     time a given challenge is solved, updates the daily streak on every
     accepted submission, and checks badge thresholds."""
     from submissions.models import Submission
+    from notifications.services import notify
 
     profile = user.profile
     today = datetime.date.today()
@@ -70,6 +78,11 @@ def record_solve(user, challenge):
             user=user, amount=challenge.points, reason=f"Solved '{challenge.title}'"
         )
         profile.total_xp += challenge.points
+        notify(
+            user,
+            f"Solved '{challenge.title}' (+{challenge.points} XP)",
+            link=f"/challenges/{challenge.slug}/",
+        )
 
     _update_streak(profile, today)
     profile.save()
@@ -81,6 +94,8 @@ def record_quiz_attempt(user, attempt):
     """Called after a quiz attempt is graded. Awards XP for a quiz's correct
     answers the first time it's completed, updates the daily streak, and
     checks badge thresholds (including quiz-score badges)."""
+    from notifications.services import notify
+
     profile = user.profile
     today = datetime.date.today()
 
@@ -98,6 +113,11 @@ def record_quiz_attempt(user, attempt):
                 user=user, amount=earned_points, reason=f"Completed quiz '{attempt.quiz.title}'"
             )
             profile.total_xp += earned_points
+        notify(
+            user,
+            f"Completed quiz '{attempt.quiz.title}' — {attempt.score}%",
+            link=f"/quizzes/attempts/{attempt.pk}/",
+        )
 
     _update_streak(profile, today)
     profile.save()

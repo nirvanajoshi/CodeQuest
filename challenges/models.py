@@ -24,6 +24,9 @@ class Challenge(models.Model):
     sample_output = models.TextField(blank=True)
     is_published = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ["-id"]
+
     def __str__(self):
         return self.title
 

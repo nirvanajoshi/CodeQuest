@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>Notifications</h1>
+
+    {% if notifications %}
+        <ul class="notification-list">
+            {% for notification in notifications %}
+                <li class="notification-item {% if not notification.is_read %}notification-unread{% endif %}">
+                    {% if notification.link %}
+                        <a href="{{ notification.link }}">{{ notification.message }}</a>
+                    {% else %}
+                        {{ notification.message }}
+                    {% endif %}
+                    <span class="text-muted">{{ notification.created_at|date:"M d, Y H:i" }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no notifications yet.</p>
+    {% endif %}
+{% endblock %}

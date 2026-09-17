@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}New Discussion — {{ course.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'discussion_list' course.slug %}">&larr; Back to discussions</a>
+
+    <h1>Start a discussion</h1>
+    <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Post</button>
+    </form>
+{% endblock %}

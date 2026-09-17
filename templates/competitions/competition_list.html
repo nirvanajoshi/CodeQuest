@@ -5,9 +5,9 @@
 {% block content %}
     <h1>Competitions</h1>
 
-    {% if competitions %}
+    {% if page_obj %}
         <ul class="challenge-list">
-            {% for competition in competitions %}
+            {% for competition in page_obj %}
                 <li class="challenge-card">
                     <a href="{% url 'competition_detail' competition.pk %}" class="challenge-title">
                         {{ competition.title }}
@@ -19,6 +19,7 @@
                 </li>
             {% endfor %}
         </ul>
+        {% include "partials/pagination.html" %}
     {% else %}
         <p>No competitions have been scheduled yet.</p>
     {% endif %}

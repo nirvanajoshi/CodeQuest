@@ -18,13 +18,15 @@
     {% endif %}
 
     <a href="{% url 'course_leaderboard' course.slug %}">View course leaderboard</a>
+    &middot;
+    <a href="{% url 'discussion_list' course.slug %}">Discussions</a>
 
     <h2>Lessons</h2>
     {% if lessons %}
         <ol class="lesson-list">
             {% for lesson in lessons %}
                 <li class="lesson-item">
-                    <h3>{{ lesson.title }}</h3>
+                    <h3><a href="{% url 'lesson_detail' course.slug lesson.pk %}">{{ lesson.title }}</a></h3>
                     <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
 
                     {% if lesson.challenges.all %}

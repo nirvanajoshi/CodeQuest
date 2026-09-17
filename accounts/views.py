@@ -22,4 +22,9 @@ def register(request):
 
 @login_required
 def profile(request):
-    return render(request, "accounts/profile.html", {"profile": request.user.profile})
+    context = {
+        "profile": request.user.profile,
+        "badges": request.user.badges.select_related("badge"),
+        "xp_transactions": request.user.xp_transactions.all()[:10],
+    }
+    return render(request, "accounts/profile.html", context)

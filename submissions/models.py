@@ -32,6 +32,7 @@ class Submission(models.Model):
     )
     score = models.PositiveIntegerField(default=0)
     execution_time = models.FloatField(null=True, blank=True, help_text="Seconds")
+    feedback = models.TextField(blank=True, help_text="Judge output shown to the user")
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

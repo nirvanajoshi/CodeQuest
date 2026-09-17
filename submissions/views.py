@@ -2,8 +2,10 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
 
 from challenges.models import Challenge
+from gamification.services import record_solve
 
 from .forms import SubmissionForm
+from .grading import grade_submission
 from .models import Submission
 
 
@@ -18,6 +20,11 @@ def submit_solution(request, slug):
             submission.user = request.user
             submission.challenge = challenge
             submission.save()
+
+            grade_submission(submission)
+            if submission.status == Submission.Status.ACCEPTED:
+                record_solve(request.user, challenge)
+
             return redirect("submission_detail", pk=submission.pk)
     else:
         form = SubmissionForm()

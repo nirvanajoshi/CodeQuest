@@ -16,6 +16,11 @@
         <span>{{ submission.submitted_at|date:"M d, Y H:i" }}</span>
     </div>
 
+    {% if submission.feedback %}
+        <h2>Judge feedback</h2>
+        <pre class="code-block feedback-block">{{ submission.feedback }}</pre>
+    {% endif %}
+
     <h2>Source code</h2>
     <pre class="code-block">{{ submission.source_code }}</pre>
 {% endblock %}

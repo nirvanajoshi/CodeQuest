@@ -21,6 +21,9 @@ class Profile(models.Model):
     )
     total_xp = models.PositiveIntegerField(default=0)
     current_streak = models.PositiveIntegerField(default=0)
+    last_activity_date = models.DateField(
+        null=True, blank=True, help_text="Last day the user solved a challenge, for streak tracking"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

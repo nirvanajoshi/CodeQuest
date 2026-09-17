@@ -38,5 +38,8 @@ class TestCase(models.Model):
     time_limit = models.FloatField(default=1.0, help_text="Seconds")
     memory_limit = models.PositiveIntegerField(default=256, help_text="Megabytes")
 
+    class Meta:
+        ordering = ["id"]
+
     def __str__(self):
         return f"TestCase for {self.challenge.title}"

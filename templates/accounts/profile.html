@@ -12,4 +12,38 @@
         <dt>Current streak</dt><dd>{{ profile.current_streak }} day(s)</dd>
         <dt>Joined</dt><dd>{{ profile.created_at|date:"M d, Y" }}</dd>
     </dl>
+
+    <h2>Badges</h2>
+    {% if badges %}
+        <ul class="badge-list">
+            {% for user_badge in badges %}
+                <li class="badge-item" title="{{ user_badge.badge.description }}">
+                    <span class="badge-icon">{{ user_badge.badge.icon }}</span>
+                    <span>{{ user_badge.badge.name }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No badges earned yet — solve a challenge to get started.</p>
+    {% endif %}
+
+    <h2>Recent XP</h2>
+    {% if xp_transactions %}
+        <table class="submission-table">
+            <thead>
+                <tr><th>Reason</th><th>Amount</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for tx in xp_transactions %}
+                    <tr>
+                        <td>{{ tx.reason }}</td>
+                        <td>{{ tx.amount }}</td>
+                        <td>{{ tx.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">No XP earned yet.</p>
+    {% endif %}
 {% endblock %}

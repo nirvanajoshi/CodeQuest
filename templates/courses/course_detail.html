@@ -48,4 +48,22 @@
     {% else %}
         <p>No lessons have been added to this course yet.</p>
     {% endif %}
+
+    <h2>Quizzes</h2>
+    {% if quizzes %}
+        <ul class="challenge-list">
+            {% for quiz in quizzes %}
+                <li class="challenge-card">
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
+                    <div class="challenge-meta">
+                        <span>{{ quiz.questions.count }} question(s)</span>
+                        <span>{{ quiz.time_limit }} min</span>
+                        <span>Pass: {{ quiz.passing_score }}%</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No quizzes for this course yet.</p>
+    {% endif %}
 {% endblock %}

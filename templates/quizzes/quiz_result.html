@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Result — {{ attempt.quiz.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'quiz_detail' attempt.quiz.pk %}">&larr; Back to {{ attempt.quiz.title }}</a>
+
+    <h1>{{ attempt.quiz.title }} — results</h1>
+    <div class="challenge-meta">
+        <span class="badge {% if attempt.passed %}status-accepted{% else %}status-wrong_answer{% endif %}">
+            {{ attempt.score }}% &middot; {% if attempt.passed %}Passed{% else %}Failed{% endif %}
+        </span>
+        <span>Pass mark: {{ attempt.quiz.passing_score }}%</span>
+    </div>
+
+    <h2>Answers</h2>
+    <ol class="lesson-list">
+        {% for answer in answers %}
+            <li class="lesson-item">
+                <p>{{ answer.question.question_text }}</p>
+                <p>Your answer: {{ answer.selected_option|upper }}) {{ answer.selected_option_text }}</p>
+                {% if answer.is_correct %}
+                    <span class="badge status-accepted">Correct</span>
+                {% else %}
+                    <span class="badge status-wrong_answer">Incorrect</span>
+                    — correct answer: {{ answer.question.correct_option|upper }}) {{ answer.question.correct_answer_text }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+{% endblock %}

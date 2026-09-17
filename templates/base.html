@@ -13,6 +13,7 @@
         <div class="nav-links">
             <a href="{% url 'course_list' %}">Courses</a>
             <a href="{% url 'challenge_list' %}">Challenges</a>
+            <a href="{% url 'quiz_list' %}">Quizzes</a>
             {% if user.is_authenticated %}
                 <span class="nav-user">{{ user.username }} · {{ user.profile.total_xp }} XP</span>
                 <a href="{% url 'submission_list' %}">My Submissions</a>

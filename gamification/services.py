@@ -17,6 +17,7 @@ def _update_streak(profile, today):
 
 
 def _check_badges(user, profile):
+    from quizzes.models import QuizAttempt
     from submissions.models import Submission
 
     solved_count = (
@@ -24,6 +25,13 @@ def _check_badges(user, profile):
         .values("challenge_id")
         .distinct()
         .count()
+    )
+    best_quiz_score = (
+        QuizAttempt.objects.filter(user=user, completed_at__isnull=False)
+        .order_by("-score")
+        .values_list("score", flat=True)
+        .first()
+        or 0
     )
 
     already_earned_ids = UserBadge.objects.filter(user=user).values_list("badge_id", flat=True)
@@ -33,6 +41,8 @@ def _check_badges(user, profile):
             qualifies = solved_count >= badge.requirement_value
         elif badge.requirement_type == Badge.RequirementType.STREAK_DAYS:
             qualifies = profile.current_streak >= badge.requirement_value
+        elif badge.requirement_type == Badge.RequirementType.QUIZ_SCORE:
+            qualifies = best_quiz_score >= badge.requirement_value
         else:
             qualifies = False
 
@@ -60,6 +70,34 @@ def record_solve(user, challenge):
             user=user, amount=challenge.points, reason=f"Solved '{challenge.title}'"
         )
         profile.total_xp += challenge.points
+
+    _update_streak(profile, today)
+    profile.save()
+    _check_badges(user, profile)
+
+
+@transaction.atomic
+def record_quiz_attempt(user, attempt):
+    """Called after a quiz attempt is graded. Awards XP for a quiz's correct
+    answers the first time it's completed, updates the daily streak, and
+    checks badge thresholds (including quiz-score badges)."""
+    profile = user.profile
+    today = datetime.date.today()
+
+    completed_count = attempt.quiz.attempts.filter(
+        user=user, completed_at__isnull=False
+    ).count()
+    first_completion = completed_count == 1
+
+    if first_completion:
+        earned_points = sum(
+            answer.question.points for answer in attempt.answers.filter(is_correct=True)
+        )
+        if earned_points:
+            XPTransaction.objects.create(
+                user=user, amount=earned_points, reason=f"Completed quiz '{attempt.quiz.title}'"
+            )
+            profile.total_xp += earned_points
 
     _update_streak(profile, today)
     profile.save()

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'challenges',
     'submissions',
     'gamification',
+    'quizzes',
 ]
 
 MIDDLEWARE = [

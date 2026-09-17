@@ -17,6 +17,9 @@ def course_detail(request, slug):
     lessons = course.lessons.prefetch_related(
         Prefetch("challenges", queryset=published_challenges)
     )
+    quizzes = course.quizzes.filter(is_published=True)
     return render(
-        request, "courses/course_detail.html", {"course": course, "lessons": lessons}
+        request,
+        "courses/course_detail.html",
+        {"course": course, "lessons": lessons, "quizzes": quizzes},
     )

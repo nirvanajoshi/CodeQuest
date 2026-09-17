@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>{{ quiz.title }}</h1>
+    <p>Time limit: {{ quiz.time_limit }} minute(s) &middot; <span id="time-remaining"></span></p>
+
+    <form method="post" class="form" id="quiz-form">
+        {% csrf_token %}
+        <input type="hidden" name="attempt_id" value="{{ attempt.pk }}">
+        {{ form.as_p }}
+        <button type="submit" class="btn">Submit quiz</button>
+    </form>
+
+    <script>
+        (function () {
+            const startedAt = new Date("{{ attempt.started_at|date:'c' }}").getTime();
+            const timeLimitMs = {{ quiz.time_limit }} * 60 * 1000;
+            const deadline = startedAt + timeLimitMs;
+            const display = document.getElementById("time-remaining");
+            const form = document.getElementById("quiz-form");
+            let submitted = false;
+
+            function tick() {
+                const remaining = deadline - Date.now();
+                if (remaining <= 0) {
+                    display.textContent = "Time's up!";
+                    if (!submitted) {
+                        submitted = true;
+                        form.submit();
+                    }
+                    return;
+                }
+                const minutes = Math.floor(remaining / 60000);
+                const seconds = Math.floor((remaining % 60000) / 1000);
+                display.textContent = minutes + ":" + String(seconds).padStart(2, "0") + " remaining";
+                setTimeout(tick, 1000);
+            }
+
+            form.addEventListener("submit", function () {
+                submitted = true;
+            });
+
+            tick();
+        })();
+    </script>
+{% endblock %}

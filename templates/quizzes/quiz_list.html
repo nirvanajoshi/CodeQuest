@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Quizzes — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>Quizzes</h1>
+
+    {% if quizzes %}
+        <ul class="challenge-list">
+            {% for quiz in quizzes %}
+                <li class="challenge-card">
+                    <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
+                    <div class="challenge-meta">
+                        <span>{{ quiz.course.title }}</span>
+                        <span>{{ quiz.questions.count }} question(s)</span>
+                        <span>{{ quiz.time_limit }} min</span>
+                        <span>Pass: {{ quiz.passing_score }}%</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No quizzes are available yet.</p>
+    {% endif %}
+{% endblock %}

@@ -6,6 +6,7 @@ class Badge(models.Model):
     class RequirementType(models.TextChoices):
         CHALLENGES_SOLVED = "challenges_solved", "Challenges solved"
         STREAK_DAYS = "streak_days", "Streak (days)"
+        QUIZ_SCORE = "quiz_score", "Quiz score (%)"
 
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)

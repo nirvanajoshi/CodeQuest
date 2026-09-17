@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}{{ quiz.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'quiz_list' %}">&larr; Back to quizzes</a>
+
+    <h1>{{ quiz.title }}</h1>
+    <div class="challenge-meta">
+        <span>{{ quiz.course.title }}</span>
+        <span>{{ quiz.questions.count }} question(s)</span>
+        <span>{{ quiz.time_limit }} min</span>
+        <span>Pass: {{ quiz.passing_score }}%</span>
+    </div>
+
+    {% if quiz.description %}
+        <p>{{ quiz.description|linebreaks }}</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <a href="{% url 'quiz_take' quiz.pk %}" class="btn">
+            {% if attempts %}Retake quiz{% else %}Start quiz{% endif %}
+        </a>
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to take this quiz.</p>
+    {% endif %}
+
+    {% if attempts %}
+        <h2>Your past attempts</h2>
+        <table class="submission-table">
+            <thead>
+                <tr><th>Score</th><th>Result</th><th>Date</th></tr>
+            </thead>
+            <tbody>
+                {% for attempt in attempts %}
+                    <tr>
+                        <td><a href="{% url 'quiz_result' attempt.pk %}">{{ attempt.score }}%</a></td>
+                        <td>
+                            {% if attempt.passed %}
+                                <span class="badge status-accepted">Passed</span>
+                            {% else %}
+                                <span class="badge status-wrong_answer">Failed</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ attempt.completed_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}

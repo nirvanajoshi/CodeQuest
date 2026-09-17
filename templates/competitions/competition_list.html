@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Competitions — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>Competitions</h1>
+
+    {% if competitions %}
+        <ul class="challenge-list">
+            {% for competition in competitions %}
+                <li class="challenge-card">
+                    <a href="{% url 'competition_detail' competition.pk %}" class="challenge-title">
+                        {{ competition.title }}
+                    </a>
+                    <div class="challenge-meta">
+                        <span class="badge status-{{ competition.status }}">{{ competition.status.label }}</span>
+                        <span>{{ competition.start_time|date:"M d, Y H:i" }} &rarr; {{ competition.end_time|date:"M d, Y H:i" }}</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No competitions have been scheduled yet.</p>
+    {% endif %}
+{% endblock %}

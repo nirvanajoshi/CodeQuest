@@ -17,6 +17,8 @@
         <p>{{ course.description|linebreaks }}</p>
     {% endif %}
 
+    <a href="{% url 'course_leaderboard' course.slug %}">View course leaderboard</a>
+
     <h2>Lessons</h2>
     {% if lessons %}
         <ol class="lesson-list">

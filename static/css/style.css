@@ -296,6 +296,21 @@ body {
     color: #e67700;
 }
 
+.status-upcoming {
+    background: #e7f5ff;
+    color: #1971c2;
+}
+
+.status-ongoing {
+    background: #ebfbee;
+    color: #2b8a3e;
+}
+
+.status-completed {
+    background: #f1f3f5;
+    color: var(--color-muted);
+}
+
 .code-editor {
     width: 100%;
     font-family: "SFMono-Regular", Consolas, monospace;
@@ -357,5 +372,10 @@ body {
 .submission-table th {
     color: var(--color-muted);
     font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.leaderboard-me {
+    background: #edf2ff;
     font-weight: 600;
 }

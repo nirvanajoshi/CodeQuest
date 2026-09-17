@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}{{ competition.title }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'competition_list' %}">&larr; Back to competitions</a>
+
+    <h1>{{ competition.title }}</h1>
+    <div class="challenge-meta">
+        <span class="badge status-{{ competition.status }}">{{ competition.status.label }}</span>
+        <span>{{ competition.start_time|date:"M d, Y H:i" }} &rarr; {{ competition.end_time|date:"M d, Y H:i" }}</span>
+    </div>
+
+    {% if competition.description %}
+        <p>{{ competition.description|linebreaks }}</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        {% if is_registered %}
+            <p>You are registered for this competition.</p>
+            {% if competition.status != "completed" %}
+                <form method="post" action="{% url 'competition_unregister' competition.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn">Unregister</button>
+                </form>
+            {% endif %}
+        {% elif competition.is_registration_open %}
+            <form method="post" action="{% url 'competition_register' competition.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="btn">Register</button>
+            </form>
+        {% else %}
+            <p class="text-muted">Registration is closed — this competition has ended.</p>
+        {% endif %}
+    {% else %}
+        <p><a href="{% url 'login' %}">Login</a> to register.</p>
+    {% endif %}
+
+    <h2>Challenges</h2>
+    {% if comp_challenges %}
+        <ul class="challenge-list">
+            {% for cc in comp_challenges %}
+                <li class="challenge-card">
+                    <a href="{% url 'challenge_detail' cc.challenge.slug %}" class="challenge-title">
+                        {{ cc.challenge.title }}
+                    </a>
+                    <div class="challenge-meta">
+                        <span class="badge badge-{{ cc.challenge.difficulty }}">{{ cc.challenge.get_difficulty_display }}</span>
+                        <span>{{ cc.points }} pts (contest)</span>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">No challenges have been added to this competition yet.</p>
+    {% endif %}
+
+    <h2>Leaderboard</h2>
+    {% if leaderboard %}
+        <table class="submission-table">
+            <thead>
+                <tr><th>Rank</th><th>User</th><th>Points</th></tr>
+            </thead>
+            <tbody>
+                {% for row in leaderboard %}
+                    <tr class="{% if row.profile.user == user %}leaderboard-me{% endif %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.profile.user.username }}</td>
+                        <td>{{ row.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p class="text-muted">No registered participants have submitted yet.</p>
+    {% endif %}
+{% endblock %}

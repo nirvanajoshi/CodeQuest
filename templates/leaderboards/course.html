@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}{{ course.title }} Leaderboard — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
+
+    <h1>{{ course.title }} leaderboard</h1>
+
+    {% if rankings %}
+        <table class="submission-table">
+            <thead>
+                <tr><th>Rank</th><th>User</th><th>Points</th></tr>
+            </thead>
+            <tbody>
+                {% for row in rankings %}
+                    <tr class="{% if row.profile.user == user %}leaderboard-me{% endif %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.profile.user.username }}</td>
+                        <td>{{ row.points }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No submissions for this course's challenges yet.</p>
+    {% endif %}
+{% endblock %}

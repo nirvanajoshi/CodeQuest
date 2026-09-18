@@ -109,6 +109,21 @@ This also seeds four starter badges (First Steps, Problem Solver, Consistent Lea
 python manage.py createsuperuser
 ```
 
+### 6b. Seed demo content (optional but recommended)
+
+A fresh database has no courses, challenges, quizzes, or competitions — so a
+newly registered user has nothing to solve and no way to earn XP or badges.
+Seed some starter content:
+
+```bash
+python manage.py seed_demo_data
+```
+
+This creates 3 published courses (Python Fundamentals, JavaScript Basics,
+Data Structures & Algorithms) with lessons, 7 solvable challenges with test
+cases, 2 quizzes, and a running "Weekly Sprint" competition. It's safe to run
+more than once — it won't create duplicates.
+
 ### 7. Run the dev server
 
 ```bash

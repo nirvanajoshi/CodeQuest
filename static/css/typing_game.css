@@ -1,0 +1,260 @@
+/* `display` rules below (e.g. `.battle-arena { display: flex }`) have the
+   same specificity as the browser's default `[hidden] { display: none }`
+   rule, and author styles win ties — so without this, a mode panel that
+   sets `display` stays visible even while `hidden` is set via JS. */
+[hidden] {
+    display: none !important;
+}
+
+.typing-stats-bar {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    box-shadow: var(--shadow-sm);
+}
+
+.typing-stats-bar strong {
+    color: var(--color-text);
+    font-size: 1.05rem;
+}
+
+.typing-passage-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.typing-passage {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    line-height: 1.9;
+    letter-spacing: 0.01em;
+    box-shadow: var(--shadow-sm);
+}
+
+.char {
+    color: var(--color-muted);
+    transition: color 60ms ease;
+}
+
+.char-correct {
+    color: var(--color-success);
+}
+
+.char-incorrect {
+    color: var(--color-danger);
+    background: var(--color-danger-bg);
+    border-radius: 2px;
+}
+
+.char-current {
+    border-left: 2px solid var(--color-primary);
+    animation: typing-cursor-blink 1s step-end infinite;
+}
+
+@keyframes typing-cursor-blink {
+    50% { border-color: transparent; }
+}
+
+.typing-result {
+    margin-top: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem 1.75rem;
+    box-shadow: var(--shadow-md);
+}
+
+/* ---------- Car Race ---------- */
+
+.race-track {
+    position: relative;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.race-lane {
+    position: relative;
+    height: 2.4rem;
+    background: var(--color-surface-muted);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.6rem;
+}
+
+.race-lane:last-of-type {
+    margin-bottom: 0.75rem;
+}
+
+.race-car {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 1.6rem;
+    transition: left 120ms linear;
+}
+
+.race-finish {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.75rem;
+    font-size: 1.4rem;
+}
+
+/* ---------- Boss Battle ---------- */
+
+.battle-arena {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.battle-arena.shake {
+    animation: typing-shake 200ms ease;
+}
+
+@keyframes typing-shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.fighter {
+    flex: 1;
+}
+
+.fighter-label {
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+}
+
+.hp-bar {
+    height: 1rem;
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    width: 100%;
+    background: var(--color-success);
+    transition: width 120ms linear;
+}
+
+.hp-fill-boss {
+    background: var(--color-danger);
+}
+
+/* ---------- Rocket Launch ---------- */
+
+.rocket-track {
+    display: flex;
+    gap: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: var(--shadow-sm);
+    align-items: stretch;
+    height: 220px;
+}
+
+.fuel-gauge {
+    width: 1.5rem;
+    background: var(--color-surface-muted);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+}
+
+.fuel-fill {
+    width: 100%;
+    background: var(--color-warning);
+    transition: height 120ms linear;
+}
+
+.rocket-shaft {
+    position: relative;
+    flex: 1;
+    background: linear-gradient(to top, var(--color-surface-muted), transparent);
+    border-radius: var(--radius-sm);
+}
+
+.rocket {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    transition: bottom 120ms linear;
+}
+
+.orbit-line {
+    position: absolute;
+    top: 0.5rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+    border-top: 1px dashed var(--color-border);
+    padding-top: 0.25rem;
+}
+
+/* ---------- Word Rain ---------- */
+
+.word-rain-area {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.lives {
+    font-size: 1.2rem;
+}
+
+.rain-zone {
+    position: relative;
+    height: 320px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.falling-word {
+    position: absolute;
+    top: 0;
+    padding: 0.3rem 0.7rem;
+    background: var(--color-primary-light);
+    color: var(--color-primary-dark);
+    border-radius: var(--radius-sm);
+    font-family: var(--font-mono);
+    font-weight: 600;
+    transition: top linear;
+}

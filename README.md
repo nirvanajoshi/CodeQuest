@@ -23,6 +23,7 @@ A gamified programming education platform. Users solve coding challenges, take q
 | `competitions` | Scheduled contests with their own point values and leaderboard |
 | `community` | Per-course discussions, comments, comment reports |
 | `notifications` | In-app notifications (badge earned, challenge solved, quiz completed, new comment) |
+| `typing_game` | The default game everyone can play — one typing test, five modes: Classic Sprint, Car Race, Boss Battle, Rocket Launch, Word Rain. Playable without an account; logged-in players earn XP (once per mode per day), unlock the "Speed Typer" badge, and appear on the typing leaderboard. |
 | `core` | Home page, about page |
 
 ### Code execution / grading

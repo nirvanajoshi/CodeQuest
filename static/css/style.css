@@ -223,6 +223,26 @@ a:hover {
     transform: translateY(0);
 }
 
+.btn-secondary {
+    display: inline-block;
+    background: var(--color-surface);
+    color: var(--color-text);
+    padding: 0.6rem 1.45rem;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.btn-secondary:hover {
+    color: var(--color-primary);
+    border-color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
 /* ---------- Forms ---------- */
 
 .form p {

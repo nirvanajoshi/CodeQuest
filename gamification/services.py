@@ -19,6 +19,7 @@ def _update_streak(profile, today):
 def _check_badges(user, profile):
     from quizzes.models import QuizAttempt
     from submissions.models import Submission
+    from typing_game.models import TypingAttempt
     from notifications.services import notify
 
     solved_count = (
@@ -34,6 +35,13 @@ def _check_badges(user, profile):
         .first()
         or 0
     )
+    best_wpm = (
+        TypingAttempt.objects.filter(user=user)
+        .order_by("-wpm")
+        .values_list("wpm", flat=True)
+        .first()
+        or 0
+    )
 
     already_earned_ids = UserBadge.objects.filter(user=user).values_list("badge_id", flat=True)
 
@@ -44,6 +52,8 @@ def _check_badges(user, profile):
             qualifies = profile.current_streak >= badge.requirement_value
         elif badge.requirement_type == Badge.RequirementType.QUIZ_SCORE:
             qualifies = best_quiz_score >= badge.requirement_value
+        elif badge.requirement_type == Badge.RequirementType.TYPING_WPM:
+            qualifies = best_wpm >= badge.requirement_value
         else:
             qualifies = False
 
@@ -87,6 +97,47 @@ def record_solve(user, challenge):
     _update_streak(profile, today)
     profile.save()
     _check_badges(user, profile)
+
+
+@transaction.atomic
+def record_typing_attempt(user, attempt):
+    """Called after a typing-game attempt is recorded. Awards a small amount
+    of XP based on speed and accuracy — capped, and only for a user's first
+    attempt of the day in that mode, to keep the typing game from becoming a
+    free XP farm — updates the daily streak, and checks badge thresholds
+    (including typing-speed badges). Returns the XP awarded (0 if none)."""
+    from notifications.services import notify
+    from typing_game.models import TypingAttempt
+
+    profile = user.profile
+    today = datetime.date.today()
+
+    already_today = (
+        TypingAttempt.objects.filter(user=user, mode=attempt.mode, created_at__date=today)
+        .exclude(pk=attempt.pk)
+        .exists()
+    )
+
+    xp_awarded = 0
+    if not already_today:
+        xp_awarded = min(round(attempt.wpm * attempt.accuracy / 100), 60)
+        if xp_awarded:
+            XPTransaction.objects.create(
+                user=user,
+                amount=xp_awarded,
+                reason=f"Typing game ({attempt.get_mode_display()}) — {attempt.wpm} WPM",
+            )
+            profile.total_xp += xp_awarded
+            notify(
+                user,
+                f"Typing game: +{xp_awarded} XP ({attempt.wpm} WPM, {attempt.accuracy}% accuracy)",
+                link="/typing/",
+            )
+
+    _update_streak(profile, today)
+    profile.save()
+    _check_badges(user, profile)
+    return xp_awarded
 
 
 @transaction.atomic

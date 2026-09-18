@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'competitions',
     'notifications',
     'community',
+    'typing_game',
     'core',
 ]
 

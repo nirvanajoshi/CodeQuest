@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}Result — {{ mode_label }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>
+        {% if attempt.outcome == "won" %}🏆 You won!
+        {% elif attempt.outcome == "lost" %}💥 Not quite — try again
+        {% else %}✅ Finished
+        {% endif %}
+    </h1>
+    <p class="text-muted">{{ mode_label }}</p>
+
+    <dl class="profile-details">
+        <dt>WPM</dt><dd>{{ attempt.wpm }}</dd>
+        <dt>Accuracy</dt><dd>{{ attempt.accuracy }}%</dd>
+        <dt>Duration</dt><dd>{{ attempt.duration_seconds|floatformat:1 }}s</dd>
+        <dt>XP earned</dt>
+        <dd>
+            {% if xp_awarded %}
+                +{{ xp_awarded }} XP
+            {% else %}
+                0 XP (you already banked XP for this mode today — come back tomorrow)
+            {% endif %}
+        </dd>
+    </dl>
+
+    <p style="margin-top: 1.5rem;">
+        <a href="{% url 'typing_game_play' attempt.mode %}" class="btn">Play again</a>
+        <a href="{% url 'typing_game_home' %}" class="btn-secondary">Choose another mode</a>
+        <a href="{% url 'typing_leaderboard' %}" class="btn-secondary">Leaderboard</a>
+    </p>
+{% endblock %}

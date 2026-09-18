@@ -30,6 +30,7 @@ urlpatterns = [
     path('competitions/', include('competitions.urls')),
     path('notifications/', include('notifications.urls')),
     path('community/', include('community.urls')),
+    path('typing/', include('typing_game.urls')),
     path('', include('core.urls')),
 ]
 

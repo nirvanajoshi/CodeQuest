@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ mode_label }} — CodeQuest{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/typing_game.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="typing-game" id="typing-game" data-mode="{{ mode }}" data-difficulty="{{ difficulty }}">
+        <a href="{% url 'typing_game_home' %}" class="text-muted">&larr; Choose a different mode</a>
+        <h1>{{ mode_icon }} {{ mode_label }}</h1>
+
+        <div class="typing-stats-bar">
+            <span>WPM <strong id="stat-wpm">0</strong></span>
+            <span>Accuracy <strong id="stat-accuracy">100</strong>%</span>
+            <span>Time <strong id="stat-timer">0.0</strong>s</span>
+        </div>
+
+        <!-- Car Race -->
+        <div class="race-track" id="race-track" hidden>
+            <div class="race-lane">
+                <span class="race-car" id="player-car" title="You">🏎️</span>
+            </div>
+            <div class="race-lane">
+                <span class="race-car" id="rival-car" title="Rival">🚙</span>
+            </div>
+            <div class="race-finish">🏁</div>
+        </div>
+
+        <!-- Boss Battle -->
+        <div class="battle-arena" id="battle-arena" hidden>
+            <div class="fighter">
+                <div class="fighter-label">You</div>
+                <div class="hp-bar"><div class="hp-fill" id="player-hp"></div></div>
+            </div>
+            <div class="fighter">
+                <div class="fighter-label">Bug Boss 👾</div>
+                <div class="hp-bar"><div class="hp-fill hp-fill-boss" id="boss-hp"></div></div>
+            </div>
+        </div>
+
+        <!-- Rocket Launch -->
+        <div class="rocket-track" id="rocket-track" hidden>
+            <div class="fuel-gauge"><div class="fuel-fill" id="fuel-fill"></div></div>
+            <div class="rocket-shaft">
+                <div class="orbit-line">🛰️ orbit</div>
+                <div class="rocket" id="rocket">🚀</div>
+            </div>
+        </div>
+
+        <!-- Word Rain -->
+        <div class="word-rain-area" id="word-rain-area" hidden>
+            <div class="lives" id="lives"></div>
+            <div class="rain-zone" id="rain-zone"></div>
+            <input type="text" id="word-input" class="code-editor" autocomplete="off"
+                   autocapitalize="off" spellcheck="false" placeholder="Type the falling word…">
+        </div>
+
+        <!-- Classic / Car Race / Boss Battle / Rocket Launch passage -->
+        <div class="typing-passage-wrap" id="typing-passage-wrap">
+            <div class="typing-passage" id="typing-passage"></div>
+            <input type="text" id="type-input" class="code-editor" autocomplete="off"
+                   autocapitalize="off" spellcheck="false" placeholder="Start typing here…">
+        </div>
+
+        <div class="typing-result" id="typing-result" hidden></div>
+
+        <form method="post" action="{% url 'typing_record_attempt' %}" id="attempt-form" hidden>
+            {% csrf_token %}
+            <input type="hidden" name="mode" value="{{ mode }}">
+            <input type="hidden" name="text_id" value="{{ text.id|default_if_none:'' }}">
+            <input type="hidden" name="wpm" id="field-wpm">
+            <input type="hidden" name="accuracy" id="field-accuracy">
+            <input type="hidden" name="duration" id="field-duration">
+            <input type="hidden" name="outcome" id="field-outcome">
+        </form>
+    </div>
+
+    <script>
+        window.TYPING_GAME_TEXT = {{ text_json|safe }};
+        window.TYPING_GAME_WORDS = {{ words_json|safe }};
+        window.TYPING_GAME_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
+    </script>
+    <script src="{% static 'js/typing_game.js' %}"></script>
+{% endblock %}

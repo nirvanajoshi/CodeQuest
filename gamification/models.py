@@ -7,6 +7,7 @@ class Badge(models.Model):
         CHALLENGES_SOLVED = "challenges_solved", "Challenges solved"
         STREAK_DAYS = "streak_days", "Streak (days)"
         QUIZ_SCORE = "quiz_score", "Quiz score (%)"
+        TYPING_WPM = "typing_wpm", "Typing speed (WPM)"
 
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)

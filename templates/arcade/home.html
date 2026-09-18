@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}Arcade — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>🕹️ Arcade</h1>
+    <p class="text-muted">
+        Quick, simple games — no coding required. Anyone can play; log in to
+        earn XP and land on the leaderboard.
+    </p>
+
+    <ul class="challenge-list">
+        {% for game in games %}
+            <li class="challenge-card">
+                <a href="{% url 'arcade_play' game.key %}" class="challenge-title">
+                    <span class="badge-icon">{{ game.icon }}</span> {{ game.label }}
+                </a>
+                <p class="text-muted">{{ game.description }}</p>
+                <a href="{% url 'arcade_play' game.key %}" class="btn">Play</a>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <p style="margin-top: 2rem;">
+        <a href="{% url 'arcade_leaderboard' %}">View the arcade leaderboard &rarr;</a>
+    </p>
+{% endblock %}

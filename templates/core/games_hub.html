@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Games — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>🎮 Games</h1>
+    <p class="text-muted">
+        Take a break from the challenges — everyone can play these, no
+        account required. Log in to earn XP, unlock badges, and land on the
+        leaderboards.
+    </p>
+
+    <h2>⌨️ Typing Game</h2>
+    <p class="text-muted">One typing test, five ways to play it.</p>
+    <ul class="challenge-list">
+        {% for mode in typing_modes %}
+            <li class="challenge-card">
+                <a href="{% url 'typing_game_play' mode.key %}" class="challenge-title">
+                    <span class="badge-icon">{{ mode.icon }}</span> {{ mode.label }}
+                </a>
+                <p class="text-muted">{{ mode.description }}</p>
+                <a href="{% url 'typing_game_play' mode.key %}" class="btn">Play</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'typing_leaderboard' %}">Typing leaderboard &rarr;</a></p>
+
+    <h2>🕹️ Arcade</h2>
+    <p class="text-muted">Quick, simple games — no coding required.</p>
+    <ul class="challenge-list">
+        {% for game in arcade_games %}
+            <li class="challenge-card">
+                <a href="{% url 'arcade_play' game.key %}" class="challenge-title">
+                    <span class="badge-icon">{{ game.icon }}</span> {{ game.label }}
+                </a>
+                <p class="text-muted">{{ game.description }}</p>
+                <a href="{% url 'arcade_play' game.key %}" class="btn">Play</a>
+            </li>
+        {% endfor %}
+    </ul>
+    <p><a href="{% url 'arcade_leaderboard' %}">Arcade leaderboard &rarr;</a></p>
+{% endblock %}

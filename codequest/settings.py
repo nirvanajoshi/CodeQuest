@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'notifications',
     'community',
     'typing_game',
+    'arcade',
     'core',
 ]
 

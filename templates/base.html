@@ -16,7 +16,7 @@
             <a href="{% url 'challenge_list' %}">Challenges</a>
             <a href="{% url 'quiz_list' %}">Quizzes</a>
             <a href="{% url 'competition_list' %}">Competitions</a>
-            <a href="{% url 'typing_game_home' %}">🎮 Games</a>
+            <a href="{% url 'games_hub' %}">🎮 Games</a>
             <a href="{% url 'global_leaderboard' %}">Leaderboard</a>
             {% if user.is_authenticated %}
                 <span class="nav-user">{{ user.username }} · {{ user.profile.total_xp }} XP</span>

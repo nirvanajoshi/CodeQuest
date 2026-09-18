@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ game_label }} — CodeQuest{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/arcade.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="arcade-game" id="arcade-game" data-game="{{ game }}">
+        <a href="{% url 'arcade_home' %}" class="text-muted">&larr; Choose a different game</a>
+        <h1>{{ game_icon }} {{ game_label }}</h1>
+
+        <!-- Snake -->
+        <div class="snake-wrap" id="snake-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <span>Score <strong id="snake-score">0</strong></span>
+                <span>Length <strong id="snake-length">3</strong></span>
+            </div>
+            <div class="snake-board">
+                <canvas id="snake-canvas" width="400" height="400"></canvas>
+                <div class="snake-overlay" id="snake-overlay">
+                    <p>Press an arrow key or WASD to start</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Memory Match -->
+        <div class="memory-wrap" id="memory-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <span>Moves <strong id="memory-moves">0</strong></span>
+                <span>Time <strong id="memory-timer">0.0</strong>s</span>
+                <span>Pairs <strong id="memory-pairs">0</strong>/8</span>
+            </div>
+            <div class="memory-grid" id="memory-grid"></div>
+        </div>
+
+        <!-- Reaction Time -->
+        <div class="reaction-wrap" id="reaction-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <span>Round <strong id="reaction-round">0</strong>/5</span>
+                <span>Last <strong id="reaction-last">–</strong></span>
+                <span>Average <strong id="reaction-avg">–</strong></span>
+            </div>
+            <div class="reaction-box state-idle" id="reaction-box">
+                <span id="reaction-message">Click to start</span>
+            </div>
+        </div>
+
+        <div class="arcade-result" id="arcade-result" hidden></div>
+
+        <form method="post" action="{% url 'arcade_record_attempt' %}" id="arcade-attempt-form" hidden>
+            {% csrf_token %}
+            <input type="hidden" name="game" value="{{ game }}">
+            <input type="hidden" name="score" id="field-score">
+            <input type="hidden" name="detail" id="field-detail">
+            <input type="hidden" name="duration" id="field-duration">
+        </form>
+    </div>
+
+    <script>
+        window.ARCADE_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
+    </script>
+    <script src="{% static 'js/arcade.js' %}"></script>
+{% endblock %}

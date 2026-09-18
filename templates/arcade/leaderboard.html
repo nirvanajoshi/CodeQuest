@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Arcade Leaderboard — CodeQuest{% endblock %}
+
+{% block content %}
+    <a href="{% url 'arcade_home' %}">&larr; Back to arcade</a>
+
+    <h1>Arcade leaderboard</h1>
+
+    <div class="filter-form">
+        <a href="{% url 'arcade_leaderboard' %}" class="btn{% if not selected_game %}{% else %}-secondary{% endif %}">All games</a>
+        {% for game in games %}
+            <a href="{% url 'arcade_leaderboard' %}?game={{ game.key }}"
+               class="btn{% if selected_game == game.key %}{% else %}-secondary{% endif %}">
+                {{ game.icon }} {{ game.label }}
+            </a>
+        {% endfor %}
+    </div>
+
+    {% if rankings %}
+        <table class="submission-table">
+            <thead>
+                <tr><th>Rank</th><th>User</th><th>Best score</th></tr>
+            </thead>
+            <tbody>
+                {% for row in rankings %}
+                    <tr class="{% if row.user__username == user.username %}leaderboard-me{% endif %}">
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ row.user__username }}</td>
+                        <td>{{ row.best_score }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No one has played this game yet — be the first.</p>
+    {% endif %}
+{% endblock %}

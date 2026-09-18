@@ -141,6 +141,47 @@ def record_typing_attempt(user, attempt):
 
 
 @transaction.atomic
+def record_arcade_attempt(user, attempt):
+    """Called after an arcade-game attempt (Snake, Memory Match, Reaction
+    Time, ...) is recorded. Awards a small amount of XP based on score —
+    capped, and only for a user's first attempt of the day in that game, for
+    the same anti-farming reason as record_typing_attempt — updates the
+    daily streak, and checks badges. Returns the XP awarded (0 if none)."""
+    from notifications.services import notify
+    from arcade.models import ArcadeAttempt
+
+    profile = user.profile
+    today = datetime.date.today()
+
+    already_today = (
+        ArcadeAttempt.objects.filter(user=user, game=attempt.game, created_at__date=today)
+        .exclude(pk=attempt.pk)
+        .exists()
+    )
+
+    xp_awarded = 0
+    if not already_today:
+        xp_awarded = min(round(attempt.score / 5), 60)
+        if xp_awarded:
+            XPTransaction.objects.create(
+                user=user,
+                amount=xp_awarded,
+                reason=f"Arcade ({attempt.get_game_display()}) — score {attempt.score}",
+            )
+            profile.total_xp += xp_awarded
+            notify(
+                user,
+                f"{attempt.get_game_display()}: +{xp_awarded} XP (score {attempt.score})",
+                link="/arcade/",
+            )
+
+    _update_streak(profile, today)
+    profile.save()
+    _check_badges(user, profile)
+    return xp_awarded
+
+
+@transaction.atomic
 def record_quiz_attempt(user, attempt):
     """Called after a quiz attempt is graded. Awards XP for a quiz's correct
     answers the first time it's completed, updates the daily streak, and

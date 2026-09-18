@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Result — {{ game_label }} — CodeQuest{% endblock %}
+
+{% block content %}
+    <h1>🏁 Game over</h1>
+    <p class="text-muted">{{ game_label }}</p>
+
+    <dl class="profile-details">
+        <dt>Score</dt><dd>{{ attempt.score }}</dd>
+        {% if attempt.detail %}<dt>Details</dt><dd>{{ attempt.detail }}</dd>{% endif %}
+        <dt>Duration</dt><dd>{{ attempt.duration_seconds|floatformat:1 }}s</dd>
+        <dt>XP earned</dt>
+        <dd>
+            {% if xp_awarded %}
+                +{{ xp_awarded }} XP
+            {% else %}
+                0 XP (you already banked XP for this game today — come back tomorrow)
+            {% endif %}
+        </dd>
+    </dl>
+
+    <p style="margin-top: 1.5rem;">
+        <a href="{% url 'arcade_play' attempt.game %}" class="btn">Play again</a>
+        <a href="{% url 'arcade_home' %}" class="btn-secondary">Choose another game</a>
+        <a href="{% url 'arcade_leaderboard' %}" class="btn-secondary">Leaderboard</a>
+    </p>
+{% endblock %}

@@ -107,7 +107,8 @@
         const rivalCar = document.getElementById("rival-car");
         const playerHp = document.getElementById("player-hp");
         const bossHp = document.getElementById("boss-hp");
-        const rocket = document.getElementById("rocket");
+        const bossAvatar = document.getElementById("boss-avatar");
+        const rocketWrap = document.getElementById("rocket-wrap");
         const fuelFill = document.getElementById("fuel-fill");
 
         const rivalWpmByDifficulty = { easy: 28, medium: 42, hard: 58 };
@@ -185,6 +186,7 @@
                 if (value[idx] !== chars[idx] && mode === "battle") {
                     playerHpValue = Math.max(0, playerHpValue - 8);
                     setBarWidth(playerHp, playerHpValue);
+                    playerHp.classList.toggle("hp-critical", playerHpValue <= 30);
                     battleArena.classList.add("shake");
                     setTimeout(() => battleArena.classList.remove("shake"), 200);
                     if (playerHpValue <= 0 && !finished) {
@@ -218,9 +220,13 @@
             if (mode === "car_race") {
                 playerCar.style.left = (progress * 92) + "%";
             } else if (mode === "battle") {
-                setBarWidth(bossHp, (1 - progress) * 100);
+                const bossPct = (1 - progress) * 100;
+                setBarWidth(bossHp, bossPct);
+                bossHp.classList.toggle("hp-critical", bossPct <= 30);
+                bossAvatar.classList.add("hit-flash");
+                setTimeout(() => bossAvatar.classList.remove("hit-flash"), 150);
             } else if (mode === "rocket") {
-                rocket.style.bottom = (progress * 88) + "%";
+                rocketWrap.style.bottom = (progress * 82) + "%";
             }
 
             if (value.length === chars.length && correct === chars.length) {

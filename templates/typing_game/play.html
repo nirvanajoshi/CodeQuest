@@ -20,6 +20,7 @@
 
         <!-- Car Race -->
         <div class="race-track" id="race-track" hidden>
+            <div class="race-sky"></div>
             <div class="race-lane">
                 <span class="race-car" id="player-car" title="You">🏎️</span>
             </div>
@@ -32,11 +33,14 @@
         <!-- Boss Battle -->
         <div class="battle-arena" id="battle-arena" hidden>
             <div class="fighter">
+                <div class="fighter-avatar player-avatar">🧑‍💻</div>
                 <div class="fighter-label">You</div>
                 <div class="hp-bar"><div class="hp-fill" id="player-hp"></div></div>
             </div>
+            <div class="vs-badge">VS</div>
             <div class="fighter">
-                <div class="fighter-label">Bug Boss 👾</div>
+                <div class="fighter-avatar boss-avatar" id="boss-avatar">👾</div>
+                <div class="fighter-label">Bug Boss</div>
                 <div class="hp-bar"><div class="hp-fill hp-fill-boss" id="boss-hp"></div></div>
             </div>
         </div>
@@ -45,15 +49,21 @@
         <div class="rocket-track" id="rocket-track" hidden>
             <div class="fuel-gauge"><div class="fuel-fill" id="fuel-fill"></div></div>
             <div class="rocket-shaft">
+                <div class="stars"></div>
                 <div class="orbit-line">🛰️ orbit</div>
-                <div class="rocket" id="rocket">🚀</div>
+                <div class="rocket-wrap" id="rocket-wrap">
+                    <div class="rocket" id="rocket">🚀</div>
+                    <div class="rocket-flame" id="rocket-flame"></div>
+                </div>
             </div>
         </div>
 
         <!-- Word Rain -->
         <div class="word-rain-area" id="word-rain-area" hidden>
             <div class="lives" id="lives"></div>
-            <div class="rain-zone" id="rain-zone"></div>
+            <div class="rain-zone" id="rain-zone">
+                <div class="rain-backdrop"></div>
+            </div>
             <input type="text" id="word-input" class="code-editor" autocomplete="off"
                    autocapitalize="off" spellcheck="false" placeholder="Type the falling word…">
         </div>

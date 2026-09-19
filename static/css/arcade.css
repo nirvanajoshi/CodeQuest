@@ -1,36 +1,63 @@
-/* Same gotcha as typing_game.css: any element that both uses the `hidden`
-   attribute and gets a `display` value from an author rule needs this, or
-   the author rule wins the cascade tie and the element stays visible. */
+/* ==========================================================
+   Arcade — dark gaming variant
+   Uses the shared games.css design system; preserves every
+   class/structure the arcade.js logic depends on.
+   ========================================================== */
+
 [hidden] {
     display: none !important;
 }
 
+/* ---------- HUD ---------- */
+
 .arcade-stats-bar {
     display: flex;
-    gap: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    padding: 0.75rem 1.25rem;
-    margin: 1rem 0;
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--games-surface);
+    border: 1px solid var(--games-border);
+    border-left: 3px solid var(--games-accent);
+    border-radius: var(--games-radius);
+    padding: 0.7rem 1.1rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 0.85rem;
+    color: var(--games-muted);
+    box-shadow: var(--games-shadow);
+    align-items: center;
+}
+
+.arcade-stats-bar .stat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+}
+
+.arcade-stats-bar .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--games-muted);
+    font-weight: 700;
 }
 
 .arcade-stats-bar strong {
-    color: var(--color-text);
-    font-size: 1.05rem;
+    color: var(--games-text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
 
+.arcade-stats-bar .stat-sep {
+    width: 1px;
+    height: 26px;
+    background: var(--games-border);
+    align-self: center;
+}
+
+/* ---------- result card ---------- */
+
 .arcade-result {
-    margin-top: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 1.75rem;
-    box-shadow: var(--shadow-md);
+    margin-top: 1rem;
 }
 
 /* ---------- Snake ---------- */
@@ -39,34 +66,50 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .snake-board {
     position: relative;
-    border-radius: var(--radius-md);
+    border-radius: var(--games-radius);
     overflow: hidden;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--games-shadow);
     line-height: 0;
+    border: 1px solid var(--games-border);
+    background: #0b0e16;
 }
 
 #snake-canvas {
     display: block;
     max-width: 100%;
     height: auto;
-    background: #0f172a;
+    background: #0b0e16;
 }
 
 .snake-overlay {
     position: absolute;
     inset: 0;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(5, 8, 20, 0.55);
-    color: #fff;
+    background: rgba(5, 8, 20, 0.6);
+    color: var(--games-text);
     font-weight: 600;
     text-align: center;
-    padding: 1rem;
+    padding: 1.25rem;
+    gap: 0.5rem;
+    backdrop-filter: blur(2px);
+}
+
+.snake-overlay p {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.snake-overlay .overlay-sub {
+    font-size: 0.85rem;
+    color: var(--games-muted);
 }
 
 /* ---------- Memory Match ---------- */
@@ -75,13 +118,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 0.75rem;
 }
 
 .memory-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0.75rem;
-    max-width: 420px;
+    max-width: 440px;
     width: 100%;
     perspective: 800px;
 }
@@ -103,8 +147,8 @@
     height: 100%;
     transform-style: preserve-3d;
     transition: transform 300ms ease;
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-sm);
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
 }
 
 .memory-card.flipped .memory-card-inner,
@@ -118,37 +162,44 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-md);
+    border-radius: 10px;
     backface-visibility: hidden;
     font-size: 1.8rem;
 }
 
 .memory-card-back {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
-    color: rgba(255, 255, 255, 0.85);
+    background: linear-gradient(135deg, var(--games-accent), #2f37a0);
+    color: rgba(255, 255, 255, 0.9);
     font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
 }
 
 .memory-card-front {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    background: var(--games-surface);
+    border: 1px solid var(--games-border);
     transform: rotateY(180deg);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 .memory-card.matched .memory-card-front {
-    background: var(--color-success-bg);
-    border-color: var(--color-success);
+    background: rgba(46, 160, 67, 0.15);
+    border-color: var(--games-success);
+    color: var(--games-success);
 }
 
 .memory-card.matched {
     cursor: default;
 }
 
+.memory-card:not(.flipped):not(.matched):hover .memory-card-inner {
+    transform: scale(1.04);
+}
+
 /* ---------- Reaction Time ---------- */
 
 .reaction-box {
-    height: 320px;
-    border-radius: var(--radius-lg);
+    height: 340px;
+    border-radius: var(--games-radius);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -156,20 +207,24 @@
     padding: 2rem;
     font-size: 1.3rem;
     font-weight: 700;
-    color: #fff;
+    color: var(--games-text);
     cursor: pointer;
     user-select: none;
-    box-shadow: var(--shadow-md);
-    transition: background 150ms ease;
+    box-shadow: var(--games-shadow);
+    transition: background 150ms ease, transform 150ms ease;
+    border: 1px solid var(--games-border);
+    min-width: 280px;
 }
 
 .reaction-box.state-idle {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    background: linear-gradient(135deg, var(--games-accent), #2f37a0);
+    border-color: var(--games-accent);
 }
 
 .reaction-box.state-waiting {
-    background: linear-gradient(135deg, #c92a2a, #862e2e);
+    background: linear-gradient(135deg, #c92a2a, #6f1c1c);
     animation: reaction-pulse 1.4s ease-in-out infinite;
+    border-color: #6f1c1c;
 }
 
 @keyframes reaction-pulse {
@@ -177,13 +232,20 @@
 }
 
 .reaction-box.state-go {
-    background: linear-gradient(135deg, #2f9e44, #37b24d);
+    background: linear-gradient(135deg, #2f9e44, #2ea043);
+    border-color: #2ea043;
 }
 
 .reaction-box.state-early {
-    background: linear-gradient(135deg, var(--color-warning), #d9480f);
+    background: linear-gradient(135deg, var(--games-warning), #b3470a);
+    border-color: #b3470a;
 }
 
 .reaction-box.state-roundResult {
-    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    background: linear-gradient(135deg, var(--games-accent), var(--games-accent-2));
+    border-color: var(--games-accent-2);
+}
+
+.reaction-message {
+    pointer-events: none;
 }

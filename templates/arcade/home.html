@@ -1,27 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Arcade — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1>🕹️ Arcade</h1>
-    <p class="text-muted">
-        Quick, simple games — no coding required. Anyone can play; log in to
-        earn XP and land on the leaderboard.
-    </p>
+    <div class="games-page">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'home' %}">&larr; Back to home</a>
+        </div>
 
-    <ul class="challenge-list">
-        {% for game in games %}
-            <li class="challenge-card">
-                <a href="{% url 'arcade_play' game.key %}" class="challenge-title">
-                    <span class="badge-icon">{{ game.icon }}</span> {{ game.label }}
-                </a>
-                <p class="text-muted">{{ game.description }}</p>
-                <a href="{% url 'arcade_play' game.key %}" class="btn">Play</a>
-            </li>
-        {% endfor %}
-    </ul>
+        <h1 class="games-title">🕹️ Arcade</h1>
+        <p class="games-sub">
+            Quick, simple games — no coding required. Anyone can play; log in to
+            earn XP and land on the leaderboard.
+        </p>
 
-    <p style="margin-top: 2rem;">
-        <a href="{% url 'arcade_leaderboard' %}">View the arcade leaderboard &rarr;</a>
-    </p>
+        <ul class="games-home-list">
+            {% for game in games %}
+                <li class="games-home-card">
+                    <a href="{% url 'arcade_play' game.key %}" class="games-home-title">
+                        <span class="badge-icon">{{ game.icon }}</span> {{ game.label }}
+                    </a>
+                    <p class="games-home-desc">{{ game.description }}</p>
+                    <div class="games-home-actions">
+                        <a href="{% url 'arcade_play' game.key %}" class="games-btn games-btn-primary">Play</a>
+                        <a href="{% url 'arcade_leaderboard' %}?game={{ game.key }}" class="games-btn games-btn-ghost">Stats</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="games-controls spaced">
+            <a href="{% url 'arcade_leaderboard' %}" class="games-btn games-btn-primary">View the arcade leaderboard</a>
+        </div>
+    </div>
 {% endblock %}

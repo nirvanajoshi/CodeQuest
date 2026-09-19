@@ -1,28 +1,41 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Typing Game — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1>🎮 Typing Game</h1>
-    <p class="text-muted">
-        The default game everyone can play — five ways to test how fast and
-        accurately you type. Anyone can play; log in to earn XP, unlock
-        badges, and land on the leaderboard.
-    </p>
+    <div class="games-page">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'home' %}">&larr; Back to home</a>
+        </div>
 
-    <ul class="challenge-list">
-        {% for mode in modes %}
-            <li class="challenge-card">
-                <a href="{% url 'typing_game_play' mode.key %}" class="challenge-title">
-                    <span class="badge-icon">{{ mode.icon }}</span> {{ mode.label }}
-                </a>
-                <p class="text-muted">{{ mode.description }}</p>
-                <a href="{% url 'typing_game_play' mode.key %}" class="btn">Play</a>
-            </li>
-        {% endfor %}
-    </ul>
+        <h1 class="games-title">⌨️ Typing Game</h1>
+        <p class="games-sub">
+            Five ways to test how fast and accurately you type. Anyone can play;
+            log in to earn XP, unlock badges, and land on the leaderboard.
+        </p>
 
-    <p style="margin-top: 2rem;">
-        <a href="{% url 'typing_leaderboard' %}">View the typing leaderboard &rarr;</a>
-    </p>
+        <ul class="games-home-list">
+            {% for mode in modes %}
+                <li class="games-home-card">
+                    <a href="{% url 'typing_game_play' mode.key %}" class="games-home-title">
+                        <span class="badge-icon">{{ mode.icon }}</span> {{ mode.label }}
+                    </a>
+                    <p class="games-home-desc">{{ mode.description }}</p>
+                    <div class="games-home-actions">
+                        <a href="{% url 'typing_game_play' mode.key %}" class="games-btn games-btn-primary">Play</a>
+                        <a href="{% url 'typing_leaderboard' %}?mode={{ mode.key }}" class="games-btn games-btn-ghost">Stats</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <div class="games-controls spaced">
+            <a href="{% url 'typing_leaderboard' %}" class="games-btn games-btn-primary">View the typing leaderboard</a>
+        </div>
+    </div>
 {% endblock %}

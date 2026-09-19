@@ -1,38 +1,57 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Typing Leaderboard — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <a href="{% url 'typing_game_home' %}">&larr; Back to games</a>
+    <div class="games-page medium">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'typing_game_home' %}">&larr; Back to games</a>
+        </div>
 
-    <h1>Typing leaderboard</h1>
+        <div class="games-leaderboard-card">
+            <h2>⌨️ Typing leaderboard</h2>
+            <p class="lb-sub">Best WPM by mode. Log in to save scores and earn XP.</p>
 
-    <div class="filter-form">
-        <a href="{% url 'typing_leaderboard' %}" class="btn{% if not selected_mode %}{% else %}-secondary{% endif %}">All modes</a>
-        {% for mode in modes %}
-            <a href="{% url 'typing_leaderboard' %}?mode={{ mode.key }}"
-               class="btn{% if selected_mode == mode.key %}{% else %}-secondary{% endif %}">
-                {{ mode.icon }} {{ mode.label }}
-            </a>
-        {% endfor %}
-    </div>
-
-    {% if rankings %}
-        <table class="submission-table">
-            <thead>
-                <tr><th>Rank</th><th>User</th><th>Best WPM</th></tr>
-            </thead>
-            <tbody>
-                {% for row in rankings %}
-                    <tr class="{% if row.user__username == user.username %}leaderboard-me{% endif %}">
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ row.user__username }}</td>
-                        <td>{{ row.best_wpm }}</td>
-                    </tr>
+            <div class="games-filter">
+                <a href="{% url 'typing_leaderboard' %}"
+                   class="games-filter-link{% if not selected_mode %} active{% endif %}">
+                    All modes
+                </a>
+                {% for mode in modes %}
+                    <a href="{% url 'typing_leaderboard' %}?mode={{ mode.key }}"
+                       class="games-filter-link{% if selected_mode == mode.key %} active{% endif %}">
+                        {{ mode.icon }} {{ mode.label }}
+                    </a>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No one has played this mode yet — be the first.</p>
-    {% endif %}
+            </div>
+
+            {% if rankings %}
+                <table class="games-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th class="num">Best WPM</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rankings %}
+                            <tr class="{% if row.user__username == user.username %}games-me{% endif %}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ row.user__username }}</td>
+                                <td class="num">{{ row.best_wpm }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="games-empty">No one has played this mode yet — be the first.</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

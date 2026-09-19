@@ -1,33 +1,59 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Result — {{ mode_label }} — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1>
-        {% if attempt.outcome == "won" %}🏆 You won!
-        {% elif attempt.outcome == "lost" %}💥 Not quite — try again
-        {% else %}✅ Finished
-        {% endif %}
-    </h1>
-    <p class="text-muted">{{ mode_label }}</p>
+    <div class="games-page narrow">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'typing_game_home' %}">&larr; Back to games</a>
+        </div>
 
-    <dl class="profile-details">
-        <dt>WPM</dt><dd>{{ attempt.wpm }}</dd>
-        <dt>Accuracy</dt><dd>{{ attempt.accuracy }}%</dd>
-        <dt>Duration</dt><dd>{{ attempt.duration_seconds|floatformat:1 }}s</dd>
-        <dt>XP earned</dt>
-        <dd>
-            {% if xp_awarded %}
-                +{{ xp_awarded }} XP
-            {% else %}
-                0 XP (you already banked XP for this mode today — come back tomorrow)
+        <div class="games-result-card">
+            <h2>
+                {% if attempt.outcome == "won" %}🏆 You won!
+                {% elif attempt.outcome == "lost" %}💥 Not quite — try again
+                {% else %}✅ Finished
+                {% endif %}
+            </h2>
+            <p class="result-sub">{{ mode_label }}</p>
+
+            <div class="games-stats">
+                <div class="games-stat accent">
+                    <div class="stat-label">WPM</div>
+                    <div class="stat-value">{{ attempt.wpm }}</div>
+                </div>
+                <div class="games-stat">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value">{{ attempt.accuracy }}%</div>
+                </div>
+                <div class="games-stat">
+                    <div class="stat-label">Duration</div>
+                    <div class="stat-value">{{ attempt.duration_seconds|floatformat:1 }}s</div>
+                </div>
+                <div class="games-stat success">
+                    <div class="stat-label">XP earned</div>
+                    <div class="stat-value">
+                        {% if xp_awarded %}+{{ xp_awarded }} XP
+                        {% else %}0 XP
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if not xp_awarded and xp_awarded == 0 %}
+                <p class="result-sub result-note">You already banked XP for this mode today — come back tomorrow.</p>
             {% endif %}
-        </dd>
-    </dl>
 
-    <p style="margin-top: 1.5rem;">
-        <a href="{% url 'typing_game_play' attempt.mode %}" class="btn">Play again</a>
-        <a href="{% url 'typing_game_home' %}" class="btn-secondary">Choose another mode</a>
-        <a href="{% url 'typing_leaderboard' %}" class="btn-secondary">Leaderboard</a>
-    </p>
+            <div class="games-controls spaced">
+                <a href="{% url 'typing_game_play' attempt.mode %}" class="games-btn games-btn-primary">Play again</a>
+                <a href="{% url 'typing_game_home' %}" class="games-btn games-btn-ghost">Choose another mode</a>
+                <a href="{% url 'typing_leaderboard' %}" class="games-btn games-btn-ghost">Leaderboard</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -4,18 +4,37 @@
 {% block title %}{{ mode_label }} — CodeQuest{% endblock %}
 
 {% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
     <link rel="stylesheet" href="{% static 'css/typing_game.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="typing-game" id="typing-game" data-mode="{{ mode }}" data-difficulty="{{ difficulty }}">
-        <a href="{% url 'typing_game_home' %}" class="text-muted">&larr; Choose a different mode</a>
-        <h1>{{ mode_icon }} {{ mode_label }}</h1>
+    <div class="games-page" id="typing-game" data-mode="{{ mode }}" data-difficulty="{{ difficulty }}">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'typing_game_home' %}">
+                &larr; Choose a different mode
+            </a>
+            <div class="games-sub">{{ mode_label }}</div>
+        </div>
 
-        <div class="typing-stats-bar">
-            <span>WPM <strong id="stat-wpm">0</strong></span>
-            <span>Accuracy <strong id="stat-accuracy">100</strong>%</span>
-            <span>Time <strong id="stat-timer">0.0</strong>s</span>
+        <h1 class="games-title">{{ mode_icon }} {{ mode_label }}</h1>
+
+        <!-- HUD -->
+        <div class="games-hud">
+            <div class="hud-item">
+                <span class="hud-label">WPM</span>
+                <span class="hud-value" id="stat-wpm">0</span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-item">
+                <span class="hud-label">Accuracy</span>
+                <span class="hud-value" id="stat-accuracy">100<small class="stat-unit">%</small></span>
+            </div>
+            <div class="hud-sep"></div>
+            <div class="hud-item">
+                <span class="hud-label">Time</span>
+                <span class="hud-value" id="stat-timer">0.0<small class="stat-unit">s</small></span>
+            </div>
         </div>
 
         <!-- Car Race -->
@@ -64,18 +83,25 @@
             <div class="rain-zone" id="rain-zone">
                 <div class="rain-backdrop"></div>
             </div>
-            <input type="text" id="word-input" class="code-editor" autocomplete="off"
+            <input type="text" id="word-input" class="games-input" autocomplete="off"
                    autocapitalize="off" spellcheck="false" placeholder="Type the falling word…">
         </div>
 
         <!-- Classic / Car Race / Boss Battle / Rocket Launch passage -->
         <div class="typing-passage-wrap" id="typing-passage-wrap">
             <div class="typing-passage" id="typing-passage"></div>
-            <input type="text" id="type-input" class="code-editor" autocomplete="off"
+            <input type="text" id="type-input" class="games-input" autocomplete="off"
                    autocapitalize="off" spellcheck="false" placeholder="Start typing here…">
         </div>
 
-        <div class="typing-result" id="typing-result" hidden></div>
+        <!-- Controls -->
+        <div class="games-controls">
+            <button type="button" id="typing-restart" class="games-btn games-btn-ghost">Restart</button>
+            <a class="games-btn games-btn-ghost" href="{% url 'typing_game_home' %}">Change mode</a>
+        </div>
+
+        <!-- Result -->
+        <div class="games-result-card typing-result" id="typing-result" hidden></div>
 
         <form method="post" action="{% url 'typing_record_attempt' %}" id="attempt-form" hidden>
             {% csrf_token %}
@@ -94,4 +120,18 @@
         window.TYPING_GAME_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
     </script>
     <script src="{% static 'js/typing_game.js' %}"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById('typing-restart');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    var container = document.getElementById('typing-game');
+                    if (!container) return;
+                    var mode = container.dataset.mode;
+                    var url = window.location.pathname.split('?')[0];
+                    window.location.href = url;
+                });
+            }
+        })();
+    </script>
 {% endblock %}

@@ -1,29 +1,71 @@
-/* `display` rules below (e.g. `.battle-arena { display: flex }`) have the
-   same specificity as the browser's default `[hidden] { display: none }`
-   rule, and author styles win ties — so without this, a mode panel that
-   sets `display` stays visible even while `hidden` is set via JS. */
+/* ==========================================================
+   Typing Game — dark gaming variant
+   Uses the shared games.css design system; preserves every
+   class/structure the typing_game.js logic depends on.
+   ========================================================== */
+
 [hidden] {
     display: none !important;
 }
 
+/* ---------- page shell ---------- */
+
+.games-page {
+    --bg: #0b0e16;
+}
+
+.games-page > a.games-back:first-child,
+.games-page .games-back:first-child {
+    align-self: flex-start;
+}
+
+/* ---------- HUD ---------- */
+
 .typing-stats-bar {
     display: flex;
-    gap: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-left: 3px solid var(--color-primary);
-    border-radius: var(--radius-md);
-    padding: 0.75rem 1.25rem;
-    margin: 1rem 0;
-    font-size: 0.9rem;
-    color: var(--color-muted);
-    box-shadow: var(--shadow-sm);
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: var(--games-surface);
+    border: 1px solid var(--games-border);
+    border-left: 3px solid var(--games-accent);
+    border-radius: var(--games-radius);
+    padding: 0.75rem 1.1rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 0.85rem;
+    color: var(--games-muted);
+    box-shadow: var(--games-shadow);
+    align-items: center;
+}
+
+.typing-stats-bar .stat-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.05rem;
+}
+
+.typing-stats-bar .stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--games-muted);
+    font-weight: 700;
 }
 
 .typing-stats-bar strong {
-    color: var(--color-text);
-    font-size: 1.05rem;
+    color: var(--games-text);
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
 }
+
+.typing-stats-bar .stat-sep {
+    width: 1px;
+    height: 26px;
+    background: var(--games-border);
+    align-self: center;
+}
+
+/* ---------- passage input ---------- */
 
 .typing-passage-wrap {
     display: flex;
@@ -32,34 +74,36 @@
 }
 
 .typing-passage {
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.25rem 1.5rem;
+    background: var(--games-bg);
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    padding: 1.25rem 1.4rem;
     font-family: var(--font-mono);
     font-size: 1.15rem;
     line-height: 1.9;
     letter-spacing: 0.01em;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--games-shadow);
+    color: var(--games-text);
+    min-height: 5rem;
 }
 
 .char {
-    color: var(--color-muted);
-    transition: color 60ms ease;
+    color: var(--games-muted);
+    transition: color 60ms ease, background 60ms ease;
 }
 
 .char-correct {
-    color: var(--color-success);
+    color: var(--games-success);
 }
 
 .char-incorrect {
-    color: var(--color-danger);
-    background: var(--color-danger-bg);
-    border-radius: 2px;
+    color: var(--games-danger);
+    background: rgba(224, 49, 49, 0.18);
+    border-radius: 3px;
 }
 
 .char-current {
-    border-left: 2px solid var(--color-primary);
+    border-left: 2px solid var(--games-accent);
     animation: typing-cursor-blink 1s step-end infinite;
 }
 
@@ -67,32 +111,35 @@
     50% { border-color: transparent; }
 }
 
+#type-input.games-input,
+#word-input.games-input {
+    font-family: var(--font-mono);
+}
+
+/* ---------- result box ---------- */
+
 .typing-result {
-    margin-top: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    padding: 1.5rem 1.75rem;
-    box-shadow: var(--shadow-md);
+    margin-top: 1rem;
 }
 
 /* ---------- Car Race ---------- */
 
 .race-track {
     position: relative;
-    background: linear-gradient(180deg, #dfe3ea, #c7ccd6);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.5rem 1rem 1.25rem;
+    background: linear-gradient(180deg, #121726, #0a0e18);
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    padding: 1.4rem 1rem 1.1rem;
     margin-bottom: 1rem;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--games-shadow);
     overflow: hidden;
 }
 
 .race-sky {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 12% 15%, rgba(255, 255, 255, 0.6), transparent 40%);
+    background: radial-gradient(circle at 12% 15%, rgba(76, 79, 242, 0.28), transparent 45%),
+               radial-gradient(circle at 85% 0%, rgba(84, 107, 255, 0.18), transparent 40%);
     pointer-events: none;
 }
 
@@ -100,11 +147,11 @@
     position: relative;
     height: 2.6rem;
     background:
-        repeating-linear-gradient(90deg, #fff 0 26px, transparent 26px 52px) center / 100% 3px no-repeat,
-        linear-gradient(180deg, #4b4f58, #35383f);
-    border-radius: var(--radius-sm);
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 26px, transparent 26px 52px) center / 100% 3px no-repeat,
+        linear-gradient(180deg, #2a3348, #161c29);
+    border-radius: 6px;
     margin-bottom: 0.7rem;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.25);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
 }
 
 .race-lane:last-of-type {
@@ -117,7 +164,7 @@
     left: 0;
     transform: translateY(-50%);
     font-size: 1.7rem;
-    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+    filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
     transition: left 120ms linear;
     animation: race-bounce 0.5s ease-in-out infinite;
 }
@@ -129,10 +176,11 @@
 
 .race-finish {
     position: absolute;
-    right: 0.35rem;
-    top: 1.1rem;
+    right: 0.5rem;
+    top: 0.9rem;
     font-size: 1.5rem;
-    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+    color: var(--games-success);
 }
 
 /* ---------- Boss Battle ---------- */
@@ -140,13 +188,13 @@
 .battle-arena {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    background: radial-gradient(circle at 50% 0%, #2c2f45, #15161f 70%);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.5rem 1.5rem;
+    gap: 1rem;
+    background: radial-gradient(circle at 50% 0%, #222a44, #0d1120 70%);
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    padding: 1.25rem 1.25rem;
     margin-bottom: 1rem;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--games-shadow);
 }
 
 .battle-arena.shake {
@@ -171,53 +219,54 @@
     font-size: 1.8rem;
     margin: 0 auto 0.5rem;
     border-radius: 50%;
-    background: radial-gradient(circle at 35% 30%, #ffffff22, transparent 60%), var(--color-primary-light);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08), var(--shadow-sm);
+    background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.25), transparent 60%), var(--games-accent-soft);
+    box-shadow: 0 0 0 3px rgba(76, 79, 242, 0.25), var(--games-shadow);
     transition: transform 120ms ease, box-shadow 120ms ease;
 }
 
 .boss-avatar {
-    background: radial-gradient(circle at 35% 30%, #ffffff22, transparent 60%), #3a2340;
+    background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.18), transparent 60%), #3a2340;
 }
 
 .boss-avatar.hit-flash {
     transform: scale(1.15);
-    box-shadow: 0 0 0 4px var(--color-danger);
+    box-shadow: 0 0 0 4px var(--games-danger);
 }
 
 .vs-badge {
     font-weight: 800;
     color: #fff;
     font-size: 0.85rem;
-    background: var(--color-primary);
-    border-radius: var(--radius-pill);
+    background: var(--games-accent);
+    border-radius: 999px;
     padding: 0.3rem 0.65rem;
     letter-spacing: 0.05em;
+    box-shadow: 0 4px 12px rgba(76, 79, 242, 0.4);
 }
 
 .fighter-label {
     font-weight: 700;
-    color: #fff;
+    color: var(--games-text);
     margin-bottom: 0.5rem;
 }
 
 .hp-bar {
     height: 1rem;
-    background: rgba(255, 255, 255, 0.12);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
     overflow: hidden;
 }
 
 .hp-fill {
     height: 100%;
     width: 100%;
-    background: linear-gradient(90deg, #37b24d, #69db7c);
+    background: linear-gradient(90deg, #2ea043, #69db7c);
     transition: width 120ms linear, background 200ms ease;
 }
 
 .hp-fill-boss {
-    background: linear-gradient(90deg, #e03131, #ff8787);
+    background: linear-gradient(90deg, var(--games-danger), #ff8787);
 }
 
 .hp-fill.hp-critical {
@@ -233,22 +282,22 @@
 
 .rocket-track {
     display: flex;
-    gap: 1.5rem;
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    padding: 1.25rem 1.5rem;
+    gap: 1.25rem;
+    background: var(--games-surface);
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    padding: 1.25rem 1.4rem;
     margin-bottom: 1rem;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--games-shadow);
     align-items: stretch;
     height: 260px;
 }
 
 .fuel-gauge {
     width: 1.5rem;
-    background: var(--color-surface-muted);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-pill);
+    background: var(--games-bg-2);
+    border: 1px solid var(--games-border);
+    border-radius: 999px;
     display: flex;
     align-items: flex-end;
     overflow: hidden;
@@ -256,7 +305,7 @@
 
 .fuel-fill {
     width: 100%;
-    background: linear-gradient(180deg, #ffd43b, var(--color-warning));
+    background: linear-gradient(180deg, #ffd43b, var(--games-warning));
     transition: height 120ms linear;
 }
 
@@ -264,7 +313,7 @@
     position: relative;
     flex: 1;
     background: linear-gradient(to top, #1c2340, #0a0d1f 55%, #050614);
-    border-radius: var(--radius-sm);
+    border-radius: 6px;
     overflow: hidden;
 }
 
@@ -294,7 +343,7 @@
 
 .rocket {
     font-size: 2.1rem;
-    filter: drop-shadow(0 0 6px rgba(255, 212, 59, 0.5));
+    filter: drop-shadow(0 0 6px rgba(255, 212, 59, 0.6));
     animation: rocket-wobble 0.4s ease-in-out infinite;
 }
 
@@ -307,7 +356,7 @@
     width: 0.6rem;
     height: 1rem;
     margin: -0.15rem auto 0;
-    background: linear-gradient(180deg, #ffd43b, var(--color-danger) 80%, transparent);
+    background: linear-gradient(180deg, #ffd43b, var(--games-danger) 80%, transparent);
     border-radius: 0 0 50% 50%;
     animation: flame-flicker 0.15s ease-in-out infinite;
 }
@@ -323,9 +372,9 @@
     left: 0;
     right: 0;
     text-align: center;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.75);
     font-size: 0.8rem;
-    border-top: 1px dashed rgba(255, 255, 255, 0.25);
+    border-top: 1px dashed rgba(255, 255, 255, 0.3);
     padding-top: 0.25rem;
 }
 
@@ -338,17 +387,18 @@
 }
 
 .lives {
-    font-size: 1.2rem;
+    font-size: 1.3rem;
+    letter-spacing: 0.25rem;
 }
 
 .rain-zone {
     position: relative;
     height: 320px;
-    background: linear-gradient(180deg, #4c5fd5 0%, #7c8ff0 45%, #cfe0ff 100%);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, #3b53b0 0%, #4c4ff2 42%, #6b5de7 70%, #2a3348 100%);
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
     overflow: hidden;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--games-shadow);
 }
 
 .rain-backdrop {
@@ -356,8 +406,8 @@
     inset: 0;
     background-image: repeating-linear-gradient(
         70deg,
-        rgba(255, 255, 255, 0.18) 0,
-        rgba(255, 255, 255, 0.18) 1px,
+        rgba(255, 255, 255, 0.14) 0,
+        rgba(255, 255, 255, 0.14) 1px,
         transparent 1px,
         transparent 26px
     );
@@ -373,11 +423,12 @@
     position: absolute;
     top: 0;
     padding: 0.35rem 0.8rem;
-    background: #ffffff;
-    color: var(--color-primary-dark);
-    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--games-accent-2);
+    border-radius: 999px;
     font-family: var(--font-mono);
     font-weight: 700;
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--games-shadow);
     transition: top linear;
+    backdrop-filter: blur(2px);
 }

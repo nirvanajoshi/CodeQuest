@@ -1,38 +1,57 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Arcade Leaderboard — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <a href="{% url 'arcade_home' %}">&larr; Back to arcade</a>
+    <div class="games-page medium">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'arcade_home' %}">&larr; Back to games</a>
+        </div>
 
-    <h1>Arcade leaderboard</h1>
+        <div class="games-leaderboard-card">
+            <h2>🕹️ Arcade leaderboard</h2>
+            <p class="lb-sub">Best score by game. Log in to save scores and earn XP.</p>
 
-    <div class="filter-form">
-        <a href="{% url 'arcade_leaderboard' %}" class="btn{% if not selected_game %}{% else %}-secondary{% endif %}">All games</a>
-        {% for game in games %}
-            <a href="{% url 'arcade_leaderboard' %}?game={{ game.key }}"
-               class="btn{% if selected_game == game.key %}{% else %}-secondary{% endif %}">
-                {{ game.icon }} {{ game.label }}
-            </a>
-        {% endfor %}
-    </div>
-
-    {% if rankings %}
-        <table class="submission-table">
-            <thead>
-                <tr><th>Rank</th><th>User</th><th>Best score</th></tr>
-            </thead>
-            <tbody>
-                {% for row in rankings %}
-                    <tr class="{% if row.user__username == user.username %}leaderboard-me{% endif %}">
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ row.user__username }}</td>
-                        <td>{{ row.best_score }}</td>
-                    </tr>
+            <div class="games-filter">
+                <a href="{% url 'arcade_leaderboard' %}"
+                   class="games-filter-link{% if not selected_game %} active{% endif %}">
+                    All games
+                </a>
+                {% for game in games %}
+                    <a href="{% url 'arcade_leaderboard' %}?game={{ game.key }}"
+                       class="games-filter-link{% if selected_game == game.key %} active{% endif %}">
+                        {{ game.icon }} {{ game.label }}
+                    </a>
                 {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p>No one has played this game yet — be the first.</p>
-    {% endif %}
+            </div>
+
+            {% if rankings %}
+                <table class="games-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>User</th>
+                            <th class="num">Best score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rankings %}
+                            <tr class="{% if row.user__username == user.username %}games-me{% endif %}">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ row.user__username }}</td>
+                                <td class="num">{{ row.best_score }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="games-empty">No one has played this game yet — be the first.</p>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

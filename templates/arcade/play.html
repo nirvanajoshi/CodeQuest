@@ -4,24 +4,39 @@
 {% block title %}{{ game_label }} — CodeQuest{% endblock %}
 
 {% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
     <link rel="stylesheet" href="{% static 'css/arcade.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="arcade-game" id="arcade-game" data-game="{{ game }}">
-        <a href="{% url 'arcade_home' %}" class="text-muted">&larr; Choose a different game</a>
-        <h1>{{ game_icon }} {{ game_label }}</h1>
+    <div class="games-page" id="arcade-game" data-game="{{ game }}">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'arcade_home' %}">
+                &larr; Choose a different game
+            </a>
+            <div class="games-sub">{{ game_label }}</div>
+        </div>
+
+        <h1 class="games-title">{{ game_icon }} {{ game_label }}</h1>
 
         <!-- Snake -->
         <div class="snake-wrap" id="snake-wrap" hidden>
             <div class="arcade-stats-bar">
-                <span>Score <strong id="snake-score">0</strong></span>
-                <span>Length <strong id="snake-length">3</strong></span>
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="snake-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Length</span>
+                    <strong id="snake-length">3</strong>
+                </div>
             </div>
             <div class="snake-board">
                 <canvas id="snake-canvas" width="400" height="400"></canvas>
                 <div class="snake-overlay" id="snake-overlay">
                     <p>Press an arrow key or WASD to start</p>
+                    <span class="overlay-sub">WASD / Arrow keys</span>
                 </div>
             </div>
         </div>
@@ -29,9 +44,20 @@
         <!-- Memory Match -->
         <div class="memory-wrap" id="memory-wrap" hidden>
             <div class="arcade-stats-bar">
-                <span>Moves <strong id="memory-moves">0</strong></span>
-                <span>Time <strong id="memory-timer">0.0</strong>s</span>
-                <span>Pairs <strong id="memory-pairs">0</strong>/8</span>
+                <div class="stat-block">
+                    <span class="stat-label">Moves</span>
+                    <strong id="memory-moves">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Time</span>
+                    <strong id="memory-timer">0.0<small class="stat-unit">s</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Pairs</span>
+                    <strong id="memory-pairs">0<small class="stat-unit">/8</small></strong>
+                </div>
             </div>
             <div class="memory-grid" id="memory-grid"></div>
         </div>
@@ -39,16 +65,34 @@
         <!-- Reaction Time -->
         <div class="reaction-wrap" id="reaction-wrap" hidden>
             <div class="arcade-stats-bar">
-                <span>Round <strong id="reaction-round">0</strong>/5</span>
-                <span>Last <strong id="reaction-last">–</strong></span>
-                <span>Average <strong id="reaction-avg">–</strong></span>
+                <div class="stat-block">
+                    <span class="stat-label">Round</span>
+                    <strong id="reaction-round">0<small class="stat-unit">/5</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Last</span>
+                    <strong id="reaction-last">–</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Average</span>
+                    <strong id="reaction-avg">–</strong>
+                </div>
             </div>
             <div class="reaction-box state-idle" id="reaction-box">
-                <span id="reaction-message">Click to start</span>
+                <span id="reaction-message" class="reaction-message">Click to start</span>
             </div>
         </div>
 
-        <div class="arcade-result" id="arcade-result" hidden></div>
+        <!-- Controls -->
+        <div class="games-controls">
+            <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>
+            <a class="games-btn games-btn-ghost" href="{% url 'arcade_home' %}">Change game</a>
+        </div>
+
+        <!-- Result -->
+        <div class="games-result-card arcade-result" id="arcade-result" hidden></div>
 
         <form method="post" action="{% url 'arcade_record_attempt' %}" id="arcade-attempt-form" hidden>
             {% csrf_token %}
@@ -63,4 +107,18 @@
         window.ARCADE_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
     </script>
     <script src="{% static 'js/arcade.js' %}"></script>
+    <script>
+        (function () {
+            var btn = document.getElementById('arcade-restart');
+            if (btn) {
+                btn.addEventListener('click', function () {
+                    var container = document.getElementById('arcade-game');
+                    if (!container) return;
+                    var game = container.dataset.game;
+                    var url = window.location.pathname.split('?')[0];
+                    window.location.href = url;
+                });
+            }
+        })();
+    </script>
 {% endblock %}

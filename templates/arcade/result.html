@@ -1,28 +1,56 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Result — {{ game_label }} — CodeQuest{% endblock %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+{% endblock %}
+
 {% block content %}
-    <h1>🏁 Game over</h1>
-    <p class="text-muted">{{ game_label }}</p>
+    <div class="games-page narrow">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'arcade_home' %}">&larr; Back to games</a>
+        </div>
 
-    <dl class="profile-details">
-        <dt>Score</dt><dd>{{ attempt.score }}</dd>
-        {% if attempt.detail %}<dt>Details</dt><dd>{{ attempt.detail }}</dd>{% endif %}
-        <dt>Duration</dt><dd>{{ attempt.duration_seconds|floatformat:1 }}s</dd>
-        <dt>XP earned</dt>
-        <dd>
-            {% if xp_awarded %}
-                +{{ xp_awarded }} XP
-            {% else %}
-                0 XP (you already banked XP for this game today — come back tomorrow)
+        <div class="games-result-card">
+            <h2>🏁 Game over</h2>
+            <p class="result-sub">{{ game_label }}</p>
+
+            <div class="games-stats">
+                <div class="games-stat accent">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value">{{ attempt.score }}</div>
+                </div>
+                <div class="games-stat">
+                    <div class="stat-label">Duration</div>
+                    <div class="stat-value">{{ attempt.duration_seconds|floatformat:1 }}s</div>
+                </div>
+                {% if attempt.detail %}
+                <div class="games-stat">
+                    <div class="stat-label">Details</div>
+                    <div class="stat-value detail">{{ attempt.detail }}</div>
+                </div>
+                {% endif %}
+                <div class="games-stat success">
+                    <div class="stat-label">XP earned</div>
+                    <div class="stat-value">
+                        {% if xp_awarded %}+{{ xp_awarded }} XP
+                        {% else %}0 XP
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            {% if not xp_awarded and xp_awarded == 0 %}
+                <p class="result-sub result-note">You already banked XP for this game today — come back tomorrow.</p>
             {% endif %}
-        </dd>
-    </dl>
 
-    <p style="margin-top: 1.5rem;">
-        <a href="{% url 'arcade_play' attempt.game %}" class="btn">Play again</a>
-        <a href="{% url 'arcade_home' %}" class="btn-secondary">Choose another game</a>
-        <a href="{% url 'arcade_leaderboard' %}" class="btn-secondary">Leaderboard</a>
-    </p>
+            <div class="games-controls spaced">
+                <a href="{% url 'arcade_play' attempt.game %}" class="games-btn games-btn-primary">Play again</a>
+                <a href="{% url 'arcade_home' %}" class="games-btn games-btn-ghost">Choose another game</a>
+                <a href="{% url 'arcade_leaderboard' %}" class="games-btn games-btn-ghost">Leaderboard</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

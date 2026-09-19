@@ -41,10 +41,48 @@
         <div class="race-track" id="race-track" hidden>
             <div class="race-sky"></div>
             <div class="race-lane">
-                <span class="race-car" id="player-car" title="You">🏎️</span>
+                <div class="race-car car-player" id="player-car" title="You">
+                    <svg class="car-svg" viewBox="0 0 64 32" aria-hidden="true">
+                        <path class="car-shell" d="M4,26 L4,20 Q4,16 8,16 L14,16 L20,8 Q22,6 26,6 L38,6 Q42,6 44,10 L48,16 L56,16 Q60,16 60,20 L60,26 Z" />
+                        <path class="car-glass" d="M23,14 L27,9 L37,9 L41,14 Z" />
+                        <rect class="car-taillight" x="3.5" y="19" width="2" height="3" rx="0.6" />
+                        <circle class="car-headlight" cx="58.5" cy="19" r="1.6" />
+                        <g class="wheel">
+                            <circle class="wheel-tire" cx="16" cy="26" r="6" />
+                            <circle class="wheel-rim" cx="16" cy="26" r="2.4" />
+                            <rect class="wheel-spoke" x="15" y="21" width="2" height="10" />
+                            <rect class="wheel-spoke" x="11" y="25" width="10" height="2" />
+                        </g>
+                        <g class="wheel">
+                            <circle class="wheel-tire" cx="48" cy="26" r="6" />
+                            <circle class="wheel-rim" cx="48" cy="26" r="2.4" />
+                            <rect class="wheel-spoke" x="47" y="21" width="2" height="10" />
+                            <rect class="wheel-spoke" x="43" y="25" width="10" height="2" />
+                        </g>
+                    </svg>
+                </div>
             </div>
             <div class="race-lane">
-                <span class="race-car" id="rival-car" title="Rival">🚙</span>
+                <div class="race-car car-rival" id="rival-car" title="Rival">
+                    <svg class="car-svg" viewBox="0 0 64 32" aria-hidden="true">
+                        <path class="car-shell" d="M4,26 L4,20 Q4,16 8,16 L14,16 L20,8 Q22,6 26,6 L38,6 Q42,6 44,10 L48,16 L56,16 Q60,16 60,20 L60,26 Z" />
+                        <path class="car-glass" d="M23,14 L27,9 L37,9 L41,14 Z" />
+                        <rect class="car-taillight" x="3.5" y="19" width="2" height="3" rx="0.6" />
+                        <circle class="car-headlight" cx="58.5" cy="19" r="1.6" />
+                        <g class="wheel">
+                            <circle class="wheel-tire" cx="16" cy="26" r="6" />
+                            <circle class="wheel-rim" cx="16" cy="26" r="2.4" />
+                            <rect class="wheel-spoke" x="15" y="21" width="2" height="10" />
+                            <rect class="wheel-spoke" x="11" y="25" width="10" height="2" />
+                        </g>
+                        <g class="wheel">
+                            <circle class="wheel-tire" cx="48" cy="26" r="6" />
+                            <circle class="wheel-rim" cx="48" cy="26" r="2.4" />
+                            <rect class="wheel-spoke" x="47" y="21" width="2" height="10" />
+                            <rect class="wheel-spoke" x="43" y="25" width="10" height="2" />
+                        </g>
+                    </svg>
+                </div>
             </div>
             <div class="race-finish">🏁</div>
         </div>

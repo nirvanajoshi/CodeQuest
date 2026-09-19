@@ -147,26 +147,100 @@
     position: relative;
     height: 2.6rem;
     background:
-        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 26px, transparent 26px 52px) center / 100% 3px no-repeat,
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.16) 0 24px, transparent 24px 52px) 0 center / 52px 3px repeat-x,
         linear-gradient(180deg, #2a3348, #161c29);
     border-radius: 6px;
     margin-bottom: 0.7rem;
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    animation: road-scroll 0.9s linear infinite;
 }
 
 .race-lane:last-of-type {
     margin-bottom: 0.75rem;
 }
 
+@keyframes road-scroll {
+    to { background-position: -52px center, 0 0; }
+}
+
 .race-car {
     position: absolute;
     top: 50%;
     left: 0;
+    width: 3.1rem;
+    aspect-ratio: 2 / 1;
     transform: translateY(-50%);
-    font-size: 1.7rem;
     filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.5));
     transition: left 120ms linear;
     animation: race-bounce 0.5s ease-in-out infinite;
+}
+
+.race-car .car-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.race-car.car-player {
+    color: var(--games-accent-2);
+}
+
+.race-car.car-rival {
+    color: #ff8787;
+}
+
+.race-car .car-shell {
+    fill: currentColor;
+}
+
+.race-car .car-glass {
+    fill: rgba(255, 255, 255, 0.4);
+}
+
+.race-car .car-headlight {
+    fill: #fff3bf;
+}
+
+.race-car .car-taillight {
+    fill: #ff6b6b;
+}
+
+.race-car .wheel {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: wheel-spin 0.6s linear infinite;
+}
+
+.race-car .wheel-tire {
+    fill: #14161f;
+}
+
+.race-car .wheel-rim,
+.race-car .wheel-spoke {
+    fill: #cbd5e1;
+}
+
+@keyframes wheel-spin {
+    to { transform: rotate(360deg); }
+}
+
+.race-car::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    opacity: 0;
+    animation: speed-trail 0.5s ease-out infinite;
+}
+
+@keyframes speed-trail {
+    0% { opacity: 0.55; width: 4px; transform: translateY(-50%) translateX(0); }
+    100% { opacity: 0; width: 22px; transform: translateY(-50%) translateX(-14px); }
 }
 
 @keyframes race-bounce {

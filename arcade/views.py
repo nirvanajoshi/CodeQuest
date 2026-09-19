@@ -27,6 +27,18 @@ GAMES = [
         "icon": "⚡",
         "description": "Click the instant the box turns green. Five rounds, lower average wins.",
     },
+    {
+        "key": "archery",
+        "label": "Archery",
+        "icon": "🏹",
+        "description": "Set your power and angle, account for the wind, and hit the bullseye. Five arrows.",
+    },
+    {
+        "key": "chess",
+        "label": "Chess",
+        "icon": "♟️",
+        "description": "Play a full game of chess against the computer. Checkmate wins.",
+    },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}
 

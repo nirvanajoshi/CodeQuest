@@ -7,6 +7,8 @@ class ArcadeAttempt(models.Model):
         SNAKE = "snake", "Snake"
         MEMORY_MATCH = "memory_match", "Memory Match"
         REACTION_TIME = "reaction_time", "Reaction Time"
+        ARCHERY = "archery", "Archery"
+        CHESS = "chess", "Chess"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="arcade_attempts"

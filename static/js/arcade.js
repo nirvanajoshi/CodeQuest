@@ -323,11 +323,354 @@
         });
     }
 
+    // -----------------------------------------------------------------
+    // Archery
+    // -----------------------------------------------------------------
+
+    function initArchery() {
+        document.getElementById("archery-wrap").hidden = false;
+
+        const TOTAL_ARROWS = 5;
+        const range = document.getElementById("archery-range");
+        const target = document.getElementById("archery-target");
+        const crosshair = document.getElementById("archery-crosshair");
+        const overlay = document.getElementById("archery-overlay");
+        const scoreEl = document.getElementById("archery-score");
+        const roundEl = document.getElementById("archery-round");
+        const windEl = document.getElementById("archery-wind");
+
+        let score = 0;
+        let arrowsFired = 0;
+        let wind = 0;
+        let startTime = null;
+        let busy = false;
+
+        function newWind() {
+            wind = Math.round(Math.random() * 30 - 15);
+            const arrow = wind === 0 ? "–" : wind > 0 ? "→" : "←";
+            windEl.textContent = arrow + " " + Math.abs(wind);
+        }
+        newWind();
+
+        function ringScore(distPct) {
+            if (distPct <= 0.12) return 100;
+            if (distPct <= 0.3) return 80;
+            if (distPct <= 0.5) return 60;
+            if (distPct <= 0.72) return 40;
+            if (distPct <= 1.0) return 20;
+            return 0;
+        }
+
+        function ringClass(points) {
+            if (points >= 100) return "ring-gold";
+            if (points >= 80) return "ring-red";
+            if (points >= 60) return "ring-blue";
+            if (points >= 40) return "ring-black";
+            if (points >= 20) return "ring-white";
+            return "ring-miss";
+        }
+
+        function pointerPos(event) {
+            const rect = range.getBoundingClientRect();
+            return {
+                x: Math.max(0, Math.min(rect.width, event.clientX - rect.left)),
+                y: Math.max(0, Math.min(rect.height, event.clientY - rect.top)),
+            };
+        }
+
+        function moveCrosshair(event) {
+            if (busy || arrowsFired >= TOTAL_ARROWS) return;
+            const pos = pointerPos(event);
+            crosshair.hidden = false;
+            crosshair.style.left = pos.x + "px";
+            crosshair.style.top = pos.y + "px";
+        }
+
+        function fire(event) {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            if (busy || arrowsFired >= TOTAL_ARROWS) return;
+            if (!startTime) startTime = Date.now();
+            overlay.hidden = true;
+            busy = true;
+
+            const pos = pointerPos(event);
+            const rangeRect = range.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const centerX = targetRect.left - rangeRect.left + targetRect.width / 2;
+            const centerY = targetRect.top - rangeRect.top + targetRect.height / 2;
+            const radius = targetRect.width / 2;
+
+            const windPx = (wind / 15) * (radius * 0.35);
+            const wobble = (Math.random() - 0.5) * radius * 0.12;
+            const landX = pos.x + windPx + wobble;
+            const landY = pos.y + (Math.random() - 0.5) * radius * 0.12;
+
+            const dist = Math.hypot(landX - centerX, landY - centerY);
+            const points = ringScore(radius > 0 ? dist / radius : 1);
+
+            score += points;
+            arrowsFired++;
+            scoreEl.textContent = String(score);
+            roundEl.textContent = String(arrowsFired);
+
+            const hit = document.createElement("span");
+            hit.className = "archery-hit " + ringClass(points);
+            hit.style.left = landX + "px";
+            hit.style.top = landY + "px";
+            range.appendChild(hit);
+            crosshair.hidden = true;
+
+            setTimeout(() => {
+                if (arrowsFired >= TOTAL_ARROWS) {
+                    const durationSeconds = (Date.now() - startTime) / 1000;
+                    finish(score, arrowsFired + " arrows, avg " + Math.round(score / arrowsFired) + " pts", durationSeconds);
+                    return;
+                }
+                newWind();
+                busy = false;
+            }, 500);
+        }
+
+        range.addEventListener("pointermove", moveCrosshair);
+        range.addEventListener("pointerdown", fire);
+        range.addEventListener("pointerleave", () => {
+            if (!busy) crosshair.hidden = true;
+        });
+    }
+
+    // -----------------------------------------------------------------
+    // Chess (vs a simple built-in opponent)
+    // -----------------------------------------------------------------
+
+    function initChess() {
+        document.getElementById("chess-wrap").hidden = false;
+
+        const boardEl = document.getElementById("chess-board");
+        const turnEl = document.getElementById("chess-turn");
+        const materialEl = document.getElementById("chess-material");
+        const statusEl = document.getElementById("chess-status");
+        const capturedBlackEl = document.getElementById("chess-captured-black");
+        const capturedWhiteEl = document.getElementById("chess-captured-white");
+
+        if (typeof Chess === "undefined") {
+            statusEl.textContent = "Could not load the chess engine.";
+            return;
+        }
+
+        const chess = new Chess();
+        let selected = null;
+        let legalTargets = [];
+        let startTime = null;
+        let gameEnded = false;
+        let aiThinking = false;
+        let materialDiff = 0;
+
+        const PIECE_GLYPH = {
+            w: { p: "♙", n: "♘", b: "♗", r: "♖", q: "♕", k: "♔" },
+            b: { p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚" },
+        };
+        const PIECE_VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
+        const START_COUNTS = { p: 8, n: 2, b: 2, r: 2, q: 1 };
+
+        function squareFromRC(row, col) {
+            return "abcdefgh"[col] + String(8 - row);
+        }
+
+        function renderBoard() {
+            const board = chess.board();
+            const inCheck = chess.in_check();
+            const turnColor = chess.turn();
+
+            boardEl.innerHTML = "";
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const sq = squareFromRC(row, col);
+                    const cell = board[row][col];
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "chess-square " + ((row + col) % 2 === 0 ? "light" : "dark");
+                    btn.dataset.square = sq;
+
+                    if (selected === sq) btn.classList.add("selected");
+                    if (legalTargets.some((m) => m.to === sq)) {
+                        btn.classList.add(cell ? "legal-capture" : "legal-move");
+                    }
+                    if (inCheck && cell && cell.type === "k" && cell.color === turnColor) {
+                        btn.classList.add("in-check");
+                    }
+
+                    if (cell) {
+                        const span = document.createElement("span");
+                        span.className = "chess-piece piece-" + (cell.color === "w" ? "white" : "black");
+                        span.textContent = PIECE_GLYPH[cell.color][cell.type];
+                        btn.appendChild(span);
+                    }
+
+                    btn.addEventListener("click", () => onSquareClick(sq));
+                    boardEl.appendChild(btn);
+                }
+            }
+        }
+
+        function renderCaptured() {
+            const board = chess.board();
+            const onBoard = { w: { p: 0, n: 0, b: 0, r: 0, q: 0 }, b: { p: 0, n: 0, b: 0, r: 0, q: 0 } };
+            board.forEach((row) => row.forEach((cell) => {
+                if (cell && cell.type !== "k") onBoard[cell.color][cell.type]++;
+            }));
+
+            capturedBlackEl.innerHTML = "";
+            capturedWhiteEl.innerHTML = "";
+            let playerValue = 0;
+            let aiValue = 0;
+
+            ["q", "r", "b", "n", "p"].forEach((type) => {
+                const blackMissing = Math.max(0, START_COUNTS[type] - onBoard.b[type]);
+                const whiteMissing = Math.max(0, START_COUNTS[type] - onBoard.w[type]);
+                for (let i = 0; i < blackMissing; i++) {
+                    const s = document.createElement("span");
+                    s.className = "chess-captured-piece";
+                    s.textContent = PIECE_GLYPH.b[type];
+                    capturedBlackEl.appendChild(s);
+                }
+                for (let i = 0; i < whiteMissing; i++) {
+                    const s = document.createElement("span");
+                    s.className = "chess-captured-piece";
+                    s.textContent = PIECE_GLYPH.w[type];
+                    capturedWhiteEl.appendChild(s);
+                }
+                playerValue += blackMissing * PIECE_VALUE[type];
+                aiValue += whiteMissing * PIECE_VALUE[type];
+            });
+
+            materialDiff = playerValue - aiValue;
+            materialEl.textContent = materialDiff === 0 ? "Even" : materialDiff > 0 ? "+" + materialDiff : String(materialDiff);
+        }
+
+        function renderStatus() {
+            const turnColor = chess.turn();
+            turnEl.textContent = turnColor === "w" ? "White (you)" : "Black (computer)";
+
+            if (chess.in_checkmate()) {
+                statusEl.textContent = turnColor === "b" ? "Checkmate — you won!" : "Checkmate — you lost";
+            } else if (chess.in_stalemate()) {
+                statusEl.textContent = "Stalemate — draw";
+            } else if (chess.insufficient_material()) {
+                statusEl.textContent = "Draw — insufficient material";
+            } else if (chess.in_threefold_repetition()) {
+                statusEl.textContent = "Draw — repetition";
+            } else if (chess.in_draw()) {
+                statusEl.textContent = "Draw";
+            } else if (chess.in_check()) {
+                statusEl.textContent = turnColor === "w" ? "Check! Your move" : "Check!";
+            } else {
+                statusEl.textContent = turnColor === "w" ? "Your move" : "Computer thinking…";
+            }
+        }
+
+        function render() {
+            renderBoard();
+            renderCaptured();
+            renderStatus();
+        }
+
+        function checkGameOver() {
+            if (gameEnded || !chess.game_over()) return;
+            gameEnded = true;
+
+            const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
+            const moveCount = Math.ceil(chess.history().length / 2);
+            let score;
+            let detail;
+
+            if (chess.in_checkmate()) {
+                if (chess.turn() === "b") {
+                    score = Math.min(900, 500 + Math.max(0, materialDiff) * 10);
+                    detail = "Checkmate in " + moveCount + " moves";
+                } else {
+                    score = Math.min(300, 50 + Math.max(0, -materialDiff) * 5);
+                    detail = "Checkmated in " + moveCount + " moves";
+                }
+            } else {
+                score = 200;
+                detail = chess.in_stalemate() ? "Draw by stalemate" : "Draw";
+            }
+
+            finish(score, detail, durationSeconds);
+        }
+
+        function makeAiMove() {
+            const moves = chess.moves({ verbose: true });
+            if (!moves.length) return;
+
+            let best = null;
+            let bestScore = -Infinity;
+            moves.forEach((m) => {
+                let s = Math.random();
+                if (m.flags.indexOf("c") !== -1 || m.flags.indexOf("e") !== -1) {
+                    s += (PIECE_VALUE[m.captured] || 1) * 10;
+                }
+                chess.move({ from: m.from, to: m.to, promotion: "q" });
+                if (chess.in_checkmate()) s += 10000;
+                else if (chess.in_check()) s += 2;
+                chess.undo();
+
+                if (s > bestScore) {
+                    bestScore = s;
+                    best = m;
+                }
+            });
+
+            if (best) chess.move({ from: best.from, to: best.to, promotion: "q" });
+        }
+
+        function scheduleAiMove() {
+            aiThinking = true;
+            setTimeout(() => {
+                makeAiMove();
+                aiThinking = false;
+                render();
+                checkGameOver();
+            }, 450 + Math.random() * 350);
+        }
+
+        function onSquareClick(sq) {
+            if (gameEnded || aiThinking || chess.turn() !== "w") return;
+            if (!startTime) startTime = Date.now();
+
+            if (selected && legalTargets.some((m) => m.to === sq)) {
+                chess.move({ from: selected, to: sq, promotion: "q" });
+                selected = null;
+                legalTargets = [];
+                render();
+                checkGameOver();
+                if (!gameEnded) scheduleAiMove();
+                return;
+            }
+
+            const piece = chess.get(sq);
+            if (piece && piece.color === "w") {
+                selected = sq;
+                legalTargets = chess.moves({ square: sq, verbose: true });
+            } else {
+                selected = null;
+                legalTargets = [];
+            }
+            render();
+        }
+
+        render();
+    }
+
     if (game === "snake") {
         initSnake();
     } else if (game === "memory_match") {
         initMemoryMatch();
     } else if (game === "reaction_time") {
         initReactionTime();
+    } else if (game === "archery") {
+        initArchery();
+    } else if (game === "chess") {
+        initChess();
     }
 })();

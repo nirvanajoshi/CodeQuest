@@ -34,7 +34,7 @@
             </div>
             <div class="snake-board">
                 <canvas id="snake-canvas" width="400" height="400"></canvas>
-                <div class="snake-overlay" id="snake-overlay">
+                <div class="game-overlay" id="snake-overlay">
                     <p>Press an arrow key or WASD to start</p>
                     <span class="overlay-sub">WASD / Arrow keys</span>
                 </div>
@@ -85,6 +85,58 @@
             </div>
         </div>
 
+        <!-- Archery -->
+        <div class="archery-wrap" id="archery-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="archery-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Arrow</span>
+                    <strong id="archery-round">0<small class="stat-unit">/5</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Wind</span>
+                    <strong id="archery-wind">–</strong>
+                </div>
+            </div>
+            <div class="archery-range" id="archery-range">
+                <div class="archery-target" id="archery-target"></div>
+                <div class="archery-crosshair" id="archery-crosshair" hidden></div>
+                <div class="game-overlay" id="archery-overlay">
+                    <p>Move to aim, click to release</p>
+                    <span class="overlay-sub">Watch the wind — it pushes your arrow</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chess -->
+        <div class="chess-wrap" id="chess-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Turn</span>
+                    <strong id="chess-turn">White</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Material</span>
+                    <strong id="chess-material">Even</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Status</span>
+                    <strong id="chess-status">Your move</strong>
+                </div>
+            </div>
+            <div class="chess-captured" id="chess-captured-black" aria-label="Pieces you captured"></div>
+            <div class="chess-board" id="chess-board"></div>
+            <div class="chess-captured" id="chess-captured-white" aria-label="Pieces the computer captured"></div>
+            <p class="games-sub chess-hint">You're White. Tap a piece, then tap a highlighted square to move. Pawns promote to queen automatically.</p>
+        </div>
+
         <!-- Controls -->
         <div class="games-controls">
             <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>
@@ -106,6 +158,9 @@
     <script>
         window.ARCADE_AUTHENTICATED = {{ user.is_authenticated|yesno:"true,false" }};
     </script>
+    {% if game == "chess" %}
+        <script src="{% static 'js/vendor/chess.js' %}"></script>
+    {% endif %}
     <script src="{% static 'js/arcade.js' %}"></script>
     <script>
         (function () {

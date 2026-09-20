@@ -662,6 +662,262 @@
         render();
     }
 
+    // -----------------------------------------------------------------
+    // Car Racing (endless lane-dodging highway, nitro boost)
+    // -----------------------------------------------------------------
+
+    function initCarRacing() {
+        document.getElementById("car-wrap").hidden = false;
+
+        const canvas = document.getElementById("car-canvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("car-overlay");
+        const scoreEl = document.getElementById("car-score");
+        const speedEl = document.getElementById("car-speed");
+        const nitroEl = document.getElementById("car-nitro");
+
+        const LANES = 3;
+        const ROAD_MARGIN = 24;
+        const roadWidth = canvas.width - ROAD_MARGIN * 2;
+        const laneWidth = roadWidth / LANES;
+        const CAR_W = 38;
+        const CAR_H = 62;
+        const PLAYER_Y = canvas.height - 70;
+        const BASE_SPEED = 190; // px/sec
+        const MAX_SPEED = 620; // px/sec
+        const NITRO_MULTIPLIER = 1.7;
+        const NITRO_DURATION = 2200; // ms
+        const OBSTACLE_COLORS = ["#e03131", "#f08c00", "#1971c2", "#37b24d", "#ae3ec9", "#f1f3f5"];
+
+        function laneCenterX(lane) {
+            return ROAD_MARGIN + laneWidth * lane + laneWidth / 2;
+        }
+
+        let lane, carX, obstacles, score, distance, speed, nitro, nitroActive, nitroTimer;
+        let started, gameOver, startTime, lastTime, stripeOffset, spawnTimer, topSpeedKmh, rafId;
+
+        function speedKmh(pxPerSec) {
+            return Math.round(pxPerSec * 0.6);
+        }
+
+        function reset() {
+            lane = 1;
+            carX = laneCenterX(lane);
+            obstacles = [];
+            score = 0;
+            distance = 0;
+            speed = BASE_SPEED;
+            nitro = 0;
+            nitroActive = false;
+            nitroTimer = 0;
+            started = false;
+            gameOver = false;
+            startTime = null;
+            lastTime = null;
+            stripeOffset = 0;
+            spawnTimer = 700;
+            topSpeedKmh = 0;
+            scoreEl.textContent = "0";
+            speedEl.textContent = "0";
+            nitroEl.textContent = "0";
+            nitroEl.style.color = "";
+            overlay.hidden = false;
+            draw();
+        }
+
+        function spawnObstacle() {
+            const occupied = new Set();
+            const count = Math.random() < 0.22 ? 2 : 1;
+            for (let i = 0; i < count; i++) {
+                let obstacleLane;
+                let attempts = 0;
+                do {
+                    obstacleLane = Math.floor(Math.random() * LANES);
+                    attempts++;
+                } while (occupied.has(obstacleLane) && attempts < 6);
+                if (occupied.has(obstacleLane)) continue;
+                occupied.add(obstacleLane);
+                obstacles.push({
+                    lane: obstacleLane,
+                    y: -CAR_H - Math.random() * 80,
+                    color: OBSTACLE_COLORS[Math.floor(Math.random() * OBSTACLE_COLORS.length)],
+                    passed: false,
+                });
+            }
+        }
+
+        function roundedRect(x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawCar(x, y, bodyColor) {
+            ctx.fillStyle = bodyColor;
+            roundedRect(x - CAR_W / 2, y - CAR_H / 2, CAR_W, CAR_H, 9);
+            ctx.fillStyle = "rgba(20,22,31,0.85)";
+            roundedRect(x - CAR_W / 2 + 6, y - CAR_H / 2 + 8, CAR_W - 12, CAR_H * 0.3, 4);
+            ctx.fillStyle = "rgba(20,22,31,0.85)";
+            roundedRect(x - CAR_W / 2 + 6, y + CAR_H * 0.08, CAR_W - 12, CAR_H * 0.22, 4);
+        }
+
+        function draw() {
+            ctx.fillStyle = "#23262f";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = "#33384a";
+            ctx.fillRect(ROAD_MARGIN, 0, roadWidth, canvas.height);
+
+            ctx.strokeStyle = "rgba(255,255,255,0.4)";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([24, 20]);
+            for (let i = 1; i < LANES; i++) {
+                const x = ROAD_MARGIN + laneWidth * i;
+                ctx.beginPath();
+                ctx.moveTo(x, stripeOffset - 44);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            ctx.setLineDash([]);
+
+            obstacles.forEach((o) => drawCar(laneCenterX(o.lane), o.y, o.color));
+            drawCar(carX, PLAYER_Y, nitroActive ? "#ffd43b" : "#4c6ef5");
+        }
+
+        function endGame() {
+            if (gameOver) return;
+            gameOver = true;
+            cancelAnimationFrame(rafId);
+            const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
+            const meters = Math.round(distance / 10);
+            finish(score, meters + "m · top " + topSpeedKmh + " km/h", durationSeconds);
+        }
+
+        function activateNitro() {
+            if (nitro < 100 || nitroActive || gameOver) return;
+            nitroActive = true;
+            nitroTimer = NITRO_DURATION;
+            nitro = 0;
+            nitroEl.textContent = "0";
+            score += 40;
+        }
+
+        function tick(timestamp) {
+            if (gameOver) return;
+            if (lastTime === null) lastTime = timestamp;
+            const dt = Math.min(50, timestamp - lastTime);
+            lastTime = timestamp;
+
+            if (started) {
+                const effSpeed = nitroActive ? speed * NITRO_MULTIPLIER : speed;
+                const dtSec = dt / 1000;
+
+                distance += effSpeed * dtSec;
+                stripeOffset = (stripeOffset + effSpeed * dtSec) % 62;
+                speed = Math.min(MAX_SPEED, BASE_SPEED + distance * 0.045);
+
+                const kmh = speedKmh(effSpeed);
+                if (kmh > topSpeedKmh) topSpeedKmh = kmh;
+                speedEl.textContent = String(kmh);
+
+                if (nitroActive) {
+                    nitroTimer -= dt;
+                    if (nitroTimer <= 0) nitroActive = false;
+                }
+
+                score += Math.round(effSpeed * dtSec * 0.4);
+                scoreEl.textContent = String(score);
+
+                spawnTimer -= dt;
+                if (spawnTimer <= 0) {
+                    spawnObstacle();
+                    const interval = Math.max(360, 900 - speed * 0.9);
+                    spawnTimer = interval + Math.random() * 260;
+                }
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const o = obstacles[i];
+                    o.y += effSpeed * dtSec;
+
+                    if (!o.passed && o.y > PLAYER_Y + CAR_H) {
+                        o.passed = true;
+                        const bonus = nitroActive ? 30 : 15;
+                        score += bonus;
+                        nitro = Math.min(100, nitro + 12);
+                        nitroEl.textContent = String(nitro);
+                        nitroEl.style.color = nitro >= 100 ? "var(--games-success)" : "";
+                        scoreEl.textContent = String(score);
+                    }
+
+                    if (o.lane === lane &&
+                        Math.abs(o.y - PLAYER_Y) < (CAR_H * 0.8) &&
+                        Math.abs(laneCenterX(o.lane) - carX) < CAR_W * 0.8) {
+                        endGame();
+                        return;
+                    }
+
+                    if (o.y - CAR_H > canvas.height) {
+                        obstacles.splice(i, 1);
+                    }
+                }
+
+                carX += (laneCenterX(lane) - carX) * Math.min(1, dt / 90);
+            }
+
+            draw();
+            rafId = requestAnimationFrame(tick);
+        }
+
+        function beginIfNeeded() {
+            if (started || gameOver) return;
+            started = true;
+            startTime = Date.now();
+            overlay.hidden = true;
+        }
+
+        function moveLane(delta) {
+            if (gameOver) return;
+            beginIfNeeded();
+            lane = Math.max(0, Math.min(LANES - 1, lane + delta));
+        }
+
+        const KEY_LEFT = { ArrowLeft: true, a: true, A: true };
+        const KEY_RIGHT = { ArrowRight: true, d: true, D: true };
+
+        document.addEventListener("keydown", (event) => {
+            if (KEY_LEFT[event.key]) {
+                event.preventDefault();
+                moveLane(-1);
+            } else if (KEY_RIGHT[event.key]) {
+                event.preventDefault();
+                moveLane(1);
+            } else if (event.key === " " || event.key === "ArrowUp" || event.key === "w" || event.key === "W") {
+                event.preventDefault();
+                beginIfNeeded();
+                activateNitro();
+            }
+        });
+
+        canvas.addEventListener("pointerdown", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+            if (x < canvas.width / 3) moveLane(-1);
+            else if (x > (canvas.width * 2) / 3) moveLane(1);
+            else {
+                beginIfNeeded();
+                activateNitro();
+            }
+        });
+
+        reset();
+        rafId = requestAnimationFrame(tick);
+    }
+
     if (game === "snake") {
         initSnake();
     } else if (game === "memory_match") {
@@ -672,5 +928,7 @@
         initArchery();
     } else if (game === "chess") {
         initChess();
+    } else if (game === "car_racing") {
+        initCarRacing();
     }
 })();

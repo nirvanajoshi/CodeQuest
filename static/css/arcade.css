@@ -459,3 +459,31 @@
     text-align: center;
     max-width: 420px;
 }
+
+/* ---------- Car Racing ---------- */
+
+.car-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.car-board {
+    position: relative;
+    border-radius: var(--games-radius);
+    overflow: hidden;
+    box-shadow: var(--games-shadow);
+    line-height: 0;
+    border: 1px solid var(--games-border);
+    background: #23262f;
+}
+
+#car-canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background: #23262f;
+    touch-action: none;
+    cursor: pointer;
+}

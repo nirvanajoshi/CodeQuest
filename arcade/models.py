@@ -9,6 +9,7 @@ class ArcadeAttempt(models.Model):
         REACTION_TIME = "reaction_time", "Reaction Time"
         ARCHERY = "archery", "Archery"
         CHESS = "chess", "Chess"
+        CAR_RACING = "car_racing", "Car Racing"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="arcade_attempts"

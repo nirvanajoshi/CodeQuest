@@ -137,6 +137,33 @@
             <p class="games-sub chess-hint">You're White. Tap a piece, then tap a highlighted square to move. Pawns promote to queen automatically.</p>
         </div>
 
+        <!-- Car Racing -->
+        <div class="car-wrap" id="car-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="car-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Speed</span>
+                    <strong id="car-speed">0<small class="stat-unit">km/h</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Nitro</span>
+                    <strong id="car-nitro">0<small class="stat-unit">%</small></strong>
+                </div>
+            </div>
+            <div class="car-board">
+                <canvas id="car-canvas" width="340" height="520"></canvas>
+                <div class="game-overlay" id="car-overlay">
+                    <p>Arrow keys / A · D to switch lanes</p>
+                    <span class="overlay-sub">Nitro full? Press Space to boost</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Controls -->
         <div class="games-controls">
             <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>

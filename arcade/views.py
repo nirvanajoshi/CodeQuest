@@ -39,6 +39,12 @@ GAMES = [
         "icon": "♟️",
         "description": "Play a full game of chess against the computer. Checkmate wins.",
     },
+    {
+        "key": "car_racing",
+        "label": "Car Racing",
+        "icon": "🏎️",
+        "description": "Dodge traffic on an endless highway. Switch lanes and pop nitro when it's full.",
+    },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}
 

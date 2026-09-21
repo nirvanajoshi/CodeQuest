@@ -918,6 +918,304 @@
         rafId = requestAnimationFrame(tick);
     }
 
+    // -----------------------------------------------------------------
+    // Bounce (Nokia-style bouncing ball: gravity, spikes, pits, rings)
+    // -----------------------------------------------------------------
+
+    function initBounce() {
+        document.getElementById("bounce-wrap").hidden = false;
+
+        const canvas = document.getElementById("bounce-canvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("bounce-overlay");
+        const scoreEl = document.getElementById("bounce-score");
+        const distanceEl = document.getElementById("bounce-distance");
+        const ringsEl = document.getElementById("bounce-rings");
+
+        const TILE_W = 40;
+        const GROUND_Y = canvas.height - 50;
+        const BALL_R = 14;
+        const BALL_SCREEN_X = 120;
+        const RING_R = 10;
+        const GRAVITY = 1900;
+        const RESTITUTION = 0.8;
+        const MIN_BOUNCE = 520;
+        const BOOST_IMPULSE = 560;
+        const BOOST_COOLDOWN = 260;
+        const STEER_DELTA = 100;
+        const VX_MIN = 130;
+
+        let ballWorldX, ballY, vy, baseVx, leftHeld, rightHeld, boostCooldownMs;
+        let tiles, lastSafeTile, score, ringsCollected, distanceScore;
+        let started, gameOver, startTime, lastTime, rafId;
+
+        function tileAt(index) {
+            while (tiles.length <= index) {
+                tiles.push(generateNextTile());
+            }
+            return tiles[index];
+        }
+
+        function generateNextTile() {
+            const i = tiles.length;
+            if (i < 10) {
+                return { type: "safe", ring: false, collected: false };
+            }
+
+            const sinceHazard = i - lastSafeTile;
+            const difficulty = Math.min(1, i / 260);
+            const hazardChance = 0.16 + difficulty * 0.12;
+
+            if (sinceHazard >= 3 && Math.random() < hazardChance) {
+                if (Math.random() < 0.55) {
+                    lastSafeTile = i + 1;
+                    return { type: "spike", ring: false, collected: false };
+                }
+                const gapLen = 1 + Math.floor(Math.random() * (difficulty > 0.5 ? 3 : 2));
+                for (let g = 0; g < gapLen; g++) {
+                    tiles.push({ type: "gap", ring: false, collected: false });
+                }
+                lastSafeTile = tiles.length;
+                return generateNextTile();
+            }
+
+            const ring = sinceHazard > 1 && Math.random() < 0.18;
+            return { type: "safe", ring: ring, collected: false };
+        }
+
+        function reset() {
+            ballWorldX = 0;
+            ballY = GROUND_Y - BALL_R;
+            vy = 0;
+            baseVx = 230;
+            leftHeld = false;
+            rightHeld = false;
+            boostCooldownMs = 0;
+            tiles = [];
+            lastSafeTile = 0;
+            score = 0;
+            ringsCollected = 0;
+            distanceScore = 0;
+            started = false;
+            gameOver = false;
+            startTime = null;
+            lastTime = null;
+            scoreEl.textContent = "0";
+            distanceEl.textContent = "0";
+            ringsEl.textContent = "0";
+            overlay.hidden = false;
+            tileAt(20);
+            draw();
+        }
+
+        function beginIfNeeded() {
+            if (started || gameOver) return;
+            started = true;
+            startTime = Date.now();
+            overlay.hidden = true;
+            vy = -700;
+        }
+
+        function boost() {
+            if (gameOver) return;
+            beginIfNeeded();
+            if (boostCooldownMs > 0) return;
+            vy -= BOOST_IMPULSE;
+            boostCooldownMs = BOOST_COOLDOWN;
+        }
+
+        function endGame(reason) {
+            if (gameOver) return;
+            gameOver = true;
+            cancelAnimationFrame(rafId);
+            const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
+            const meters = Math.round(ballWorldX / 10);
+            finish(score, meters + "m · " + ringsCollected + " rings · " + reason, durationSeconds);
+        }
+
+        function drawSpike(screenX, topY) {
+            ctx.fillStyle = "#e03131";
+            ctx.beginPath();
+            ctx.moveTo(screenX, topY);
+            ctx.lineTo(screenX + TILE_W / 2, topY - 26);
+            ctx.lineTo(screenX + TILE_W, topY);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function draw() {
+            ctx.fillStyle = "#7ec8f2";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "rgba(255,255,255,0.55)";
+            ctx.beginPath();
+            ctx.arc(90, 60, 22, 0, Math.PI * 2);
+            ctx.arc(120, 55, 28, 0, Math.PI * 2);
+            ctx.arc(150, 62, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            const firstIndex = Math.floor((ballWorldX - BALL_SCREEN_X) / TILE_W) - 1;
+            const lastIndex = Math.floor((ballWorldX + (canvas.width - BALL_SCREEN_X)) / TILE_W) + 1;
+
+            for (let i = Math.max(0, firstIndex); i <= lastIndex; i++) {
+                const tile = tileAt(i);
+                const screenX = BALL_SCREEN_X + (i * TILE_W - ballWorldX);
+
+                if (tile.type === "gap") continue;
+
+                ctx.fillStyle = tile.type === "spike" ? "#5c4033" : "#8c5a2b";
+                ctx.fillRect(screenX, GROUND_Y, TILE_W + 1, canvas.height - GROUND_Y);
+                ctx.fillStyle = "#6fae4a";
+                ctx.fillRect(screenX, GROUND_Y, TILE_W + 1, 6);
+
+                if (tile.type === "spike") {
+                    drawSpike(screenX, GROUND_Y);
+                }
+
+                if (tile.type === "safe" && tile.ring && !tile.collected) {
+                    const cx = screenX + TILE_W / 2;
+                    const cy = GROUND_Y - 70;
+                    ctx.strokeStyle = "#ffd43b";
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(cx, cy, RING_R, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            }
+
+            const ballScreenY = ballY;
+            ctx.fillStyle = "#f76707";
+            ctx.beginPath();
+            ctx.arc(BALL_SCREEN_X, ballScreenY, BALL_R, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#d9480f";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.strokeStyle = "rgba(0,0,0,0.35)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(BALL_SCREEN_X - BALL_R + 3, ballScreenY);
+            ctx.lineTo(BALL_SCREEN_X + BALL_R - 3, ballScreenY);
+            ctx.moveTo(BALL_SCREEN_X, ballScreenY - BALL_R + 3);
+            ctx.lineTo(BALL_SCREEN_X, ballScreenY + BALL_R - 3);
+            ctx.stroke();
+        }
+
+        function tick(timestamp) {
+            if (gameOver) return;
+            if (lastTime === null) lastTime = timestamp;
+            const dt = Math.min(0.035, (timestamp - lastTime) / 1000);
+            lastTime = timestamp;
+
+            if (boostCooldownMs > 0) boostCooldownMs = Math.max(0, boostCooldownMs - dt * 1000);
+
+            if (started) {
+                const difficultyVx = Math.min(340, baseVx + ballWorldX * 0.03);
+                let vx = difficultyVx;
+                if (leftHeld) vx -= STEER_DELTA;
+                if (rightHeld) vx += STEER_DELTA;
+                vx = Math.max(VX_MIN, vx);
+
+                ballWorldX += vx * dt;
+                vy += GRAVITY * dt;
+                ballY += vy * dt;
+
+                const tileIndex = Math.floor(ballWorldX / TILE_W);
+                const tile = tileAt(tileIndex);
+
+                const ringTile = tile;
+                if (ringTile.type === "safe" && ringTile.ring && !ringTile.collected) {
+                    const ringCenterWorldX = tileIndex * TILE_W + TILE_W / 2;
+                    const ringCenterY = GROUND_Y - 70;
+                    const dx = ballWorldX - ringCenterWorldX;
+                    const dyy = ballY - ringCenterY;
+                    if (Math.hypot(dx, dyy) < BALL_R + RING_R) {
+                        ringTile.collected = true;
+                        ringsCollected++;
+                        ringsEl.textContent = String(ringsCollected);
+                        score += 25;
+                    }
+                }
+
+                if (ballY + BALL_R >= GROUND_Y && vy > 0) {
+                    if (tile.type === "spike") {
+                        endGame("hit a spike");
+                        return;
+                    } else if (tile.type === "gap") {
+                        // fall through, no bounce
+                    } else {
+                        ballY = GROUND_Y - BALL_R;
+                        vy = -Math.max(MIN_BOUNCE, Math.abs(vy) * RESTITUTION);
+                    }
+                }
+
+                if (ballY - BALL_R > canvas.height) {
+                    endGame("fell into a pit");
+                    return;
+                }
+
+                distanceScore += vx * dt * 0.3;
+                score = Math.round(distanceScore) + ringsCollected * 25;
+                scoreEl.textContent = String(score);
+                distanceEl.textContent = String(Math.round(ballWorldX / 10));
+            }
+
+            draw();
+            rafId = requestAnimationFrame(tick);
+        }
+
+        const KEY_LEFT = { ArrowLeft: true, a: true, A: true };
+        const KEY_RIGHT = { ArrowRight: true, d: true, D: true };
+        const KEY_BOOST = { " ": true, ArrowUp: true, w: true, W: true };
+
+        document.addEventListener("keydown", (event) => {
+            if (KEY_LEFT[event.key]) {
+                event.preventDefault();
+                leftHeld = true;
+                beginIfNeeded();
+            } else if (KEY_RIGHT[event.key]) {
+                event.preventDefault();
+                rightHeld = true;
+                beginIfNeeded();
+            } else if (KEY_BOOST[event.key]) {
+                event.preventDefault();
+                boost();
+            } else if (!started && !gameOver) {
+                beginIfNeeded();
+            }
+        });
+
+        document.addEventListener("keyup", (event) => {
+            if (KEY_LEFT[event.key]) leftHeld = false;
+            else if (KEY_RIGHT[event.key]) rightHeld = false;
+        });
+
+        canvas.addEventListener("pointerdown", (event) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = (event.clientX - rect.left) * (canvas.width / rect.width);
+            if (x < canvas.width / 3) {
+                leftHeld = true;
+                beginIfNeeded();
+            } else if (x > (canvas.width * 2) / 3) {
+                rightHeld = true;
+                beginIfNeeded();
+            } else {
+                boost();
+            }
+        });
+
+        canvas.addEventListener("pointerup", () => {
+            leftHeld = false;
+            rightHeld = false;
+        });
+        canvas.addEventListener("pointerleave", () => {
+            leftHeld = false;
+            rightHeld = false;
+        });
+
+        reset();
+        rafId = requestAnimationFrame(tick);
+    }
+
     if (game === "snake") {
         initSnake();
     } else if (game === "memory_match") {
@@ -930,5 +1228,7 @@
         initChess();
     } else if (game === "car_racing") {
         initCarRacing();
+    } else if (game === "bounce") {
+        initBounce();
     }
 })();

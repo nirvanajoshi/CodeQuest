@@ -164,6 +164,33 @@
             </div>
         </div>
 
+        <!-- Bounce -->
+        <div class="bounce-wrap" id="bounce-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="bounce-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Distance</span>
+                    <strong id="bounce-distance">0<small class="stat-unit">m</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Rings</span>
+                    <strong id="bounce-rings">0</strong>
+                </div>
+            </div>
+            <div class="bounce-board">
+                <canvas id="bounce-canvas" width="480" height="300"></canvas>
+                <div class="game-overlay" id="bounce-overlay">
+                    <p>Press any key or tap to start</p>
+                    <span class="overlay-sub">&larr;/&rarr; slow down / speed up &middot; Space to boost the bounce</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Controls -->
         <div class="games-controls">
             <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>

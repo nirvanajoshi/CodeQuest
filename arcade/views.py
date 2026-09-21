@@ -45,6 +45,12 @@ GAMES = [
         "icon": "🏎️",
         "description": "Dodge traffic on an endless highway. Switch lanes and pop nitro when it's full.",
     },
+    {
+        "key": "bounce",
+        "label": "Bounce",
+        "icon": "🟠",
+        "description": "Nokia-style bouncing ball. Steer around spikes and pits, collect rings, keep bouncing.",
+    },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}
 

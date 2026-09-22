@@ -919,7 +919,8 @@
     }
 
     // -----------------------------------------------------------------
-    // Bounce (Nokia-style bouncing ball: gravity, spikes, pits, rings)
+    // Bounce (Nokia-style: level-based, ball auto-bounces, bounces off
+    // walls too, steer + boost to clear spikes/pits and reach the flag)
     // -----------------------------------------------------------------
 
     function initBounce() {
@@ -929,7 +930,7 @@
         const ctx = canvas.getContext("2d");
         const overlay = document.getElementById("bounce-overlay");
         const scoreEl = document.getElementById("bounce-score");
-        const distanceEl = document.getElementById("bounce-distance");
+        const levelEl = document.getElementById("bounce-level");
         const ringsEl = document.getElementById("bounce-rings");
 
         const TILE_W = 40;
@@ -939,72 +940,81 @@
         const RING_R = 10;
         const GRAVITY = 1900;
         const RESTITUTION = 0.8;
+        const WALL_RESTITUTION = 0.75;
         const MIN_BOUNCE = 520;
         const BOOST_IMPULSE = 560;
         const BOOST_COOLDOWN = 260;
         const STEER_DELTA = 100;
-        const VX_MIN = 130;
+        const VX_ACCEL = 500;
+        const RUNWAY = 8;
 
-        let ballWorldX, ballY, vy, baseVx, leftHeld, rightHeld, boostCooldownMs;
-        let tiles, lastSafeTile, score, ringsCollected, distanceScore;
-        let started, gameOver, startTime, lastTime, rafId;
+        // '.' safe  'x' spike  '_' gap  'o' safe+ring  'w' short wall  'W' tall wall  'F' flag/finish
+        const WALL_HEIGHT = { w: 70, W: 130 };
+        const LEVELS = [
+            "..........x....o.........__..x.x....o........w.......F",
+            "......o...x__x....w.....x...o....__x..W....o......x..F",
+            "..o.......x.W...__..x..o....x__x....w...x.o...W....x.F",
+        ];
+
+        function buildLevel(index) {
+            const layout = LEVELS[index % LEVELS.length];
+            const tiles = [];
+            for (let i = 0; i < RUNWAY; i++) {
+                tiles.push({ type: "safe", ring: false, collected: false, wallHeight: 0 });
+            }
+            for (let i = 0; i < layout.length; i++) {
+                const ch = layout[i];
+                if (ch === "x") tiles.push({ type: "spike", ring: false, collected: false, wallHeight: 0 });
+                else if (ch === "_") tiles.push({ type: "gap", ring: false, collected: false, wallHeight: 0 });
+                else if (ch === "o") tiles.push({ type: "safe", ring: true, collected: false, wallHeight: 0 });
+                else if (ch === "F") tiles.push({ type: "flag", ring: false, collected: false, wallHeight: 0 });
+                else if (ch === "w" || ch === "W") tiles.push({ type: "safe", ring: false, collected: false, wallHeight: WALL_HEIGHT[ch] });
+                else tiles.push({ type: "safe", ring: false, collected: false, wallHeight: 0 });
+            }
+            return tiles;
+        }
 
         function tileAt(index) {
-            while (tiles.length <= index) {
-                tiles.push(generateNextTile());
-            }
-            return tiles[index];
+            return tiles[Math.max(0, Math.min(tiles.length - 1, index))];
         }
 
-        function generateNextTile() {
-            const i = tiles.length;
-            if (i < 10) {
-                return { type: "safe", ring: false, collected: false };
-            }
+        let levelIndex, tiles, ballWorldX, ballY, vy, vx, leftHeld, rightHeld, boostCooldownMs, levelComplete;
+        let score, ringsCollected, progressScore, levelBonus;
+        let started, gameOver, startTime, lastTime, rafId;
 
-            const sinceHazard = i - lastSafeTile;
-            const difficulty = Math.min(1, i / 260);
-            const hazardChance = 0.16 + difficulty * 0.12;
-
-            if (sinceHazard >= 3 && Math.random() < hazardChance) {
-                if (Math.random() < 0.55) {
-                    lastSafeTile = i + 1;
-                    return { type: "spike", ring: false, collected: false };
-                }
-                const gapLen = 1 + Math.floor(Math.random() * (difficulty > 0.5 ? 3 : 2));
-                for (let g = 0; g < gapLen; g++) {
-                    tiles.push({ type: "gap", ring: false, collected: false });
-                }
-                lastSafeTile = tiles.length;
-                return generateNextTile();
-            }
-
-            const ring = sinceHazard > 1 && Math.random() < 0.18;
-            return { type: "safe", ring: ring, collected: false };
+        function targetVx() {
+            return 230 + levelIndex * 35;
         }
 
-        function reset() {
+        function loadLevel(index) {
+            levelIndex = index;
+            tiles = buildLevel(index);
             ballWorldX = 0;
             ballY = GROUND_Y - BALL_R;
             vy = 0;
-            baseVx = 230;
+            vx = targetVx();
             leftHeld = false;
             rightHeld = false;
             boostCooldownMs = 0;
-            tiles = [];
-            lastSafeTile = 0;
+            levelComplete = false;
+            levelEl.textContent = (index + 1) + "/" + LEVELS.length;
+        }
+
+        function reset() {
             score = 0;
             ringsCollected = 0;
-            distanceScore = 0;
+            progressScore = 0;
+            levelBonus = 0;
             started = false;
             gameOver = false;
             startTime = null;
             lastTime = null;
             scoreEl.textContent = "0";
-            distanceEl.textContent = "0";
             ringsEl.textContent = "0";
             overlay.hidden = false;
-            tileAt(20);
+            overlay.innerHTML = "<p>Press any key or tap to start</p>" +
+                "<span class=\"overlay-sub\">&larr;/&rarr; steer &middot; Space to boost &middot; bounce off walls to reach the flag</span>";
+            loadLevel(0);
             draw();
         }
 
@@ -1017,7 +1027,7 @@
         }
 
         function boost() {
-            if (gameOver) return;
+            if (gameOver || levelComplete) return;
             beginIfNeeded();
             if (boostCooldownMs > 0) return;
             vy -= BOOST_IMPULSE;
@@ -1029,8 +1039,34 @@
             gameOver = true;
             cancelAnimationFrame(rafId);
             const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
-            const meters = Math.round(ballWorldX / 10);
-            finish(score, meters + "m · " + ringsCollected + " rings · " + reason, durationSeconds);
+            const detail = "Level " + (levelIndex + 1) + "/" + LEVELS.length + " · " + ringsCollected + " rings · " + reason;
+            finish(score, detail, durationSeconds);
+        }
+
+        function completeLevel() {
+            if (gameOver || levelComplete) return;
+            levelComplete = true;
+            levelBonus += 100 + levelIndex * 25;
+            score = Math.round(progressScore) + ringsCollected * 25 + levelBonus;
+            scoreEl.textContent = String(score);
+
+            const isLast = levelIndex >= LEVELS.length - 1;
+            if (isLast) {
+                cancelAnimationFrame(rafId);
+                const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
+                finish(score, "Cleared all " + LEVELS.length + " levels · " + ringsCollected + " rings", durationSeconds);
+                return;
+            }
+
+            overlay.hidden = false;
+            overlay.innerHTML = "<p>Level " + (levelIndex + 1) + " complete!</p>" +
+                "<span class=\"overlay-sub\">Next level starting…</span>";
+            setTimeout(() => {
+                if (gameOver) return;
+                loadLevel(levelIndex + 1);
+                overlay.hidden = true;
+                vy = -700;
+            }, 1100);
         }
 
         function drawSpike(screenX, topY) {
@@ -1039,6 +1075,30 @@
             ctx.moveTo(screenX, topY);
             ctx.lineTo(screenX + TILE_W / 2, topY - 26);
             ctx.lineTo(screenX + TILE_W, topY);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawWall(screenX, height) {
+            ctx.fillStyle = "#495057";
+            ctx.fillRect(screenX - 4, GROUND_Y - height, 8, height);
+            ctx.fillStyle = "#adb5bd";
+            ctx.fillRect(screenX - 6, GROUND_Y - height - 6, 12, 6);
+        }
+
+        function drawFlag(screenX) {
+            const poleH = 90;
+            ctx.strokeStyle = "#495057";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(screenX + TILE_W / 2, GROUND_Y);
+            ctx.lineTo(screenX + TILE_W / 2, GROUND_Y - poleH);
+            ctx.stroke();
+            ctx.fillStyle = "#37b24d";
+            ctx.beginPath();
+            ctx.moveTo(screenX + TILE_W / 2, GROUND_Y - poleH);
+            ctx.lineTo(screenX + TILE_W / 2 + 26, GROUND_Y - poleH + 10);
+            ctx.lineTo(screenX + TILE_W / 2, GROUND_Y - poleH + 20);
             ctx.closePath();
             ctx.fill();
         }
@@ -1056,8 +1116,8 @@
             const firstIndex = Math.floor((ballWorldX - BALL_SCREEN_X) / TILE_W) - 1;
             const lastIndex = Math.floor((ballWorldX + (canvas.width - BALL_SCREEN_X)) / TILE_W) + 1;
 
-            for (let i = Math.max(0, firstIndex); i <= lastIndex; i++) {
-                const tile = tileAt(i);
+            for (let i = Math.max(0, firstIndex); i <= Math.min(tiles.length - 1, lastIndex); i++) {
+                const tile = tiles[i];
                 const screenX = BALL_SCREEN_X + (i * TILE_W - ballWorldX);
 
                 if (tile.type === "gap") continue;
@@ -1071,7 +1131,11 @@
                     drawSpike(screenX, GROUND_Y);
                 }
 
-                if (tile.type === "safe" && tile.ring && !tile.collected) {
+                if (tile.type === "flag") {
+                    drawFlag(screenX);
+                }
+
+                if (tile.ring && !tile.collected) {
                     const cx = screenX + TILE_W / 2;
                     const cy = GROUND_Y - 70;
                     ctx.strokeStyle = "#ffd43b";
@@ -1079,6 +1143,10 @@
                     ctx.beginPath();
                     ctx.arc(cx, cy, RING_R, 0, Math.PI * 2);
                     ctx.stroke();
+                }
+
+                if (tile.wallHeight > 0) {
+                    drawWall(screenX, tile.wallHeight);
                 }
             }
 
@@ -1100,6 +1168,29 @@
             ctx.stroke();
         }
 
+        function applyWallCollisions(prevX, candidateX) {
+            const dir = candidateX >= prevX ? 1 : -1;
+            const lo = Math.floor(Math.min(prevX, candidateX) / TILE_W) - 1;
+            const hi = Math.floor(Math.max(prevX, candidateX) / TILE_W) + 1;
+
+            for (let ti = Math.max(0, lo); ti <= Math.min(tiles.length - 1, hi); ti++) {
+                const t = tiles[ti];
+                if (!t.wallHeight) continue;
+                const wallX = ti * TILE_W;
+                const frontPrev = dir > 0 ? prevX + BALL_R : prevX - BALL_R;
+                const frontNow = dir > 0 ? candidateX + BALL_R : candidateX - BALL_R;
+                const crossed = dir > 0 ? (frontPrev < wallX && frontNow >= wallX) : (frontPrev > wallX && frontNow <= wallX);
+                if (!crossed) continue;
+
+                const ballTop = ballY - BALL_R;
+                if (ballTop > GROUND_Y - t.wallHeight) {
+                    vx = -vx * WALL_RESTITUTION;
+                    return dir > 0 ? wallX - BALL_R : wallX + BALL_R;
+                }
+            }
+            return candidateX;
+        }
+
         function tick(timestamp) {
             if (gameOver) return;
             if (lastTime === null) lastTime = timestamp;
@@ -1108,31 +1199,38 @@
 
             if (boostCooldownMs > 0) boostCooldownMs = Math.max(0, boostCooldownMs - dt * 1000);
 
-            if (started) {
-                const difficultyVx = Math.min(340, baseVx + ballWorldX * 0.03);
-                let vx = difficultyVx;
-                if (leftHeld) vx -= STEER_DELTA;
-                if (rightHeld) vx += STEER_DELTA;
-                vx = Math.max(VX_MIN, vx);
+            if (started && !levelComplete) {
+                let desired = targetVx();
+                if (leftHeld) desired -= STEER_DELTA;
+                if (rightHeld) desired += STEER_DELTA;
 
-                ballWorldX += vx * dt;
+                if (vx < desired) vx = Math.min(desired, vx + VX_ACCEL * dt);
+                else if (vx > desired) vx = Math.max(desired, vx - VX_ACCEL * dt);
+
+                const prevX = ballWorldX;
+                let candidateX = ballWorldX + vx * dt;
+                candidateX = applyWallCollisions(prevX, candidateX);
+                if (candidateX < 0) {
+                    candidateX = 0;
+                    vx = Math.abs(vx) * WALL_RESTITUTION;
+                }
+                ballWorldX = candidateX;
+
                 vy += GRAVITY * dt;
                 ballY += vy * dt;
 
                 const tileIndex = Math.floor(ballWorldX / TILE_W);
                 const tile = tileAt(tileIndex);
 
-                const ringTile = tile;
-                if (ringTile.type === "safe" && ringTile.ring && !ringTile.collected) {
+                if (tile.ring && !tile.collected) {
                     const ringCenterWorldX = tileIndex * TILE_W + TILE_W / 2;
                     const ringCenterY = GROUND_Y - 70;
                     const dx = ballWorldX - ringCenterWorldX;
                     const dyy = ballY - ringCenterY;
                     if (Math.hypot(dx, dyy) < BALL_R + RING_R) {
-                        ringTile.collected = true;
+                        tile.collected = true;
                         ringsCollected++;
                         ringsEl.textContent = String(ringsCollected);
-                        score += 25;
                     }
                 }
 
@@ -1153,10 +1251,14 @@
                     return;
                 }
 
-                distanceScore += vx * dt * 0.3;
-                score = Math.round(distanceScore) + ringsCollected * 25;
+                const flagWorldX = (tiles.length - 1) * TILE_W + TILE_W / 2;
+                if (ballWorldX >= flagWorldX) {
+                    completeLevel();
+                }
+
+                if (vx > 0) progressScore += vx * dt * 0.2;
+                score = Math.round(progressScore) + ringsCollected * 25 + levelBonus;
                 scoreEl.textContent = String(score);
-                distanceEl.textContent = String(Math.round(ballWorldX / 10));
             }
 
             draw();

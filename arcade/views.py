@@ -49,7 +49,7 @@ GAMES = [
         "key": "bounce",
         "label": "Bounce",
         "icon": "🟠",
-        "description": "Nokia-style bouncing ball. Steer around spikes and pits, collect rings, keep bouncing.",
+        "description": "Nokia-style bouncing ball. Steer, bounce off walls, dodge spikes and pits, collect rings, and reach the flag across 3 levels.",
     },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}

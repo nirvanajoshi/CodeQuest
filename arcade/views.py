@@ -51,6 +51,12 @@ GAMES = [
         "icon": "🟠",
         "description": "Nokia-style bouncing ball. Steer, bounce off walls, dodge spikes and pits, collect rings, and reach the flag across 3 levels.",
     },
+    {
+        "key": "breakout",
+        "label": "Breakout",
+        "icon": "🧱",
+        "description": "Classic Breakout. Move the paddle to bounce the ball and smash all the bricks. Lose the ball and it's game over.",
+    },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}
 

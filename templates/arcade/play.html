@@ -191,6 +191,33 @@
             </div>
         </div>
 
+        <!-- Breakout -->
+        <div class="breakout-wrap" id="breakout-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="breakout-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Balls</span>
+                    <strong id="breakout-lives">3</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Bricks</span>
+                    <strong id="breakout-bricks">0<small class="stat-unit">/10</small></strong>
+                </div>
+            </div>
+            <div class="breakout-board">
+                <canvas id="breakout-canvas" width="480" height="360"></canvas>
+                <div class="game-overlay" id="breakout-overlay">
+                    <p>Move mouse or use arrow keys to control the paddle</p>
+                    <span class="overlay-sub">Break all the bricks to win!</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Controls -->
         <div class="games-controls">
             <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>

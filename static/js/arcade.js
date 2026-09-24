@@ -919,8 +919,7 @@
     }
 
     // -----------------------------------------------------------------
-    // Bounce (Nokia-style: level-based, ball auto-bounces, bounces off
-    // walls too, steer + boost to clear spikes/pits and reach the flag)
+    // Bounce (manual platforming: direct movement and a double jump)
     // -----------------------------------------------------------------
 
     function initBounce() {
@@ -939,13 +938,12 @@
         const BALL_SCREEN_X = 120;
         const RING_R = 10;
         const GRAVITY = 1900;
-        const RESTITUTION = 0.8;
         const WALL_RESTITUTION = 0.75;
-        const MIN_BOUNCE = 520;
-        const BOOST_IMPULSE = 560;
-        const BOOST_COOLDOWN = 260;
-        const STEER_DELTA = 100;
-        const VX_ACCEL = 500;
+        const JUMP_IMPULSE = 700;
+        const MOVE_SPEED = 260;
+        const VX_ACCEL = 1100;
+        const VX_FRICTION = 1400;
+        const MAX_JUMPS = 2;
         const RUNWAY = 8;
 
         // '.' safe  'x' spike  '_' gap  'o' safe+ring  'w' short wall  'W' tall wall  'F' flag/finish
@@ -978,13 +976,9 @@
             return tiles[Math.max(0, Math.min(tiles.length - 1, index))];
         }
 
-        let levelIndex, tiles, ballWorldX, ballY, vy, vx, leftHeld, rightHeld, boostCooldownMs, levelComplete;
+        let levelIndex, tiles, ballWorldX, ballY, vy, vx, leftHeld, rightHeld, jumpsRemaining, levelComplete;
         let score, ringsCollected, progressScore, levelBonus;
         let started, gameOver, startTime, lastTime, rafId;
-
-        function targetVx() {
-            return 230 + levelIndex * 35;
-        }
 
         function loadLevel(index) {
             levelIndex = index;
@@ -992,10 +986,10 @@
             ballWorldX = 0;
             ballY = GROUND_Y - BALL_R;
             vy = 0;
-            vx = targetVx();
+            vx = 0;
             leftHeld = false;
             rightHeld = false;
-            boostCooldownMs = 0;
+            jumpsRemaining = MAX_JUMPS;
             levelComplete = false;
             levelEl.textContent = (index + 1) + "/" + LEVELS.length;
         }
@@ -1012,8 +1006,8 @@
             scoreEl.textContent = "0";
             ringsEl.textContent = "0";
             overlay.hidden = false;
-            overlay.innerHTML = "<p>Press any key or tap to start</p>" +
-                "<span class=\"overlay-sub\">&larr;/&rarr; steer &middot; Space to boost &middot; bounce off walls to reach the flag</span>";
+            overlay.innerHTML = "<p>Use the controls to start</p>" +
+                "<span class=\"overlay-sub\">&larr;/&rarr; move &middot; Space / &uarr; jump twice &middot; reach the flag</span>";
             loadLevel(0);
             draw();
         }
@@ -1023,15 +1017,14 @@
             started = true;
             startTime = Date.now();
             overlay.hidden = true;
-            vy = -700;
         }
 
-        function boost() {
+        function jump() {
             if (gameOver || levelComplete) return;
+            if (jumpsRemaining <= 0) return;
             beginIfNeeded();
-            if (boostCooldownMs > 0) return;
-            vy -= BOOST_IMPULSE;
-            boostCooldownMs = BOOST_COOLDOWN;
+            vy = -JUMP_IMPULSE;
+            jumpsRemaining--;
         }
 
         function endGame(reason) {
@@ -1065,7 +1058,6 @@
                 if (gameOver) return;
                 loadLevel(levelIndex + 1);
                 overlay.hidden = true;
-                vy = -700;
             }, 1100);
         }
 
@@ -1151,7 +1143,24 @@
             }
 
             const ballScreenY = ballY;
-            ctx.fillStyle = "#f76707";
+            const shadowDistance = Math.max(0, GROUND_Y - ballScreenY - BALL_R);
+            ctx.fillStyle = "rgba(37, 57, 32, " + Math.max(0.08, 0.3 - shadowDistance / 500) + ")";
+            ctx.beginPath();
+            ctx.ellipse(BALL_SCREEN_X, GROUND_Y - 2, BALL_R + shadowDistance * 0.05, 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            const ballGradient = ctx.createRadialGradient(
+                BALL_SCREEN_X - BALL_R * 0.35,
+                ballScreenY - BALL_R * 0.4,
+                2,
+                BALL_SCREEN_X,
+                ballScreenY,
+                BALL_R * 1.2
+            );
+            ballGradient.addColorStop(0, "#ffb347");
+            ballGradient.addColorStop(0.55, "#f76707");
+            ballGradient.addColorStop(1, "#c2410c");
+            ctx.fillStyle = ballGradient;
             ctx.beginPath();
             ctx.arc(BALL_SCREEN_X, ballScreenY, BALL_R, 0, Math.PI * 2);
             ctx.fill();
@@ -1197,15 +1206,14 @@
             const dt = Math.min(0.035, (timestamp - lastTime) / 1000);
             lastTime = timestamp;
 
-            if (boostCooldownMs > 0) boostCooldownMs = Math.max(0, boostCooldownMs - dt * 1000);
-
             if (started && !levelComplete) {
-                let desired = targetVx();
-                if (leftHeld) desired -= STEER_DELTA;
-                if (rightHeld) desired += STEER_DELTA;
+                let desired = 0;
+                if (leftHeld) desired -= MOVE_SPEED;
+                if (rightHeld) desired += MOVE_SPEED;
 
                 if (vx < desired) vx = Math.min(desired, vx + VX_ACCEL * dt);
                 else if (vx > desired) vx = Math.max(desired, vx - VX_ACCEL * dt);
+                if (!leftHeld && !rightHeld && Math.abs(vx) < VX_FRICTION * dt) vx = 0;
 
                 const prevX = ballWorldX;
                 let candidateX = ballWorldX + vx * dt;
@@ -1242,7 +1250,8 @@
                         // fall through, no bounce
                     } else {
                         ballY = GROUND_Y - BALL_R;
-                        vy = -Math.max(MIN_BOUNCE, Math.abs(vy) * RESTITUTION);
+                        vy = 0;
+                        jumpsRemaining = MAX_JUMPS;
                     }
                 }
 
@@ -1267,7 +1276,7 @@
 
         const KEY_LEFT = { ArrowLeft: true, a: true, A: true };
         const KEY_RIGHT = { ArrowRight: true, d: true, D: true };
-        const KEY_BOOST = { " ": true, ArrowUp: true, w: true, W: true };
+        const KEY_JUMP = { " ": true, ArrowUp: true, w: true, W: true };
 
         document.addEventListener("keydown", (event) => {
             if (KEY_LEFT[event.key]) {
@@ -1278,11 +1287,9 @@
                 event.preventDefault();
                 rightHeld = true;
                 beginIfNeeded();
-            } else if (KEY_BOOST[event.key]) {
+            } else if (KEY_JUMP[event.key]) {
                 event.preventDefault();
-                boost();
-            } else if (!started && !gameOver) {
-                beginIfNeeded();
+                if (!event.repeat) jump();
             }
         });
 
@@ -1301,7 +1308,7 @@
                 rightHeld = true;
                 beginIfNeeded();
             } else {
-                boost();
+                jump();
             }
         });
 
@@ -1350,7 +1357,7 @@
             ["#48dbfb", "#0abde3"],
         ];
 
-        let paddle, ball, balls, bricks, score, lives, started, gameOver, startTime, rafId;
+        let paddle, balls, bricks, score, lives, started, gameOver, startTime, lastTime, rafId;
 
         function reset() {
             paddle = {
@@ -1366,9 +1373,13 @@
             started = false;
             gameOver = false;
             startTime = null;
+            lastTime = null;
+            leftPressed = false;
+            rightPressed = false;
             scoreEl.textContent = "0";
             livesEl.textContent = "3";
             overlay.hidden = false;
+            overlay.innerHTML = "<p>Click or press Space to launch</p>";
             initBricks();
             draw();
         }
@@ -1393,17 +1404,19 @@
         }
 
         function launchBall() {
-            balls.push({
+            const ball = {
                 x: paddle.x + paddle.w / 2,
                 y: paddle.y - BALL_R - 1,
                 dx: 0,
                 dy: -420,
                 r: BALL_R,
-            });
+            };
+            ball.dx = (Math.random() * 2 - 1) * 170;
+            balls.push(ball);
             if (!startTime) {
                 startTime = Date.now();
-                overlay.hidden = true;
             }
+            overlay.hidden = true;
         }
 
         function draw() {
@@ -1515,122 +1528,6 @@
             ctx.globalAlpha = 1;
         }
 
-        function tick(timestamp) {
-            if (gameOver) return;
-            const dt = Math.min(50, timestamp - (window._lastTime || timestamp)) / 1000;
-            window._lastTime = timestamp;
-
-            if (started && !gameOver) {
-                // Move paddle with mouse/touch
-                // (handled via pointermove)
-
-                for (let bi = balls.length - 1; bi >= 0; bi--) {
-                    const b = balls[bi];
-
-                    // Apply gravity-like effect (none for breakout)
-                    // Move ball
-                    b.x += b.dx * dt;
-                    b.y += b.dy * dt;
-
-                    // Wall collisions
-                    if (b.x - b.r < 0) {
-                        b.x = b.r;
-                        b.dx = Math.abs(b.dx);
-                    } else if (b.x + b.r > canvas.width) {
-                        b.x = canvas.width - b.r;
-                        b.dx = -Math.abs(b.dx);
-                    }
-
-                    if (b.y - b.r < 0) {
-                        b.y = b.r;
-                        b.dy = Math.abs(b.dy);
-                    }
-
-                    // Bottom - lose ball
-                    if (b.y - b.r > canvas.height) {
-                        balls.splice(bi, 1);
-                        if (balls.length === 0) {
-                            lives--;
-                            livesEl.textContent = String(lives);
-                            if (lives <= 0) {
-                                endGame("No balls left");
-                                return;
-                            }
-                            resetBall();
-                        }
-                        continue;
-                    }
-
-                    // Paddle collision
-                    if (
-                        b.dy > 0 &&
-                        b.y + b.r >= paddle.y &&
-                        b.y + b.r <= paddle.y + paddle.h + 5 &&
-                        b.x >= paddle.x - b.r &&
-                        b.x <= paddle.x + paddle.w + b.r
-                    ) {
-                        // Calculate hit position (-1 to 1)
-                        const hitPos = (b.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
-                        const angle = hitPos * (Math.PI / 3); // -60 to 60 degrees from vertical
-                        const speed = Math.sqrt(b.dx * b.dx + b.dy * b.dy);
-                        b.dx = speed * Math.sin(angle);
-                        b.dy = -speed * Math.cos(angle);
-                        b.y = paddle.y - b.r;
-
-                        spawnParticles(b.x, b.y, "#48dbfb", 8);
-                    }
-
-                    // Brick collision
-                    for (let i = 0; i < bricks.length; i++) {
-                        const brick = bricks[i];
-                        if (!brick.alive) continue;
-
-                        if (
-                            b.x + b.r > brick.x &&
-                            b.x - b.r < brick.x + brick.w &&
-                            b.y + b.r > brick.y &&
-                            b.y - b.r < brick.y + brick.h
-                        ) {
-                            brick.alive = false;
-                            score += 100;
-                            scoreEl.textContent = String(score);
-
-                            // Update brick count
-                            const remaining = bricks.filter((br) => br.alive).length;
-                            bricksEl.innerHTML = remaining + "<small class=\"stat-unit\">/" + (BRICK_ROWS * BRICK_COLS) + "</small>";
-
-                            // Determine collision side
-                            const overlapLeft = (b.x + b.r) - brick.x;
-                            const overlapRight = (brick.x + brick.w) - (b.x - b.r);
-                            const overlapTop = (b.y + b.r) - brick.y;
-                            const overlapBottom = (brick.y + brick.h) - (b.y - b.r);
-
-                            const minOverlapX = Math.min(overlapLeft, overlapRight);
-                            const minOverlapY = Math.min(overlapTop, overlapBottom);
-
-                            if (minOverlapX < minOverlapY) {
-                                b.dx = -b.dx;
-                            } else {
-                                b.dy = -b.dy;
-                            }
-
-                            spawnParticles(brick.x + brick.w / 2, brick.y + brick.h / 2, brick.color, 12);
-
-                            // Check win condition
-                            if (bricks.every((br) => !br.alive)) {
-                                endGame("All bricks broken!");
-                                return;
-                            }
-                            break; // Only hit one brick per frame
-                        }
-                    }
-                }
-            }
-
-            draw();
-            rafId = requestAnimationFrame(tick);
-        }
-
         function resetBall() {
             balls = [];
             paddle.x = canvas.width / 2 - paddle.w / 2;
@@ -1686,37 +1583,36 @@
             }
         }
 
+        // Launch on any interaction
+        function handleLaunchInteraction(event) {
+            if (!started || (balls.length === 0 && !gameOver)) {
+                launchIfNeeded();
+            }
+        }
+
+        canvas.addEventListener("click", handleLaunchInteraction);
+        canvas.addEventListener("pointerdown", handleLaunchInteraction);
+
+        // Keyboard controls (launch + paddle)
+        let rightPressed = false;
+        let leftPressed = false;
+        const PADDLE_SPEED = 400;
+
         document.addEventListener("keydown", (event) => {
+            // Launch ball on Space/Enter
             if (event.key === " " || event.key === "Enter") {
                 event.preventDefault();
                 if (!started || (balls.length === 0 && !gameOver)) {
                     launchIfNeeded();
                 }
             }
-        });
-
-        canvas.addEventListener("click", () => {
-            if (!started || (balls.length === 0 && !gameOver)) {
-                launchIfNeeded();
-            }
-        });
-
-        canvas.addEventListener("pointerdown", () => {
-            if (!started || (balls.length === 0 && !gameOver)) {
-                launchIfNeeded();
-            }
-        });
-
-        // Keyboard paddle control
-        let rightPressed = false;
-        let leftPressed = false;
-        const PADDLE_SPEED = 400;
-
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "ArrowLeft" || event.key === "a" || event.key === "A") {
+            // Paddle left
+            else if (event.key === "ArrowLeft" || event.key === "a" || event.key === "A") {
                 leftPressed = true;
                 event.preventDefault();
-            } else if (event.key === "ArrowRight" || event.key === "d" || event.key === "D") {
+            }
+            // Paddle right
+            else if (event.key === "ArrowRight" || event.key === "d" || event.key === "D") {
                 rightPressed = true;
                 event.preventDefault();
             }
@@ -1730,11 +1626,21 @@
             }
         });
 
-        // Override tick to include keyboard control
-        const originalTick = tick;
-        tick = function (timestamp) {
-            if (gameOver) return;
+        // Game loop - consolidated tick function (includes paddle control + ball physics)
+        function tick(timestamp) {
+            if (gameOver) {
+                return;
+            }
 
+            if (!lastTime) lastTime = timestamp;
+            const dtRaw = (timestamp - lastTime) / 1000;
+            const dt = Math.min(0.05, Math.max(0.001, dtRaw));  // Ensure dt is at least 1ms
+            lastTime = timestamp;
+
+            if (!tick._frameCount) tick._frameCount = 0;
+            tick._frameCount++;
+
+            // Paddle keyboard control
             if (started && !gameOver && balls.length > 0) {
                 if (leftPressed) {
                     paddle.x = Math.max(0, paddle.x - PADDLE_SPEED * dt);
@@ -1742,14 +1648,114 @@
                 if (rightPressed) {
                     paddle.x = Math.min(canvas.width - paddle.w, paddle.x + PADDLE_SPEED * dt);
                 }
+
+                // Ball physics
+                for (let bi = balls.length - 1; bi >= 0; bi--) {
+                    const b = balls[bi];
+
+                    // Move ball
+                    b.x += b.dx * dt;
+                    b.y += b.dy * dt;
+
+                    // Wall collisions (left/right)
+                    if (b.x - b.r < 0) {
+                        b.x = b.r;
+                        b.dx = Math.abs(b.dx);
+                    } else if (b.x + b.r > canvas.width) {
+                        b.x = canvas.width - b.r;
+                        b.dx = -Math.abs(b.dx);
+                    }
+
+                    // Top wall collision
+                    if (b.y - b.r < 0) {
+                        b.y = b.r;
+                        b.dy = Math.abs(b.dy);
+                    }
+
+                    // Bottom - lose ball
+                    if (b.y - b.r > canvas.height) {
+                        balls.splice(bi, 1);
+                        if (balls.length === 0) {
+                            lives--;
+                            livesEl.textContent = String(lives);
+                            if (lives <= 0) {
+                                endGame("No balls left");
+                                return;
+                            }
+                            resetBall();
+                        }
+                        continue;
+                    }
+
+                    // Paddle collision
+                    if (
+                        b.dy > 0 &&
+                        b.y + b.r >= paddle.y &&
+                        b.y + b.r <= paddle.y + paddle.h + 8 &&
+                        b.x >= paddle.x - b.r &&
+                        b.x <= paddle.x + paddle.w + b.r
+                    ) {
+                        // Calculate hit position (-1 to 1)
+                        const hitPos = (b.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+                        const speed = Math.sqrt(b.dx * b.dx + b.dy * b.dy);
+                        const angle = hitPos * (Math.PI / 3); // -60 to 60 degrees
+
+                        // Ensure ball goes upward after hitting paddle
+                        b.dx = speed * Math.sin(angle);
+                        b.dy = -Math.abs(speed * Math.cos(angle));
+                        b.y = paddle.y - b.r;
+
+                        spawnParticles(b.x, b.y, "#48dbfb", 8);
+                    }
+
+                    // Brick collision
+                    for (let i = 0; i < bricks.length; i++) {
+                        const brick = bricks[i];
+                        if (!brick.alive) continue;
+
+                        if (
+                            b.x + b.r > brick.x &&
+                            b.x - b.r < brick.x + brick.w &&
+                            b.y + b.r > brick.y &&
+                            b.y - b.r < brick.y + brick.h
+                        ) {
+                            brick.alive = false;
+                            score += 100;
+                            scoreEl.textContent = String(score);
+
+                            const remaining = bricks.filter((br) => br.alive).length;
+                            bricksEl.innerHTML = remaining + "<small class=\"stat-unit\">/" + (BRICK_ROWS * BRICK_COLS) + "</small>";
+
+                            // Determine collision side
+                            const overlapLeft = (b.x + b.r) - brick.x;
+                            const overlapRight = (brick.x + brick.w) - (b.x - b.r);
+                            const overlapTop = (b.y + b.r) - brick.y;
+                            const overlapBottom = (brick.y + brick.h) - (b.y - b.r);
+
+                            const minOverlapX = Math.min(overlapLeft, overlapRight);
+                            const minOverlapY = Math.min(overlapTop, overlapBottom);
+
+                            if (minOverlapX < minOverlapY) {
+                                b.dx = -b.dx;
+                            } else {
+                                b.dy = -b.dy;
+                            }
+
+                            spawnParticles(brick.x + brick.w / 2, brick.y + brick.h / 2, brick.color, 12);
+
+                            // Check win condition
+                            if (bricks.every((br) => !br.alive)) {
+                                endGame("All bricks broken!");
+                                return;
+                            }
+                            break;
+                        }
+                    }
+                }
             }
 
-            window._lastTime = window._lastTime || timestamp;
-            const dt2 = Math.min(50, timestamp - window._lastTime) / 1000;
-            window._lastTime = timestamp;
-
-            // Call original logic
-            originalTick(timestamp);
+            draw();
+            rafId = requestAnimationFrame(tick);
         };
 
         reset();

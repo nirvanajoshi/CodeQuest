@@ -218,8 +218,36 @@
             </div>
         </div>
 
+        <!-- Pong -->
+        <div class="pong-wrap" id="pong-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">You</span>
+                    <strong id="pong-player-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Computer</span>
+                    <strong id="pong-ai-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Match</span>
+                    <strong>First to 5</strong>
+                </div>
+            </div>
+            <div class="pong-board">
+                <canvas id="pong-canvas" width="600" height="400"></canvas>
+                <div class="game-overlay" id="pong-overlay">
+                    <p>Press W/S or ↑/↓ to serve</p>
+                    <span class="overlay-sub">First to five points wins</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Controls -->
         <div class="games-controls">
+            <button type="button" id="arcade-fullscreen" class="games-btn games-btn-ghost" aria-pressed="false">Enter full screen</button>
             <button type="button" id="arcade-restart" class="games-btn games-btn-ghost">Restart</button>
             <a class="games-btn games-btn-ghost" href="{% url 'arcade_home' %}">Change game</a>
         </div>
@@ -245,12 +273,31 @@
     <script src="{% static 'js/arcade.js' %}"></script>
     <script>
         (function () {
+            var fullscreenBtn = document.getElementById('arcade-fullscreen');
+            var container = document.getElementById('arcade-game');
+
+            if (fullscreenBtn && container && container.requestFullscreen) {
+                fullscreenBtn.addEventListener('click', function () {
+                    if (document.fullscreenElement) {
+                        document.exitFullscreen();
+                    } else {
+                        container.requestFullscreen();
+                    }
+                });
+
+                document.addEventListener('fullscreenchange', function () {
+                    var isFullscreen = document.fullscreenElement === container;
+                    fullscreenBtn.textContent = isFullscreen ? 'Exit full screen' : 'Enter full screen';
+                    fullscreenBtn.setAttribute('aria-pressed', String(isFullscreen));
+                });
+            } else if (fullscreenBtn) {
+                fullscreenBtn.hidden = true;
+            }
+
             var btn = document.getElementById('arcade-restart');
             if (btn) {
                 btn.addEventListener('click', function () {
-                    var container = document.getElementById('arcade-game');
                     if (!container) return;
-                    var game = container.dataset.game;
                     var url = window.location.pathname.split('?')[0];
                     window.location.href = url;
                 });

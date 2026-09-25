@@ -6,15 +6,22 @@ from .models import ArcadeAttempt
 
 
 class GameHomeAndPlayTests(TestCase):
-    def test_home_lists_all_three_games(self):
+    def test_home_lists_games_including_pong(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
-        for game_key in ["snake", "memory_match", "reaction_time"]:
+        for game_key in ["snake", "memory_match", "reaction_time", "pong"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
     def test_play_page_accessible_without_login(self):
         response = self.client.get(reverse("arcade_play", args=["snake"]))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="arcade-fullscreen"')
+
+    def test_pong_page_is_playable_without_login(self):
+        response = self.client.get(reverse("arcade_play", args=["pong"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="pong-canvas"')
+        self.assertContains(response, "First to five points wins")
 
     def test_unknown_game_404s(self):
         response = self.client.get(reverse("arcade_play", args=["not-a-game"]))
@@ -46,6 +53,15 @@ class RecordAttemptTests(TestCase):
 
         self.user.profile.refresh_from_db()
         self.assertGreater(self.user.profile.total_xp, 0)
+
+    def test_records_pong_attempt(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("arcade_record_attempt"),
+            {"game": "pong", "score": 510, "detail": "Won 5-4", "duration": 38},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "pong")
 
     def test_values_are_clamped_to_sane_bounds(self):
         self.client.force_login(self.user)

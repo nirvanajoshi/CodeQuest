@@ -57,6 +57,12 @@ GAMES = [
         "icon": "🧱",
         "description": "Classic Breakout. Move the paddle to bounce the ball and smash all the bricks. Lose the ball and it's game over.",
     },
+    {
+        "key": "pong",
+        "label": "Pong",
+        "icon": "🏓",
+        "description": "Challenge the computer in a first-to-five table-tennis rally. Move with W/S or the arrow keys.",
+    },
 ]
 GAME_BY_KEY = {game["key"]: game for game in GAMES}
 

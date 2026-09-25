@@ -8,6 +8,23 @@
     display: none !important;
 }
 
+#arcade-game:fullscreen {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: none;
+    min-height: 100vh;
+    min-height: 100dvh;
+    margin: 0;
+    padding: 1.5rem clamp(1rem, 4vw, 3rem);
+    overflow-y: auto;
+    background: var(--games-bg);
+    align-items: center;
+}
+
+#arcade-game:fullscreen > * {
+    width: min(100%, 980px);
+}
+
 /* ---------- HUD ---------- */
 
 .arcade-stats-bar {
@@ -84,6 +101,11 @@
     max-width: 100%;
     height: auto;
     background: #0b0e16;
+}
+
+.snake-board {
+    border-color: #375d50;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45), 0 0 30px rgba(45, 130, 92, 0.16);
 }
 
 .game-overlay {
@@ -542,4 +564,31 @@
     background: #1e1e2e;
     touch-action: none;
     cursor: none;
+}
+
+/* ---------- Pong ---------- */
+
+.pong-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.pong-board {
+    position: relative;
+    width: min(100%, 600px);
+    overflow: hidden;
+    border: 1px solid #3a5264;
+    border-radius: var(--games-radius);
+    background: #0b1921;
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45), 0 0 28px rgba(60, 190, 188, 0.12);
+    line-height: 0;
+}
+
+#pong-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;
 }

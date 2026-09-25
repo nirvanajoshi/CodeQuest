@@ -12,6 +12,7 @@ class ArcadeAttempt(models.Model):
         CAR_RACING = "car_racing", "Car Racing"
         BOUNCE = "bounce", "Bounce"
         BREAKOUT = "breakout", "Breakout"
+        PONG = "pong", "Pong"
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="arcade_attempts"

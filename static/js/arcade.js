@@ -40,10 +40,18 @@
         const overlay = document.getElementById("snake-overlay");
         const scoreEl = document.getElementById("snake-score");
         const lengthEl = document.getElementById("snake-length");
+        const modeSelect = document.getElementById("snake-mode");
 
         let snake, direction, pendingDirection, food, score, started, gameOver, startTime, loopTimeout, delay;
 
+        function updateInstructions() {
+            const endless = modeSelect.value === "endless";
+            overlay.innerHTML = "<p>Press an arrow key or WASD to start</p>" +
+                "<span class=\"overlay-sub\">" + (endless ? "Endless mode: edges wrap around" : "Classic mode: avoid the walls") + "</span>";
+        }
+
         function reset() {
+            clearTimeout(loopTimeout);
             snake = [{ x: 10, y: 10 }, { x: 9, y: 10 }, { x: 8, y: 10 }];
             direction = { dx: 1, dy: 0 };
             pendingDirection = direction;
@@ -56,6 +64,7 @@
             scoreEl.textContent = "0";
             lengthEl.textContent = String(snake.length);
             overlay.hidden = false;
+            updateInstructions();
             draw();
         }
 
@@ -187,14 +196,19 @@
         function tick() {
             direction = pendingDirection;
             const head = { x: snake[0].x + direction.dx, y: snake[0].y + direction.dy };
+            const endless = modeSelect.value === "endless";
+            if (endless) {
+                head.x = (head.x + GRID) % GRID;
+                head.y = (head.y + GRID) % GRID;
+            }
 
-            const hitWall = head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID;
+            const hitWall = !endless && (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID);
             const hitSelf = snake.some((s) => s.x === head.x && s.y === head.y);
 
             if (hitWall || hitSelf) {
                 gameOver = true;
                 const durationSeconds = startTime ? (Date.now() - startTime) / 1000 : 0;
-                finish(score, "Length " + snake.length, durationSeconds);
+                finish(score, (endless ? "Endless" : "Classic") + " · Length " + snake.length, durationSeconds);
                 return;
             }
 
@@ -237,6 +251,220 @@
             }
         });
 
+        modeSelect.addEventListener("change", reset);
+        reset();
+    }
+
+    // -----------------------------------------------------------------
+    // Minesweeper
+    // -----------------------------------------------------------------
+
+    function initMinesweeper() {
+        document.getElementById("minesweeper-wrap").hidden = false;
+
+        const difficultySelect = document.getElementById("minesweeper-difficulty");
+        const board = document.getElementById("minesweeper-board");
+        const minesEl = document.getElementById("minesweeper-mines");
+        const timerEl = document.getElementById("minesweeper-timer");
+        const statusEl = document.getElementById("minesweeper-status");
+        const flagToggle = document.getElementById("minesweeper-flag-toggle");
+        const settings = {
+            beginner: { label: "Beginner", columns: 9, rows: 9, mines: 10 },
+            intermediate: { label: "Intermediate", columns: 16, rows: 16, mines: 40 },
+            expert: { label: "Expert", columns: 30, rows: 16, mines: 99 },
+        };
+
+        let config, cells, flags, revealed, startedAt, timerInterval, finished, flagMode;
+
+        function neighbors(index) {
+            const x = index % config.columns;
+            const y = Math.floor(index / config.columns);
+            const result = [];
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < config.columns && ny >= 0 && ny < config.rows) {
+                        result.push(ny * config.columns + nx);
+                    }
+                }
+            }
+            return result;
+        }
+
+        function updateMineCount() {
+            minesEl.textContent = String(config.mines - flags);
+        }
+
+        function updateTimer() {
+            timerEl.textContent = String(Math.floor((Date.now() - startedAt) / 1000));
+        }
+
+        function startTimer() {
+            if (startedAt !== null) return;
+            startedAt = Date.now();
+            statusEl.textContent = "In progress";
+            timerInterval = setInterval(updateTimer, 250);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        function refreshCell(index) {
+            const cell = cells[index];
+            const button = cell.button;
+            button.className = "minesweeper-cell";
+            button.disabled = finished || cell.revealed;
+            if (cell.flagged) {
+                button.classList.add("flagged");
+                button.textContent = "⚑";
+                button.setAttribute("aria-label", "Flagged cell");
+            } else if (cell.revealed) {
+                button.classList.add("revealed");
+                if (cell.mine) {
+                    button.classList.add("mine");
+                    button.textContent = "✹";
+                    button.setAttribute("aria-label", "Mine");
+                } else {
+                    button.textContent = cell.count ? String(cell.count) : "";
+                    if (cell.count) button.classList.add("number-" + cell.count);
+                    button.setAttribute("aria-label", cell.count ? cell.count + " neighboring mines" : "Empty cell");
+                }
+            } else {
+                button.textContent = "";
+                button.setAttribute("aria-label", "Hidden cell");
+            }
+        }
+
+        function recalculateCounts() {
+            cells.forEach((cell, index) => {
+                cell.count = cell.mine ? 0 : neighbors(index).filter((neighbor) => cells[neighbor].mine).length;
+            });
+        }
+
+        function ensureSafeFirstClick(index) {
+            if (!cells[index].mine) return;
+            const safeIndex = cells.findIndex((cell, candidate) =>
+                !cell.mine && cell.count === 0 && candidate !== index && !neighbors(index).includes(candidate)
+            );
+            if (safeIndex < 0) return;
+            cells[index].mine = false;
+            cells[safeIndex].mine = true;
+            recalculateCounts();
+        }
+
+        function finishGame(won, reason) {
+            if (finished) return;
+            finished = true;
+            flagToggle.disabled = true;
+            stopTimer();
+            cells.forEach((cell, index) => {
+                if (cell.mine) cell.revealed = true;
+                refreshCell(index);
+            });
+            const duration = startedAt === null ? 0 : (Date.now() - startedAt) / 1000;
+            const elapsed = Math.floor(duration);
+            const score = won ? Math.max(100, config.mines * 20 + 1000 - elapsed * 2) : 0;
+            statusEl.textContent = won ? "Board cleared" : reason;
+            finish(score, config.label + (won ? " cleared" : " · " + reason), duration);
+        }
+
+        function reveal(index) {
+            if (finished || cells[index].revealed || cells[index].flagged) return;
+            startTimer();
+            if (revealed === 0) ensureSafeFirstClick(index);
+            if (cells[index].mine) {
+                cells[index].revealed = true;
+                revealed++;
+                finishGame(false, "Mine hit");
+                return;
+            }
+
+            const pending = [index];
+            while (pending.length) {
+                const current = pending.pop();
+                const cell = cells[current];
+                if (cell.revealed || cell.flagged || cell.mine) continue;
+                cell.revealed = true;
+                revealed++;
+                if (cell.count === 0) {
+                    neighbors(current).forEach((neighbor) => {
+                        if (!cells[neighbor].revealed && !cells[neighbor].flagged) pending.push(neighbor);
+                    });
+                }
+            }
+
+            cells.forEach((cell, cellIndex) => {
+                if (cell.revealed) refreshCell(cellIndex);
+            });
+            if (revealed === cells.length - config.mines) finishGame(true, "Board cleared");
+        }
+
+        function toggleFlag(index, event) {
+            if (event) event.preventDefault();
+            if (finished || cells[index].revealed) return;
+            if (!cells[index].flagged && flags >= config.mines) return;
+            cells[index].flagged = !cells[index].flagged;
+            flags += cells[index].flagged ? 1 : -1;
+            updateMineCount();
+            refreshCell(index);
+        }
+
+        function reset() {
+            stopTimer();
+            config = settings[difficultySelect.value];
+            cells = Array.from({ length: config.columns * config.rows }, () => ({
+                mine: false, count: 0, revealed: false, flagged: false, button: null,
+            }));
+            flags = 0;
+            revealed = 0;
+            startedAt = null;
+            finished = false;
+            flagMode = false;
+            flagToggle.disabled = false;
+            flagToggle.setAttribute("aria-pressed", "false");
+            flagToggle.textContent = "Flag mode: off";
+            timerEl.textContent = "0";
+            statusEl.textContent = "Click a cell to begin";
+            board.style.setProperty("--minesweeper-columns", config.columns);
+            board.setAttribute("aria-label", config.label + " Minesweeper board");
+            board.innerHTML = "";
+
+            let placed = 0;
+            while (placed < config.mines) {
+                const index = Math.floor(Math.random() * cells.length);
+                if (cells[index].mine) continue;
+                cells[index].mine = true;
+                placed++;
+            }
+            recalculateCounts();
+
+            cells.forEach((cell, index) => {
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "minesweeper-cell";
+                button.setAttribute("aria-label", "Hidden cell");
+                button.addEventListener("click", () => {
+                    if (flagMode) toggleFlag(index);
+                    else reveal(index);
+                });
+                button.addEventListener("contextmenu", (event) => toggleFlag(index, event));
+                cell.button = button;
+                board.appendChild(button);
+            });
+            updateMineCount();
+        }
+
+        flagToggle.addEventListener("click", () => {
+            flagMode = !flagMode;
+            flagToggle.setAttribute("aria-pressed", String(flagMode));
+            flagToggle.textContent = "Flag mode: " + (flagMode ? "on" : "off");
+            statusEl.textContent = flagMode ? "Flag mode on" : (startedAt === null ? "Click a cell to begin" : "In progress");
+        });
+        difficultySelect.addEventListener("change", reset);
         reset();
     }
 
@@ -2051,6 +2279,8 @@
         initSnake();
     } else if (game === "memory_match") {
         initMemoryMatch();
+    } else if (game === "minesweeper") {
+        initMinesweeper();
     } else if (game === "reaction_time") {
         initReactionTime();
     } else if (game === "archery") {

@@ -9,13 +9,26 @@ class GameHomeAndPlayTests(TestCase):
     def test_home_lists_games_including_pong(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
-        for game_key in ["snake", "memory_match", "reaction_time", "pong"]:
+        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
     def test_play_page_accessible_without_login(self):
         response = self.client.get(reverse("arcade_play", args=["snake"]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="arcade-fullscreen"')
+
+    def test_minesweeper_page_has_three_difficulties(self):
+        response = self.client.get(reverse("arcade_play", args=["minesweeper"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="minesweeper-board"')
+        self.assertContains(response, 'value="beginner"')
+        self.assertContains(response, 'value="intermediate"')
+        self.assertContains(response, 'value="expert"')
+
+    def test_snake_page_has_classic_and_endless_modes(self):
+        response = self.client.get(reverse("arcade_play", args=["snake"]))
+        self.assertContains(response, 'value="classic"')
+        self.assertContains(response, 'value="endless"')
 
     def test_pong_page_is_playable_without_login(self):
         response = self.client.get(reverse("arcade_play", args=["pong"]))
@@ -62,6 +75,15 @@ class RecordAttemptTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "pong")
+
+    def test_records_minesweeper_attempt(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("arcade_record_attempt"),
+            {"game": "minesweeper", "score": 1000, "detail": "Beginner cleared", "duration": 40},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "minesweeper")
 
     def test_values_are_clamped_to_sane_bounds(self):
         self.client.force_login(self.user)

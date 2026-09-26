@@ -21,6 +21,13 @@
 
         <!-- Snake -->
         <div class="snake-wrap" id="snake-wrap" hidden>
+            <label class="arcade-mode-control" for="snake-mode">
+                <span>Mode</span>
+                <select id="snake-mode" aria-label="Snake mode">
+                    <option value="classic">Classic</option>
+                    <option value="endless">Endless wraparound</option>
+                </select>
+            </label>
             <div class="arcade-stats-bar">
                 <div class="stat-block">
                     <span class="stat-label">Score</span>
@@ -39,6 +46,37 @@
                     <span class="overlay-sub">WASD / Arrow keys</span>
                 </div>
             </div>
+        </div>
+
+        <!-- Minesweeper -->
+        <div class="minesweeper-wrap" id="minesweeper-wrap" hidden>
+            <div class="minesweeper-toolbar">
+                <label class="arcade-mode-control" for="minesweeper-difficulty">
+                    <span>Difficulty</span>
+                    <select id="minesweeper-difficulty" aria-label="Minesweeper difficulty">
+                        <option value="beginner">Beginner · 9×9 · 10 mines</option>
+                        <option value="intermediate">Intermediate · 16×16 · 40 mines</option>
+                        <option value="expert">Expert · 30×16 · 99 mines</option>
+                    </select>
+                </label>
+                <button type="button" class="minesweeper-flag-toggle" id="minesweeper-flag-toggle" aria-pressed="false">Flag mode: off</button>
+                <div class="arcade-stats-bar">
+                    <div class="stat-block">
+                        <span class="stat-label">Mines</span>
+                        <strong id="minesweeper-mines">10</strong>
+                    </div>
+                    <div class="stat-sep"></div>
+                    <div class="stat-block">
+                        <span class="stat-label">Time</span>
+                        <strong><span id="minesweeper-timer">0</span><small class="stat-unit">s</small></strong>
+                    </div>
+                </div>
+            </div>
+            <div class="minesweeper-status" id="minesweeper-status" role="status" aria-live="polite">Click a cell to begin</div>
+            <div class="minesweeper-board-scroll">
+                <div class="minesweeper-board" id="minesweeper-board" role="group"></div>
+            </div>
+            <p class="minesweeper-hint">Click to reveal · right-click or use Flag mode to mark a mine</p>
         </div>
 
         <!-- Memory Match -->

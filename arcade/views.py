@@ -13,7 +13,13 @@ GAMES = [
         "key": "snake",
         "label": "Snake",
         "icon": "🐍",
-        "description": "Classic Snake. Arrow keys or WASD — eat food, don't hit the walls or yourself.",
+        "description": "Choose Classic wall rules or Endless wraparound. Arrow keys or WASD — eat food and avoid yourself.",
+    },
+    {
+        "key": "minesweeper",
+        "label": "Minesweeper",
+        "icon": "💣",
+        "description": "Clear the board without hitting a mine. Choose Beginner, Intermediate, or Expert.",
     },
     {
         "key": "memory_match",

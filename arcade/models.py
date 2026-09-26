@@ -5,6 +5,7 @@ from django.db import models
 class ArcadeAttempt(models.Model):
     class Game(models.TextChoices):
         SNAKE = "snake", "Snake"
+        MINESWEEPER = "minesweeper", "Minesweeper"
         MEMORY_MATCH = "memory_match", "Memory Match"
         REACTION_TIME = "reaction_time", "Reaction Time"
         ARCHERY = "archery", "Archery"

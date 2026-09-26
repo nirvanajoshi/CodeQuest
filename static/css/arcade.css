@@ -86,6 +86,25 @@
     gap: 0.75rem;
 }
 
+.arcade-mode-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.65rem;
+    color: var(--games-muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+}
+
+.arcade-mode-control select {
+    min-height: 40px;
+    padding: 0.45rem 2rem 0.45rem 0.7rem;
+    border: 1px solid var(--games-border);
+    border-radius: 6px;
+    background: var(--games-surface);
+    color: var(--games-text);
+    font: inherit;
+}
+
 .snake-board {
     position: relative;
     border-radius: var(--games-radius);
@@ -101,6 +120,127 @@
     max-width: 100%;
     height: auto;
     background: #0b0e16;
+}
+
+/* ---------- Minesweeper ---------- */
+
+.minesweeper-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.minesweeper-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.minesweeper-toolbar .arcade-stats-bar {
+    margin: 0;
+}
+
+.minesweeper-flag-toggle {
+    min-height: 40px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--games-border);
+    border-radius: 6px;
+    background: var(--games-surface);
+    color: var(--games-text);
+    font: inherit;
+    cursor: pointer;
+}
+
+.minesweeper-flag-toggle[aria-pressed="true"] {
+    border-color: #e09f3e;
+    background: #554222;
+}
+
+.minesweeper-status {
+    min-height: 1.4em;
+    color: var(--games-text);
+    font-weight: 700;
+}
+
+.minesweeper-board-scroll {
+    max-width: 100%;
+    overflow: auto;
+    border: 1px solid var(--games-border);
+    border-radius: 6px;
+    background: #263330;
+    box-shadow: var(--games-shadow);
+}
+
+.minesweeper-board {
+    display: grid;
+    grid-template-columns: repeat(var(--minesweeper-columns), 28px);
+    gap: 1px;
+    width: max-content;
+    padding: 5px;
+}
+
+.minesweeper-cell {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid #77938a;
+    border-radius: 3px;
+    background: linear-gradient(145deg, #8da99e, #60796f);
+    color: #f5f4e8;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+}
+
+.minesweeper-cell:hover:not(:disabled) {
+    filter: brightness(1.16);
+}
+
+.minesweeper-cell:focus-visible {
+    outline: 2px solid #ffd166;
+    outline-offset: 1px;
+    z-index: 1;
+}
+
+.minesweeper-cell.revealed {
+    border-color: #52655e;
+    background: #d5d8c5;
+    cursor: default;
+}
+
+.minesweeper-cell.flagged {
+    color: #ac302f;
+}
+
+.minesweeper-cell.mine {
+    background: #cf5547;
+    color: #fff4da;
+}
+
+.minesweeper-cell.number-1 { color: #1768aa; }
+.minesweeper-cell.number-2 { color: #238046; }
+.minesweeper-cell.number-3 { color: #c43d32; }
+.minesweeper-cell.number-4 { color: #553f9b; }
+.minesweeper-cell.number-5,
+.minesweeper-cell.number-6,
+.minesweeper-cell.number-7,
+.minesweeper-cell.number-8 { color: #713c25; }
+
+.minesweeper-hint {
+    margin: 0;
+    color: var(--games-muted);
+    font-size: 0.85rem;
 }
 
 .snake-board {

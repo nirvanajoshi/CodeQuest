@@ -456,6 +456,73 @@
     border: 3px solid #3a2b18;
 }
 
+.archery-equipment {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.archery-bow-limb {
+    fill: none;
+    stroke: url(#bow-wood);
+    stroke-width: 11;
+    stroke-linecap: round;
+    filter: drop-shadow(2px 3px 2px rgba(0, 0, 0, 0.65));
+}
+
+.archery-bow-shadow,
+.archery-bow-highlight {
+    fill: none;
+    stroke-linecap: round;
+    pointer-events: none;
+}
+
+.archery-bow-shadow {
+    stroke: #301d17;
+    stroke-width: 15;
+}
+
+.archery-bow-highlight {
+    stroke: rgba(255, 226, 168, 0.8);
+    stroke-width: 2;
+}
+
+.archery-bow-string {
+    fill: none;
+    stroke: #e5d6b8;
+    stroke-width: 1.5;
+}
+
+.archery-bow-grip {
+    fill: none;
+    stroke: #50351f;
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+.archery-arrow-shaft {
+    fill: none;
+    stroke: url(#arrow-metal);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.7));
+}
+
+.archery-arrow-fletching {
+    fill: #b34c32;
+    stroke: #612d25;
+    stroke-width: 1;
+}
+
+.archery-arrowhead {
+    fill: url(#arrow-metal);
+    stroke: #374347;
+    stroke-width: 1;
+}
+
 .archery-crosshair {
     position: absolute;
     width: 26px;
@@ -517,6 +584,115 @@
 @keyframes archery-pop {
     from { transform: translate(-50%, -50%) scale(0); }
     to { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ---------- Tetris ---------- */
+
+.tetris-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tetris-layout {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.tetris-board-wrap {
+    position: relative;
+    width: min(300px, 68vw);
+    aspect-ratio: 1 / 2;
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    background: #111820;
+    box-shadow: var(--games-shadow);
+    overflow: hidden;
+    touch-action: manipulation;
+}
+
+#tetris-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.tetris-side {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 132px;
+}
+
+.tetris-next {
+    display: grid;
+    justify-items: center;
+    gap: 0.4rem;
+    padding: 0.65rem;
+    border: 1px solid var(--games-border);
+    border-radius: var(--games-radius);
+    background: var(--games-surface);
+}
+
+#tetris-next {
+    width: 120px;
+    height: 100px;
+}
+
+.tetris-touch-controls {
+    display: grid;
+    grid-template-columns: repeat(3, 40px);
+    gap: 0.35rem;
+}
+
+.tetris-touch-controls button {
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0.25rem;
+}
+
+.tetris-touch-controls [data-tetris-action="rotate"] {
+    grid-column: 2;
+}
+
+.tetris-touch-controls [data-tetris-action="left"] {
+    grid-column: 1;
+}
+
+.tetris-touch-controls [data-tetris-action="down"] {
+    grid-column: 2;
+}
+
+.tetris-touch-controls [data-tetris-action="right"] {
+    grid-column: 3;
+}
+
+.tetris-touch-controls .tetris-drop {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+@media (max-width: 480px) {
+    .tetris-layout {
+        gap: 0.5rem;
+    }
+
+    .tetris-side {
+        width: 112px;
+    }
+
+    .tetris-touch-controls {
+        grid-template-columns: repeat(3, 34px);
+    }
+
+    .tetris-touch-controls button {
+        min-width: 34px;
+        min-height: 38px;
+    }
 }
 
 /* ---------- Chess ---------- */

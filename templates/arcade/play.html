@@ -143,11 +143,79 @@
             </div>
             <div class="archery-range" id="archery-range">
                 <div class="archery-target" id="archery-target"></div>
+                <svg class="archery-equipment" viewBox="0 0 520 380" preserveAspectRatio="none" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="bow-wood" x1="0" y1="0" x2="1" y2="0">
+                            <stop offset="0" stop-color="#57341f" />
+                            <stop offset="0.32" stop-color="#d59a54" />
+                            <stop offset="0.55" stop-color="#f0c77c" />
+                            <stop offset="0.78" stop-color="#9b6337" />
+                            <stop offset="1" stop-color="#4c2d1e" />
+                        </linearGradient>
+                        <linearGradient id="arrow-metal" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0" stop-color="#eef4ee" />
+                            <stop offset="0.5" stop-color="#7f9295" />
+                            <stop offset="1" stop-color="#d0d9d4" />
+                        </linearGradient>
+                    </defs>
+                    <g id="archery-bow" transform="rotate(-25 78 276)">
+                        <path class="archery-bow-shadow" d="M81 222 Q37 276 81 330" />
+                        <path class="archery-bow-limb" d="M78 222 Q34 276 78 330" />
+                        <path class="archery-bow-highlight" d="M76 228 Q43 276 76 324" />
+                        <path class="archery-bow-string" d="M78 222 L78 330" />
+                        <path class="archery-bow-grip" d="M78 263 L78 289" />
+                        <path class="archery-arrow-shaft" d="M68 276 L179 276" />
+                        <path class="archery-arrow-fletching" d="M75 276 L61 268 L64 276 L61 284 Z" />
+                        <path class="archery-arrowhead" d="M179 270 L195 276 L179 282 Z" />
+                    </g>
+                </svg>
                 <div class="archery-crosshair" id="archery-crosshair" hidden></div>
                 <div class="game-overlay" id="archery-overlay">
                     <p>Move to aim, click to release</p>
                     <span class="overlay-sub">Watch the wind — it pushes your arrow</span>
                 </div>
+            </div>
+        </div>
+
+        <!-- Tetris -->
+        <div class="tetris-wrap" id="tetris-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="tetris-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Lines</span>
+                    <strong id="tetris-lines">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Level</span>
+                    <strong id="tetris-level">1</strong>
+                </div>
+            </div>
+            <div class="tetris-layout">
+                <div class="tetris-board-wrap">
+                    <canvas id="tetris-canvas" width="300" height="600" aria-label="Tetris game board"></canvas>
+                    <div class="game-overlay" id="tetris-overlay">
+                        <p>Press a key or tap the board to start</p>
+                        <span class="overlay-sub">Move with arrows · rotate with Up · drop with Space</span>
+                    </div>
+                </div>
+                <aside class="tetris-side">
+                    <div class="tetris-next">
+                        <span class="stat-label">Next</span>
+                        <canvas id="tetris-next" width="120" height="100" aria-label="Next Tetris piece"></canvas>
+                    </div>
+                    <div class="tetris-touch-controls" role="group" aria-label="Tetris controls">
+                        <button type="button" data-tetris-action="rotate" aria-label="Rotate piece">↻</button>
+                        <button type="button" data-tetris-action="left" aria-label="Move left">←</button>
+                        <button type="button" data-tetris-action="down" aria-label="Move down">↓</button>
+                        <button type="button" data-tetris-action="right" aria-label="Move right">→</button>
+                        <button type="button" class="tetris-drop" data-tetris-action="drop">Drop</button>
+                    </div>
+                </aside>
             </div>
         </div>
 

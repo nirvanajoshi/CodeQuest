@@ -40,6 +40,12 @@ GAMES = [
         "description": "Set your power and angle, account for the wind, and hit the bullseye. Five arrows.",
     },
     {
+        "key": "tetris",
+        "label": "Tetris",
+        "icon": "🧩",
+        "description": "Stack falling blocks, clear lines, and keep the board from filling up.",
+    },
+    {
         "key": "chess",
         "label": "Chess",
         "icon": "♟️",

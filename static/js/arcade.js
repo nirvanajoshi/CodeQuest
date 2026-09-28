@@ -754,6 +754,224 @@
     }
 
     // -----------------------------------------------------------------
+    // Geometry Dash
+    // -----------------------------------------------------------------
+
+    function initGeometryDash() {
+        document.getElementById("geometry-wrap").hidden = false;
+
+        const canvas = document.getElementById("geometry-canvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("geometry-overlay");
+        const scoreEl = document.getElementById("geometry-score");
+        const speedEl = document.getElementById("geometry-speed");
+        const statusEl = document.getElementById("geometry-status");
+
+        const WORLD = { width: canvas.width, height: canvas.height };
+        let player;
+        let obstacles;
+        let stars;
+        let score;
+        let started;
+        let gameOver;
+        let lastTime;
+        let spawnTimer;
+        let speed;
+
+        function reset() {
+            player = {
+                x: 90,
+                y: WORLD.height - 70,
+                width: 26,
+                height: 26,
+                vy: 0,
+                onGround: true,
+            };
+            obstacles = [];
+            stars = [];
+            for (let i = 0; i < 30; i++) {
+                stars.push({ x: Math.random() * WORLD.width, y: Math.random() * 130, r: 1.5 + Math.random() * 2.4 });
+            }
+            score = 0;
+            started = false;
+            gameOver = false;
+            lastTime = 0;
+            spawnTimer = 0;
+            speed = 210;
+            scoreEl.textContent = "0";
+            speedEl.textContent = "1.0x";
+            statusEl.textContent = "Ready";
+            overlay.hidden = false;
+            overlay.innerHTML = "<p>Press space or tap to start</p><span class=\"overlay-sub\">jump over obstacles and stay on rhythm</span>";
+            draw();
+        }
+
+        function jump() {
+            if (!started) {
+                started = true;
+                overlay.hidden = true;
+                statusEl.textContent = "Running";
+                lastTime = performance.now();
+            }
+            if (gameOver) return;
+            if (player.onGround) {
+                player.vy = -355;
+                player.onGround = false;
+            }
+        }
+
+        function spawnObstacle() {
+            const typeRoll = Math.random();
+            const width = typeRoll > 0.72 ? 28 : 18 + Math.random() * 28;
+            const height = typeRoll > 0.72 ? 34 + Math.random() * 35 : 24 + Math.random() * 18;
+            obstacles.push({
+                x: WORLD.width + 26,
+                y: WORLD.height - height - 24,
+                width,
+                height,
+                color: typeRoll > 0.72 ? "#ff7a7a" : "#ffb347",
+            });
+        }
+
+        function rectCollision(a, b) {
+            return a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y;
+        }
+
+        function drawBackground() {
+            const sky = ctx.createLinearGradient(0, 0, 0, WORLD.height);
+            sky.addColorStop(0, "#2d7af0");
+            sky.addColorStop(0.35, "#6bc7ff");
+            sky.addColorStop(0.55, "#dff7ff");
+            sky.addColorStop(0.56, "#aae57e");
+            sky.addColorStop(1, "#3c9d3d");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, WORLD.width, WORLD.height);
+
+            for (const star of stars) {
+                ctx.fillStyle = "rgba(255,255,255,0.8)";
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.fillStyle = "rgba(255,255,255,0.2)";
+            for (let i = 0; i < 7; i++) {
+                const px = (i * 110 + (score * 0.3) % 120) % (WORLD.width + 120) - 60;
+                ctx.beginPath();
+                ctx.moveTo(px, 110);
+                ctx.lineTo(px + 40, 90);
+                ctx.lineTo(px + 80, 110);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            ctx.fillStyle = "#5ea13d";
+            ctx.fillRect(0, WORLD.height - 24, WORLD.width, 24);
+            ctx.fillStyle = "rgba(255,255,255,0.12)";
+            for (let x = 0; x < WORLD.width; x += 20) {
+                ctx.fillRect(x, WORLD.height - 24, 10, 6);
+            }
+        }
+
+        function drawPlayer() {
+            const bodyX = player.x;
+            const bodyY = player.y;
+            const glow = ctx.createRadialGradient(bodyX + 13, bodyY + 13, 2, bodyX + 13, bodyY + 13, 22);
+            glow.addColorStop(0, "#dff9ff");
+            glow.addColorStop(0.4, "#7bf0ff");
+            glow.addColorStop(1, "rgba(84, 214, 255, 0)");
+            ctx.fillStyle = glow;
+            ctx.fillRect(bodyX - 8, bodyY - 8, player.width + 20, player.height + 20);
+
+            ctx.fillStyle = "#14d0ff";
+            ctx.fillRect(bodyX, bodyY, player.width, player.height);
+            ctx.fillStyle = "#0a3a7b";
+            ctx.fillRect(bodyX + 5, bodyY + 6, 6, 6);
+            ctx.fillRect(bodyX + 15, bodyY + 6, 6, 6);
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(bodyX + 7, bodyY + 16, 12, 2);
+        }
+
+        function drawObstacle(obstacle) {
+            ctx.fillStyle = obstacle.color;
+            ctx.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+            ctx.fillStyle = "rgba(0, 0, 0, 0.2)";
+            ctx.fillRect(obstacle.x, obstacle.y + obstacle.height - 5, obstacle.width, 5);
+        }
+
+        function draw() {
+            drawBackground();
+            for (const obstacle of obstacles) drawObstacle(obstacle);
+            drawPlayer();
+        }
+
+        function tick(timestamp) {
+            if (!started) {
+                draw();
+                requestAnimationFrame(tick);
+                return;
+            }
+
+            if (!lastTime) lastTime = timestamp;
+            const delta = (timestamp - lastTime) / 1000;
+            lastTime = timestamp;
+
+            if (!gameOver) {
+                score += delta * 18;
+                speed = Math.min(520, 210 + score * 1.8);
+                speedEl.textContent = (speed / 210).toFixed(1) + "x";
+                scoreEl.textContent = String(Math.floor(score));
+
+                player.vy += 750 * delta;
+                player.y += player.vy * delta;
+                const floorY = WORLD.height - 24 - player.height;
+                if (player.y >= floorY) {
+                    player.y = floorY;
+                    player.vy = 0;
+                    player.onGround = true;
+                }
+
+                spawnTimer -= delta;
+                if (spawnTimer <= 0) {
+                    spawnObstacle();
+                    spawnTimer = Math.max(0.9, 1.7 - speed / 500);
+                }
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    obstacles[i].x -= speed * delta;
+                    if (rectCollision(player, obstacles[i])) {
+                        gameOver = true;
+                        statusEl.textContent = "Crashed";
+                        const durationSeconds = (Date.now() - startTime) / 1000;
+                        finish(Math.floor(score), "Distance " + Math.floor(score) + "m", durationSeconds);
+                        return;
+                    }
+                    if (obstacles[i].x + obstacles[i].width < -10) obstacles.splice(i, 1);
+                }
+            }
+
+            draw();
+            if (!gameOver) requestAnimationFrame(tick);
+        }
+
+        let startTime = null;
+        canvas.addEventListener("pointerdown", () => {
+            if (!started) startTime = Date.now();
+            jump();
+        });
+        document.addEventListener("keydown", (event) => {
+            if (event.code === "Space" || event.key === "ArrowUp" || event.key === "w" || event.key === "W") {
+                event.preventDefault();
+                if (!started) startTime = Date.now();
+                jump();
+            }
+        });
+
+        reset();
+        requestAnimationFrame(tick);
+    }
+
+    // -----------------------------------------------------------------
     // Tetris
     // -----------------------------------------------------------------
 
@@ -2551,6 +2769,8 @@
         initReactionTime();
     } else if (game === "archery") {
         initArchery();
+    } else if (game === "geometry_dash") {
+        initGeometryDash();
     } else if (game === "tetris") {
         initTetris();
     } else if (game === "chess") {

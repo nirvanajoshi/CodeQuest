@@ -40,6 +40,12 @@ GAMES = [
         "description": "Set your power and angle, account for the wind, and hit the bullseye. Five arrows.",
     },
     {
+        "key": "geometry_dash",
+        "label": "Geometry Dash",
+        "icon": "⚡",
+        "description": "A neon runner: jump, dodge spikes, build speed, and survive the endless obstacle rush.",
+    },
+    {
         "key": "tetris",
         "label": "Tetris",
         "icon": "🧩",

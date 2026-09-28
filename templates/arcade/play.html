@@ -177,6 +177,33 @@
             </div>
         </div>
 
+        <!-- Geometry Dash -->
+        <div class="geometry-wrap" id="geometry-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="geometry-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Speed</span>
+                    <strong id="geometry-speed">1.0x</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Status</span>
+                    <strong id="geometry-status">Ready</strong>
+                </div>
+            </div>
+            <div class="geometry-board">
+                <canvas id="geometry-canvas" width="560" height="300" aria-label="Geometry Dash runner"></canvas>
+                <div class="game-overlay" id="geometry-overlay">
+                    <p>Press space or tap to start</p>
+                    <span class="overlay-sub">jump over obstacles and stay on rhythm</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Tetris -->
         <div class="tetris-wrap" id="tetris-wrap" hidden>
             <div class="arcade-stats-bar">

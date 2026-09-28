@@ -6,10 +6,10 @@ from .models import ArcadeAttempt
 
 
 class GameHomeAndPlayTests(TestCase):
-    def test_home_lists_games_including_pong(self):
+    def test_home_lists_games_including_pong_and_runner(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
-        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris"]:
+        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
     def test_play_page_accessible_without_login(self):
@@ -35,6 +35,12 @@ class GameHomeAndPlayTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="pong-canvas"')
         self.assertContains(response, "First to five points wins")
+
+    def test_geometry_dash_page_is_playable_without_login(self):
+        response = self.client.get(reverse("arcade_play", args=["geometry_dash"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="geometry-canvas"')
+        self.assertContains(response, "jump over obstacles")
 
     def test_tetris_page_has_board_and_touch_controls(self):
         response = self.client.get(reverse("arcade_play", args=["tetris"]))

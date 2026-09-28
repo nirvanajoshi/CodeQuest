@@ -430,13 +430,43 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, #1c2340 0%, #141a2e 55%, #0d1120 100%);
+    background:
+        linear-gradient(180deg, rgba(130, 189, 255, 0.9) 0%, rgba(155, 219, 240, 0.74) 22%, rgba(191, 238, 170, 0.62) 42%, rgba(88, 143, 78, 0.35) 100%),
+        linear-gradient(180deg, #1c2340 0%, #161d39 45%, #0c1224 100%);
     border: 1px solid var(--games-border);
     border-radius: var(--games-radius);
     box-shadow: var(--games-shadow);
     overflow: hidden;
     cursor: crosshair;
     touch-action: none;
+}
+
+.archery-range::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 48%), repeating-linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06) 0,
+        rgba(255, 255, 255, 0.06) 1px,
+        transparent 1px,
+        transparent 28px
+    );
+    pointer-events: none;
+}
+
+.archery-range::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 28%;
+    background:
+        linear-gradient(180deg, rgba(118, 185, 74, 0.2), rgba(53, 108, 54, 0.7)),
+        repeating-linear-gradient(90deg, rgba(95, 175, 79, 0.9) 0 2px, rgba(147, 202, 101, 0.8) 2px 12px, rgba(92, 137, 52, 0.75) 12px 28px);
+    border-top: 3px solid rgba(255, 255, 255, 0.12);
+    pointer-events: none;
 }
 
 .archery-target {
@@ -584,6 +614,34 @@
 @keyframes archery-pop {
     from { transform: translate(-50%, -50%) scale(0); }
     to { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ---------- Geometry Dash ---------- */
+
+.geometry-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.geometry-board {
+    position: relative;
+    border-radius: var(--games-radius);
+    overflow: hidden;
+    box-shadow: var(--games-shadow);
+    line-height: 0;
+    border: 1px solid var(--games-border);
+    background: #0a1022;
+}
+
+#geometry-canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background: linear-gradient(180deg, #2d7af0 0%, #6bc7ff 18%, #dff7ff 38%, #9cd07d 39%, #4f9b3b 100%);
+    touch-action: none;
+    cursor: pointer;
 }
 
 /* ---------- Tetris ---------- */

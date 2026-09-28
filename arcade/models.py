@@ -9,6 +9,7 @@ class ArcadeAttempt(models.Model):
         MEMORY_MATCH = "memory_match", "Memory Match"
         REACTION_TIME = "reaction_time", "Reaction Time"
         ARCHERY = "archery", "Archery"
+        GEOMETRY_DASH = "geometry_dash", "Geometry Dash"
         TETRIS = "tetris", "Tetris"
         CHESS = "chess", "Chess"
         CAR_RACING = "car_racing", "Car Racing"

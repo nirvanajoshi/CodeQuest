@@ -972,6 +972,294 @@
     }
 
     // -----------------------------------------------------------------
+    // Dinosaur Run
+    // -----------------------------------------------------------------
+
+    function initDinosaur() {
+        document.getElementById("dinosaur-wrap").hidden = false;
+
+        const canvas = document.getElementById("dinosaur-canvas");
+        const ctx = canvas.getContext("2d");
+        const overlay = document.getElementById("dinosaur-overlay");
+        const scoreEl = document.getElementById("dinosaur-score");
+        const speedEl = document.getElementById("dinosaur-speed");
+        const statusEl = document.getElementById("dinosaur-status");
+        const groundY = 224;
+        const dino = { x: 68, y: groundY - 42, width: 42, height: 42, velocityY: 0, grounded: true };
+        const clouds = [
+            { x: 82, y: 58, scale: 0.9 },
+            { x: 285, y: 92, scale: 0.65 },
+            { x: 510, y: 48, scale: 0.8 },
+        ];
+        let obstacles = [];
+        let started = false;
+        let gameOver = false;
+        let score = 0;
+        let speed = 285;
+        let spawnTimer = 1.1;
+        let lastFrame = 0;
+        let startTime = null;
+        let groundOffset = 0;
+        let runFrame = 0;
+
+        function drawCloud(cloud) {
+            ctx.save();
+            ctx.translate(cloud.x, cloud.y);
+            ctx.scale(cloud.scale, cloud.scale);
+            ctx.fillStyle = "rgba(255, 255, 255, 0.84)";
+            ctx.beginPath();
+            ctx.ellipse(0, 8, 25, 8, 0, 0, Math.PI * 2);
+            ctx.ellipse(-10, 3, 11, 10, 0, 0, Math.PI * 2);
+            ctx.ellipse(2, -2, 14, 13, 0, 0, Math.PI * 2);
+            ctx.ellipse(14, 5, 11, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function drawBackground() {
+            const night = Math.floor(score / 700) % 2 === 1;
+            const sky = ctx.createLinearGradient(0, 0, 0, groundY);
+            sky.addColorStop(0, night ? "#24354b" : "#b9e1e9");
+            sky.addColorStop(1, night ? "#d5c9a6" : "#f5f0d9");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = night ? "#f3e7a0" : "#f3c96c";
+            ctx.beginPath();
+            ctx.arc(530, 62, 19, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (night) {
+                ctx.fillStyle = "rgba(255, 250, 214, 0.8)";
+                for (let i = 0; i < 18; i++) {
+                    const x = (i * 47 + 19) % canvas.width;
+                    const y = 20 + (i * 31) % 90;
+                    ctx.fillRect(x, y, 2, 2);
+                }
+            } else {
+                for (const cloud of clouds) drawCloud(cloud);
+            }
+
+            ctx.fillStyle = night ? "#a59d78" : "#d9c58c";
+            ctx.beginPath();
+            ctx.moveTo(0, groundY - 27);
+            ctx.lineTo(90, groundY - 53);
+            ctx.lineTo(184, groundY - 28);
+            ctx.lineTo(296, groundY - 62);
+            ctx.lineTo(405, groundY - 30);
+            ctx.lineTo(520, groundY - 54);
+            ctx.lineTo(canvas.width, groundY - 28);
+            ctx.lineTo(canvas.width, groundY);
+            ctx.lineTo(0, groundY);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = night ? "#ded6bd" : "#f5eed6";
+            ctx.fillRect(0, groundY, canvas.width, canvas.height - groundY);
+            ctx.fillStyle = night ? "#817a64" : "#9f966e";
+            ctx.fillRect(0, groundY, canvas.width, 2);
+            ctx.fillStyle = night ? "#b0a585" : "#c6bb8e";
+            for (let x = -groundOffset; x < canvas.width; x += 42) {
+                ctx.fillRect(x, groundY + 15, 14, 2);
+                ctx.fillRect(x + 22, groundY + 29, 4, 2);
+            }
+
+            for (const cloud of clouds) {
+                cloud.x -= speed * 0.035 / 60;
+                if (cloud.x < -40) cloud.x = canvas.width + 35;
+            }
+        }
+
+        function drawDinosaur() {
+            const x = dino.x;
+            const y = dino.y;
+            const color = Math.floor(score / 700) % 2 === 1 ? "#354b4b" : "#485b50";
+            const legSwing = dino.grounded && started ? Math.sin(runFrame * 0.32) * 4 : 0;
+
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x + 4, y + 26);
+            ctx.lineTo(x - 10, y + 20);
+            ctx.lineTo(x + 5, y + 18);
+            ctx.lineTo(x + 12, y + 22);
+            ctx.lineTo(x + 20, y + 22);
+            ctx.lineTo(x + 23, y + 11);
+            ctx.lineTo(x + 32, y + 3);
+            ctx.lineTo(x + 47, y + 4);
+            ctx.lineTo(x + 50, y + 16);
+            ctx.lineTo(x + 44, y + 21);
+            ctx.lineTo(x + 40, y + 37);
+            ctx.lineTo(x + 34, y + 37);
+            ctx.lineTo(x + 34, y + 28);
+            ctx.lineTo(x + 25, y + 29);
+            ctx.lineTo(x + 23, y + 40);
+            ctx.lineTo(x + 17, y + 40);
+            ctx.lineTo(x + 17, y + 29);
+            ctx.lineTo(x + 9, y + 30);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = "#f4f0d9";
+            ctx.fillRect(x + 40, y + 9, 3, 3);
+            ctx.fillStyle = color;
+            ctx.fillRect(x + 25, y + 25, 3, 6);
+            ctx.fillRect(x + 20, y + 36 + legSwing, 4, 7 - Math.abs(legSwing));
+            ctx.fillRect(x + 34, y + 34 - legSwing, 4, 7 - Math.abs(legSwing));
+        }
+
+        function drawCactus(obstacle) {
+            ctx.fillStyle = obstacle.tone;
+            const segments = obstacle.segments;
+            for (let i = 0; i < segments; i++) {
+                const x = obstacle.x + i * 13;
+                const h = obstacle.height - (i % 2) * 7;
+                ctx.fillRect(x + 4, groundY - h, 9, h);
+                ctx.fillRect(x, groundY - h + 10, 6, 5);
+                ctx.fillRect(x, groundY - h + 5, 5, 11);
+                ctx.fillRect(x + 12, groundY - h + 17, 6, 5);
+                ctx.fillRect(x + 13, groundY - h + 12, 5, 12);
+                ctx.fillStyle = "rgba(239, 240, 194, 0.42)";
+                ctx.fillRect(x + 6, groundY - h + 5, 2, h - 7);
+                ctx.fillStyle = obstacle.tone;
+            }
+        }
+
+        function drawBird(obstacle) {
+            const wing = Math.sin(runFrame * 0.3) * 5;
+            ctx.fillStyle = "#596760";
+            ctx.fillRect(obstacle.x + 5, obstacle.y + 8, 24, 8);
+            ctx.fillRect(obstacle.x + 25, obstacle.y + 6, 8, 6);
+            ctx.fillStyle = "#c47e55";
+            ctx.beginPath();
+            ctx.moveTo(obstacle.x + 32, obstacle.y + 8);
+            ctx.lineTo(obstacle.x + 39, obstacle.y + 11);
+            ctx.lineTo(obstacle.x + 32, obstacle.y + 13);
+            ctx.fill();
+            ctx.fillStyle = "#596760";
+            ctx.beginPath();
+            ctx.moveTo(obstacle.x + 15, obstacle.y + 9);
+            ctx.lineTo(obstacle.x + 9, obstacle.y + wing);
+            ctx.lineTo(obstacle.x + 24, obstacle.y + 9);
+            ctx.fill();
+        }
+
+        function draw() {
+            drawBackground();
+            for (const obstacle of obstacles) {
+                if (obstacle.type === "bird") drawBird(obstacle);
+                else drawCactus(obstacle);
+            }
+            drawDinosaur();
+            scoreEl.textContent = String(Math.floor(score));
+        }
+
+        function spawnObstacle() {
+            if (score > 450 && Math.random() < 0.24) {
+                obstacles.push({ x: canvas.width + 20, y: groundY - 76 - Math.random() * 22, width: 40, height: 20, type: "bird" });
+                return;
+            }
+            const segments = score > 900 && Math.random() > 0.68 ? 2 + Math.floor(Math.random() * 2) : 1;
+            obstacles.push({
+                x: canvas.width + 20,
+                y: groundY - (34 + Math.random() * 16),
+                width: 18 + (segments - 1) * 13,
+                height: 34 + Math.random() * 16,
+                type: "cactus",
+                segments,
+                tone: Math.floor(score / 700) % 2 === 1 ? "#526b58" : "#637b5d",
+            });
+        }
+
+        function collides(obstacle) {
+            const playerBox = { x: dino.x + 5, y: dino.y + 5, width: dino.width - 10, height: dino.height - 7 };
+            const obstacleBox = obstacle.type === "bird"
+                ? { x: obstacle.x + 4, y: obstacle.y + 4, width: obstacle.width - 8, height: obstacle.height - 6 }
+                : { x: obstacle.x + 2, y: groundY - obstacle.height + 8, width: obstacle.width - 4, height: obstacle.height - 8 };
+            return playerBox.x < obstacleBox.x + obstacleBox.width &&
+                playerBox.x + playerBox.width > obstacleBox.x &&
+                playerBox.y < obstacleBox.y + obstacleBox.height &&
+                playerBox.y + playerBox.height > obstacleBox.y;
+        }
+
+        function endGame() {
+            if (gameOver) return;
+            gameOver = true;
+            statusEl.textContent = "Finished";
+            finish(Math.floor(score), "Distance " + Math.floor(score) + "m", (Date.now() - startTime) / 1000);
+        }
+
+        function jump() {
+            if (gameOver) return;
+            if (!started) {
+                started = true;
+                startTime = Date.now();
+                lastFrame = performance.now();
+                overlay.hidden = true;
+                statusEl.textContent = "Running";
+            }
+            if (dino.grounded) {
+                dino.velocityY = -510;
+                dino.grounded = false;
+            }
+        }
+
+        function tick(timestamp) {
+            if (!started || gameOver) {
+                draw();
+                requestAnimationFrame(tick);
+                return;
+            }
+
+            const delta = Math.min((timestamp - lastFrame) / 1000 || 0, 0.04);
+            lastFrame = timestamp;
+            runFrame++;
+            score += delta * 12;
+            speed = Math.min(620, 285 + score * 0.55);
+            speedEl.textContent = (speed / 285).toFixed(1) + "x";
+            groundOffset = (groundOffset + speed * delta) % 42;
+
+            dino.velocityY += 1450 * delta;
+            dino.y += dino.velocityY * delta;
+            const floor = groundY - dino.height;
+            if (dino.y >= floor) {
+                dino.y = floor;
+                dino.velocityY = 0;
+                dino.grounded = true;
+            }
+
+            spawnTimer -= delta;
+            if (spawnTimer <= 0) {
+                spawnObstacle();
+                spawnTimer = Math.max(0.78, 1.35 + Math.random() * 0.55 - score / 2200);
+            }
+
+            for (let index = obstacles.length - 1; index >= 0; index--) {
+                const obstacle = obstacles[index];
+                obstacle.x -= speed * delta;
+                if (collides(obstacle)) {
+                    endGame();
+                    break;
+                }
+                if (obstacle.x + obstacle.width < -10) obstacles.splice(index, 1);
+            }
+
+            draw();
+            if (!gameOver) requestAnimationFrame(tick);
+        }
+
+        canvas.addEventListener("pointerdown", jump);
+        document.addEventListener("keydown", (event) => {
+            if ((event.code === "Space" || event.code === "ArrowUp") && !event.repeat) {
+                event.preventDefault();
+                jump();
+            }
+        });
+
+        draw();
+        requestAnimationFrame(tick);
+    }
+
+    // -----------------------------------------------------------------
     // Tetris
     // -----------------------------------------------------------------
 
@@ -2771,6 +3059,8 @@
         initArchery();
     } else if (game === "geometry_dash") {
         initGeometryDash();
+    } else if (game === "dinosaur") {
+        initDinosaur();
     } else if (game === "tetris") {
         initTetris();
     } else if (game === "chess") {

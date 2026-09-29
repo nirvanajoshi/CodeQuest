@@ -10,6 +10,7 @@ class ArcadeAttempt(models.Model):
         REACTION_TIME = "reaction_time", "Reaction Time"
         ARCHERY = "archery", "Archery"
         GEOMETRY_DASH = "geometry_dash", "Geometry Dash"
+        DINOSAUR = "dinosaur", "Dinosaur Run"
         TETRIS = "tetris", "Tetris"
         CHESS = "chess", "Chess"
         CAR_RACING = "car_racing", "Car Racing"

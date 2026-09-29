@@ -204,6 +204,33 @@
             </div>
         </div>
 
+        <!-- Dinosaur Run -->
+        <div class="dinosaur-wrap" id="dinosaur-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Distance</span>
+                    <strong id="dinosaur-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Speed</span>
+                    <strong id="dinosaur-speed">1.0x</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Status</span>
+                    <strong id="dinosaur-status">Ready</strong>
+                </div>
+            </div>
+            <div class="dinosaur-board">
+                <canvas id="dinosaur-canvas" width="640" height="280" aria-label="Dinosaur desert runner"></canvas>
+                <div class="game-overlay" id="dinosaur-overlay">
+                    <p>Press space to jump</p>
+                    <span class="overlay-sub">Use Space, Up, or tap to run and jump over obstacles</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Tetris -->
         <div class="tetris-wrap" id="tetris-wrap" hidden>
             <div class="arcade-stats-bar">

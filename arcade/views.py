@@ -46,6 +46,12 @@ GAMES = [
         "description": "A neon runner: jump, dodge spikes, build speed, and survive the endless obstacle rush.",
     },
     {
+        "key": "dinosaur",
+        "label": "Dinosaur Run",
+        "icon": "🦖",
+        "description": "Jump over cacti and flying obstacles in a desert sprint inspired by Chrome's offline game.",
+    },
+    {
         "key": "tetris",
         "label": "Tetris",
         "icon": "🧩",

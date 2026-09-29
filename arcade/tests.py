@@ -9,7 +9,7 @@ class GameHomeAndPlayTests(TestCase):
     def test_home_lists_games_including_pong_and_runner(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
-        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash"]:
+        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash", "dinosaur"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
     def test_play_page_accessible_without_login(self):
@@ -41,6 +41,12 @@ class GameHomeAndPlayTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="geometry-canvas"')
         self.assertContains(response, "jump over obstacles")
+
+    def test_dinosaur_page_is_playable_without_login(self):
+        response = self.client.get(reverse("arcade_play", args=["dinosaur"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="dinosaur-canvas"')
+        self.assertContains(response, "Press space to jump")
 
     def test_tetris_page_has_board_and_touch_controls(self):
         response = self.client.get(reverse("arcade_play", args=["tetris"]))
@@ -87,6 +93,15 @@ class RecordAttemptTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "pong")
+
+    def test_records_dinosaur_attempt(self):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("arcade_record_attempt"),
+            {"game": "dinosaur", "score": 245, "detail": "Distance 245m", "duration": 22},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "dinosaur")
 
     def test_records_tetris_attempt(self):
         self.client.force_login(self.user)

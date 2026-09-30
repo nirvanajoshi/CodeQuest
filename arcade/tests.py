@@ -9,7 +9,7 @@ class GameHomeAndPlayTests(TestCase):
     def test_home_lists_games_including_pong_and_runner(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
-        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash", "dinosaur"]:
+        for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash", "dinosaur", "blackjack", "solitaire"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
     def test_play_page_accessible_without_login(self):
@@ -47,6 +47,18 @@ class GameHomeAndPlayTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="dinosaur-canvas"')
         self.assertContains(response, "Press space to jump")
+
+    def test_blackjack_page_has_play_controls(self):
+        response = self.client.get(reverse("arcade_play", args=["blackjack"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="blackjack-hit"')
+        self.assertContains(response, 'id="blackjack-deal"')
+
+    def test_solitaire_page_has_stock_and_tableau(self):
+        response = self.client.get(reverse("arcade_play", args=["solitaire"]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="solitaire-stock"')
+        self.assertContains(response, 'id="solitaire-tableau"')
 
     def test_tetris_page_has_board_and_touch_controls(self):
         response = self.client.get(reverse("arcade_play", args=["tetris"]))
@@ -102,6 +114,17 @@ class RecordAttemptTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ArcadeAttempt.objects.get(user=self.user).game, "dinosaur")
+
+    def test_records_blackjack_and_solitaire_attempts(self):
+        self.client.force_login(self.user)
+        for game in ["blackjack", "solitaire"]:
+            with self.subTest(game=game):
+                response = self.client.post(
+                    reverse("arcade_record_attempt"),
+                    {"game": game, "score": 150, "detail": "Match complete", "duration": 45},
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertTrue(ArcadeAttempt.objects.filter(user=self.user, game=game).exists())
 
     def test_records_tetris_attempt(self):
         self.client.force_login(self.user)

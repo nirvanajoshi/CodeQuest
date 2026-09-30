@@ -100,6 +100,73 @@
             <div class="memory-grid" id="memory-grid"></div>
         </div>
 
+        <!-- Blackjack -->
+        <div class="blackjack-wrap" id="blackjack-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Hand</span>
+                    <strong id="blackjack-round">0<small class="stat-unit">/5</small></strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Match points</span>
+                    <strong id="blackjack-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Record</span>
+                    <strong id="blackjack-record">0-0-0</strong>
+                </div>
+            </div>
+            <div class="blackjack-table">
+                <section class="blackjack-hand-area" aria-label="Dealer hand">
+                    <div class="blackjack-hand-heading"><span>Dealer</span><strong id="blackjack-dealer-score">-</strong></div>
+                    <div class="playing-hand" id="blackjack-dealer-hand"></div>
+                </section>
+                <p class="blackjack-status" id="blackjack-status" role="status" aria-live="polite">Deal to begin</p>
+                <section class="blackjack-hand-area" aria-label="Your hand">
+                    <div class="blackjack-hand-heading"><span>You</span><strong id="blackjack-player-score">-</strong></div>
+                    <div class="playing-hand" id="blackjack-player-hand"></div>
+                </section>
+                <div class="blackjack-controls" role="group" aria-label="Blackjack controls">
+                    <button type="button" class="games-btn games-btn-primary" id="blackjack-deal">Deal hand</button>
+                    <button type="button" class="games-btn games-btn-ghost" id="blackjack-hit" disabled>Hit</button>
+                    <button type="button" class="games-btn games-btn-ghost" id="blackjack-stand" disabled>Stand</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Klondike Solitaire -->
+        <div class="solitaire-wrap" id="solitaire-wrap" hidden>
+            <div class="arcade-stats-bar">
+                <div class="stat-block">
+                    <span class="stat-label">Score</span>
+                    <strong id="solitaire-score">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Moves</span>
+                    <strong id="solitaire-moves">0</strong>
+                </div>
+                <div class="stat-sep"></div>
+                <div class="stat-block">
+                    <span class="stat-label">Time</span>
+                    <strong id="solitaire-time">0<small class="stat-unit">s</small></strong>
+                </div>
+            </div>
+            <div class="solitaire-board" id="solitaire-board">
+                <div class="solitaire-piles">
+                    <div class="solitaire-draw-piles">
+                        <button type="button" class="playing-card card-back" id="solitaire-stock" aria-label="Draw from stock">↻</button>
+                        <div class="solitaire-pile" id="solitaire-waste" aria-label="Waste pile"></div>
+                    </div>
+                    <div class="solitaire-foundations" id="solitaire-foundations" role="group" aria-label="Foundation piles"></div>
+                </div>
+                <div class="solitaire-tableau" id="solitaire-tableau" role="group" aria-label="Tableau columns"></div>
+            </div>
+            <p class="games-sub solitaire-hint">Move cards by selecting them, then selecting a destination. Build down in alternating colors; send aces to foundations.</p>
+        </div>
+
         <!-- Reaction Time -->
         <div class="reaction-wrap" id="reaction-wrap" hidden>
             <div class="arcade-stats-bar">

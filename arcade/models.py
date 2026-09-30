@@ -7,6 +7,8 @@ class ArcadeAttempt(models.Model):
         SNAKE = "snake", "Snake"
         MINESWEEPER = "minesweeper", "Minesweeper"
         MEMORY_MATCH = "memory_match", "Memory Match"
+        BLACKJACK = "blackjack", "Blackjack"
+        SOLITAIRE = "solitaire", "Solitaire"
         REACTION_TIME = "reaction_time", "Reaction Time"
         ARCHERY = "archery", "Archery"
         GEOMETRY_DASH = "geometry_dash", "Geometry Dash"

@@ -8,6 +8,38 @@
     const authenticated = window.ARCADE_AUTHENTICATED === true;
     const resultBox = document.getElementById("arcade-result");
     const attemptForm = document.getElementById("arcade-attempt-form");
+    const CARD_SUITS = [
+        { symbol: "♠", color: "black" },
+        { symbol: "♥", color: "red" },
+        { symbol: "♦", color: "red" },
+        { symbol: "♣", color: "black" },
+    ];
+
+    function createShuffledDeck() {
+        const deck = [];
+        CARD_SUITS.forEach((suit) => {
+            for (let rank = 1; rank <= 13; rank++) deck.push({ suit: suit.symbol, color: suit.color, rank });
+        });
+        for (let index = deck.length - 1; index > 0; index--) {
+            const swapIndex = Math.floor(Math.random() * (index + 1));
+            [deck[index], deck[swapIndex]] = [deck[swapIndex], deck[index]];
+        }
+        return deck;
+    }
+
+    function cardRankLabel(rank) {
+        return rank === 1 ? "A" : rank === 11 ? "J" : rank === 12 ? "Q" : rank === 13 ? "K" : String(rank);
+    }
+
+    function createPlayingCard(card, extraClass) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "playing-card " + (card.color === "red" ? "red-card " : "") + (extraClass || "");
+        button.setAttribute("aria-label", cardRankLabel(card.rank) + " of " + card.suit);
+        button.innerHTML = "<span class=\"card-corner\"><span>" + cardRankLabel(card.rank) + "</span><span>" + card.suit + "</span></span>" +
+            "<span class=\"card-center-suit\" aria-hidden=\"true\">" + card.suit + "</span>";
+        return button;
+    }
 
     function finish(score, detail, durationSeconds) {
         if (authenticated) {
@@ -549,6 +581,429 @@
                 }
             }
         }
+    }
+
+    // -----------------------------------------------------------------
+    // Blackjack
+    // -----------------------------------------------------------------
+
+    function initBlackjack() {
+        document.getElementById("blackjack-wrap").hidden = false;
+
+        const dealerHand = document.getElementById("blackjack-dealer-hand");
+        const playerHand = document.getElementById("blackjack-player-hand");
+        const dealerScoreEl = document.getElementById("blackjack-dealer-score");
+        const playerScoreEl = document.getElementById("blackjack-player-score");
+        const roundEl = document.getElementById("blackjack-round");
+        const scoreEl = document.getElementById("blackjack-score");
+        const recordEl = document.getElementById("blackjack-record");
+        const statusEl = document.getElementById("blackjack-status");
+        const dealButton = document.getElementById("blackjack-deal");
+        const hitButton = document.getElementById("blackjack-hit");
+        const standButton = document.getElementById("blackjack-stand");
+        const totalHands = 5;
+
+        let deck = [];
+        let dealer = [];
+        let player = [];
+        let rounds = 0;
+        let points = 0;
+        let wins = 0;
+        let losses = 0;
+        let pushes = 0;
+        let active = false;
+        let matchStartedAt = null;
+        let complete = false;
+
+        function drawCard() {
+            return deck.pop();
+        }
+
+        function handValue(hand) {
+            let total = 0;
+            let aces = 0;
+            hand.forEach((card) => {
+                if (card.rank === 1) {
+                    total += 11;
+                    aces++;
+                } else {
+                    total += Math.min(card.rank, 10);
+                }
+            });
+            while (total > 21 && aces > 0) {
+                total -= 10;
+                aces--;
+            }
+            return total;
+        }
+
+        function showHand(element, hand, hideHoleCard) {
+            element.innerHTML = "";
+            hand.forEach((card, index) => {
+                if (hideHoleCard && index === 1) {
+                    const back = document.createElement("span");
+                    back.className = "playing-card card-back";
+                    back.setAttribute("aria-label", "Hidden dealer card");
+                    back.textContent = "✦";
+                    element.appendChild(back);
+                } else {
+                    element.appendChild(createPlayingCard(card));
+                }
+            });
+        }
+
+        function render(hideHoleCard) {
+            showHand(dealerHand, dealer, hideHoleCard);
+            showHand(playerHand, player, false);
+            dealerScoreEl.textContent = dealer.length ? (hideHoleCard ? String(handValue([dealer[0]])) + "+" : String(handValue(dealer))) : "-";
+            playerScoreEl.textContent = player.length ? String(handValue(player)) : "-";
+            roundEl.innerHTML = rounds + "<small class=\"stat-unit\">/" + totalHands + "</small>";
+            scoreEl.textContent = String(points);
+            recordEl.textContent = wins + "-" + losses + "-" + pushes;
+        }
+
+        function finishMatch() {
+            if (complete) return;
+            complete = true;
+            active = false;
+            dealButton.disabled = true;
+            hitButton.disabled = true;
+            standButton.disabled = true;
+            statusEl.textContent = "Match complete · " + wins + " wins, " + losses + " losses, " + pushes + " pushes";
+            const duration = (Date.now() - matchStartedAt) / 1000;
+            finish(points, wins + " wins, " + losses + " losses, " + pushes + " pushes", duration);
+        }
+
+        function settleHand() {
+            if (!active) return;
+            active = false;
+            const playerValue = handValue(player);
+            while (playerValue <= 21 && handValue(dealer) < 17) dealer.push(drawCard());
+            const dealerValue = handValue(dealer);
+            let result;
+
+            if (playerValue > 21) {
+                losses++;
+                result = "Bust. Dealer wins.";
+            } else if (dealerValue > 21 || playerValue > dealerValue) {
+                wins++;
+                const natural = player.length === 2 && playerValue === 21;
+                points += natural ? 200 : 150;
+                result = natural ? "Blackjack! You win." : "You win.";
+            } else if (playerValue === dealerValue) {
+                pushes++;
+                points += 50;
+                result = "Push. It's a tie.";
+            } else {
+                losses++;
+                result = "Dealer wins.";
+            }
+
+            statusEl.textContent = result;
+            hitButton.disabled = true;
+            standButton.disabled = true;
+            dealButton.disabled = false;
+            dealButton.textContent = rounds >= totalHands ? "Match complete" : "Deal next hand";
+            render(false);
+            if (rounds >= totalHands) finishMatch();
+        }
+
+        function dealHand() {
+            if (active || complete) return;
+            if (rounds === 0) matchStartedAt = Date.now();
+            deck = createShuffledDeck();
+            player = [drawCard(), drawCard()];
+            dealer = [drawCard(), drawCard()];
+            rounds++;
+            active = true;
+            dealButton.disabled = true;
+            hitButton.disabled = false;
+            standButton.disabled = false;
+            statusEl.textContent = "Your move";
+            render(true);
+            if (handValue(player) === 21) settleHand();
+        }
+
+        dealButton.addEventListener("click", dealHand);
+        hitButton.addEventListener("click", () => {
+            if (!active) return;
+            player.push(drawCard());
+            render(true);
+            if (handValue(player) >= 21) settleHand();
+        });
+        standButton.addEventListener("click", settleHand);
+        render(false);
+    }
+
+    // -----------------------------------------------------------------
+    // Klondike Solitaire
+    // -----------------------------------------------------------------
+
+    function initSolitaire() {
+        document.getElementById("solitaire-wrap").hidden = false;
+
+        const board = document.getElementById("solitaire-board");
+        const stockButton = document.getElementById("solitaire-stock");
+        const waste = document.getElementById("solitaire-waste");
+        const foundations = document.getElementById("solitaire-foundations");
+        const tableau = document.getElementById("solitaire-tableau");
+        const scoreEl = document.getElementById("solitaire-score");
+        const movesEl = document.getElementById("solitaire-moves");
+        const timeEl = document.getElementById("solitaire-time");
+
+        let stock = [];
+        let wasteCards = [];
+        let columns = [];
+        let foundationPiles = {};
+        let selected = null;
+        let moves = 0;
+        let score = 0;
+        let startedAt = null;
+        let timer = null;
+        let finished = false;
+
+        function startTimer() {
+            if (startedAt !== null) return;
+            startedAt = Date.now();
+            timer = setInterval(() => {
+                timeEl.textContent = String(Math.floor((Date.now() - startedAt) / 1000));
+            }, 1000);
+        }
+
+        function moveMade() {
+            moves++;
+            movesEl.textContent = String(moves);
+            scoreEl.textContent = String(score);
+        }
+
+        function flipExposedCard(column) {
+            if (column.length && !column[column.length - 1].faceUp) column[column.length - 1].faceUp = true;
+        }
+
+        function selectedCards() {
+            if (!selected) return [];
+            if (selected.source === "waste") return wasteCards.length ? [wasteCards[wasteCards.length - 1]] : [];
+            return columns[selected.column].slice(selected.index);
+        }
+
+        function clearSelection() {
+            selected = null;
+        }
+
+        function finishGame() {
+            if (finished) return;
+            finished = true;
+            clearInterval(timer);
+            const duration = startedAt === null ? 0 : (Date.now() - startedAt) / 1000;
+            timeEl.textContent = String(Math.floor(duration));
+            score += Math.max(0, 500 - moves * 2 - Math.floor(duration / 10));
+            scoreEl.textContent = String(score);
+            render();
+            finish(score, "Klondike cleared in " + moves + " moves", duration);
+        }
+
+        function renderCard(card, source, columnIndex, cardIndex) {
+            const button = createPlayingCard(card, card.faceUp ? "" : "card-back");
+            button.dataset.cardSource = source;
+            if (columnIndex !== null) button.dataset.column = String(columnIndex);
+            if (cardIndex !== null) button.dataset.cardIndex = String(cardIndex);
+            if (!card.faceUp) {
+                button.textContent = "✦";
+                button.setAttribute("aria-label", "Face-down card");
+            }
+            if (selected && source === selected.source &&
+                (source === "waste" || (columnIndex === selected.column && cardIndex >= selected.index))) {
+                button.classList.add("selected");
+            }
+            return button;
+        }
+
+        function render() {
+            waste.innerHTML = "";
+            foundations.innerHTML = "";
+            tableau.innerHTML = "";
+            stockButton.disabled = finished;
+            stockButton.textContent = stock.length ? String(stock.length) : "↻";
+            stockButton.classList.toggle("solitaire-stock-empty", stock.length === 0);
+
+            if (wasteCards.length) {
+                waste.appendChild(renderCard(wasteCards[wasteCards.length - 1], "waste", null, null));
+            } else {
+                const emptyWaste = document.createElement("span");
+                emptyWaste.className = "solitaire-stock-empty";
+                emptyWaste.setAttribute("aria-label", "Empty waste pile");
+                waste.appendChild(emptyWaste);
+            }
+
+            CARD_SUITS.forEach((suit) => {
+                const pile = document.createElement("button");
+                pile.type = "button";
+                pile.className = "solitaire-foundation" + (suit.color === "red" ? " red-card" : "");
+                pile.dataset.foundationSuit = suit.symbol;
+                pile.setAttribute("aria-label", suit.symbol + " foundation");
+                const cards = foundationPiles[suit.symbol];
+                if (cards.length) pile.appendChild(renderCard(cards[cards.length - 1], "foundation", null, null));
+                else pile.textContent = suit.symbol;
+                foundations.appendChild(pile);
+            });
+
+            columns.forEach((column, columnIndex) => {
+                const columnElement = document.createElement("div");
+                columnElement.className = "solitaire-column";
+                columnElement.dataset.targetColumn = String(columnIndex);
+                columnElement.setAttribute("aria-label", "Tableau column " + (columnIndex + 1));
+                if (!column.length) {
+                    const empty = document.createElement("button");
+                    empty.type = "button";
+                    empty.className = "solitaire-empty-column";
+                    empty.dataset.targetColumn = String(columnIndex);
+                    empty.setAttribute("aria-label", "Empty column " + (columnIndex + 1));
+                    empty.textContent = "K";
+                    columnElement.appendChild(empty);
+                } else {
+                    column.forEach((card, cardIndex) => {
+                        const cardButton = renderCard(card, "tableau", columnIndex, cardIndex);
+                        cardButton.style.zIndex = String(cardIndex + 1);
+                        columnElement.appendChild(cardButton);
+                    });
+                }
+                tableau.appendChild(columnElement);
+            });
+            scoreEl.textContent = String(score);
+            movesEl.textContent = String(moves);
+        }
+
+        function tryTableauMove(targetColumn) {
+            if (!selected || finished) return false;
+            const moving = selectedCards();
+            const destination = columns[targetColumn];
+            if (!moving.length || (selected.source === "tableau" && selected.column === targetColumn)) return false;
+            const first = moving[0];
+            const top = destination[destination.length - 1];
+            const valid = top ? top.faceUp && top.color !== first.color && top.rank === first.rank + 1 : first.rank === 13;
+            if (!valid) return false;
+
+            startTimer();
+            if (selected.source === "waste") wasteCards.pop();
+            else {
+                columns[selected.column].splice(selected.index);
+                flipExposedCard(columns[selected.column]);
+            }
+            destination.push(...moving);
+            clearSelection();
+            moveMade();
+            render();
+            return true;
+        }
+
+        function tryFoundationMove(suitSymbol) {
+            if (!selected || finished) return;
+            const moving = selectedCards();
+            if (moving.length !== 1) return;
+            const card = moving[0];
+            const pile = foundationPiles[suitSymbol];
+            const top = pile[pile.length - 1];
+            if (card.suit !== suitSymbol || (top ? card.rank !== top.rank + 1 : card.rank !== 1)) return;
+
+            startTimer();
+            if (selected.source === "waste") wasteCards.pop();
+            else {
+                columns[selected.column].pop();
+                flipExposedCard(columns[selected.column]);
+            }
+            pile.push(card);
+            score += 10;
+            clearSelection();
+            moveMade();
+            if (Object.values(foundationPiles).every((cards) => cards.length === 13)) finishGame();
+            else render();
+        }
+
+        function reset() {
+            clearInterval(timer);
+            const deck = createShuffledDeck().map((card) => ({ ...card, faceUp: false }));
+            columns = Array.from({ length: 7 }, (_, columnIndex) => {
+                const column = deck.splice(0, columnIndex + 1);
+                column[column.length - 1].faceUp = true;
+                return column;
+            });
+            stock = deck;
+            wasteCards = [];
+            foundationPiles = Object.fromEntries(CARD_SUITS.map((suit) => [suit.symbol, []]));
+            selected = null;
+            moves = 0;
+            score = 0;
+            startedAt = null;
+            finished = false;
+            timeEl.textContent = "0";
+            render();
+        }
+
+        stockButton.addEventListener("click", () => {
+            if (finished) return;
+            clearSelection();
+            startTimer();
+            if (stock.length) {
+                const card = stock.pop();
+                card.faceUp = true;
+                wasteCards.push(card);
+            } else if (wasteCards.length) {
+                stock = wasteCards.splice(0).reverse();
+                stock.forEach((card) => { card.faceUp = false; });
+            }
+            else return;
+            moveMade();
+            render();
+        });
+
+        board.addEventListener("click", (event) => {
+            const foundationButton = event.target.closest("[data-foundation-suit]");
+            if (foundationButton) {
+                tryFoundationMove(foundationButton.dataset.foundationSuit);
+                return;
+            }
+
+            const cardButton = event.target.closest("button[data-card-source]");
+            if (cardButton) {
+                const source = cardButton.dataset.cardSource;
+                if (source === "tableau") {
+                    const columnIndex = Number(cardButton.dataset.column);
+                    const cardIndex = Number(cardButton.dataset.cardIndex);
+                    const column = columns[columnIndex];
+                    const card = column[cardIndex];
+                    if (!card.faceUp) {
+                        if (cardIndex === column.length - 1) {
+                            startTimer();
+                            card.faceUp = true;
+                            clearSelection();
+                            moveMade();
+                            render();
+                        }
+                        return;
+                    }
+                    if (selected && tryTableauMove(columnIndex)) return;
+                    selected = selected && selected.source === source && selected.column === columnIndex && selected.index === cardIndex
+                        ? null
+                        : { source, column: columnIndex, index: cardIndex };
+                    render();
+                } else if (source === "waste") {
+                    selected = selected && selected.source === "waste" ? null : { source: "waste" };
+                    render();
+                }
+                return;
+            }
+
+            const targetColumn = event.target.closest("[data-target-column]");
+            if (targetColumn) {
+                const index = Number(targetColumn.dataset.targetColumn);
+                if (!tryTableauMove(index) && selected) {
+                    clearSelection();
+                    render();
+                }
+            }
+        });
+
+        reset();
     }
 
     // -----------------------------------------------------------------
@@ -3051,6 +3506,10 @@
         initSnake();
     } else if (game === "memory_match") {
         initMemoryMatch();
+    } else if (game === "blackjack") {
+        initBlackjack();
+    } else if (game === "solitaire") {
+        initSolitaire();
     } else if (game === "minesweeper") {
         initMinesweeper();
     } else if (game === "reaction_time") {

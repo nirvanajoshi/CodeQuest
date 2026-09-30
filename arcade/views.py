@@ -28,6 +28,18 @@ GAMES = [
         "description": "Flip cards, find the pairs. Fewer moves and less time score higher.",
     },
     {
+        "key": "blackjack",
+        "label": "Blackjack",
+        "icon": "🂡",
+        "description": "Play five hands against the dealer. Hit or stand, and get as close to 21 as you can without busting.",
+    },
+    {
+        "key": "solitaire",
+        "label": "Solitaire",
+        "icon": "🃏",
+        "description": "Play Klondike Solitaire. Draw cards, build alternating-color columns, and complete the four foundations.",
+    },
+    {
         "key": "reaction_time",
         "label": "Reaction Time",
         "icon": "⚡",

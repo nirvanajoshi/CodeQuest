@@ -1,0 +1,311 @@
+.gba-page {
+    --gba-accent: #5ee1a4;
+    --gba-accent-dim: rgba(94, 225, 164, 0.14);
+    max-width: 960px;
+}
+
+.gba-heading {
+    display: grid;
+    gap: 0.45rem;
+}
+
+.gba-kicker,
+.gba-system-tag,
+.gba-section-heading > span {
+    color: var(--gba-accent);
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.gba-kicker {
+    margin: 0;
+}
+
+.gba-heading .games-title {
+    font-size: 2rem;
+}
+
+.gba-player-shell,
+.gba-load-panel,
+.gba-controls-panel {
+    border: 1px solid var(--games-border);
+    border-radius: 8px;
+    background: var(--games-surface);
+}
+
+.gba-player-shell {
+    padding: clamp(0.75rem, 3vw, 1.25rem);
+    box-shadow: 0 18px 52px rgba(0, 0, 0, 0.42);
+}
+
+.gba-player-topline {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    min-height: 1.5rem;
+    margin: 0 0 0.8rem;
+    color: var(--games-muted);
+    font: 700 0.7rem Consolas, "Courier New", monospace;
+    letter-spacing: 0.06em;
+}
+
+.gba-live-mark {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--gba-accent);
+    box-shadow: 0 0 12px rgba(94, 225, 164, 0.65);
+}
+
+.gba-system-tag {
+    margin-left: auto;
+}
+
+.gba-screen-frame {
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid #3a465a;
+    border-radius: 5px;
+    background: #05070b;
+    box-shadow: inset 0 0 0 5px #0b1018, 0 12px 28px rgba(0, 0, 0, 0.36);
+}
+
+.gba-player-screen {
+    position: relative;
+    width: 100%;
+    min-height: 240px;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #080b11;
+}
+
+.gba-player-screen canvas,
+.gba-player-screen iframe {
+    display: block;
+    max-width: 100%;
+}
+
+.gba-screen-placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: 0.75rem;
+    color: var(--games-muted);
+    background-image: radial-gradient(rgba(94, 225, 164, 0.1) 1px, transparent 1px);
+    background-size: 18px 18px;
+}
+
+.gba-screen-placeholder p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.gba-placeholder-mark {
+    display: grid;
+    place-items: center;
+    width: 5rem;
+    aspect-ratio: 1;
+    border: 1px solid rgba(94, 225, 164, 0.45);
+    border-radius: 5px;
+    color: var(--gba-accent);
+    background: var(--gba-accent-dim);
+    font: 700 1.15rem Consolas, "Courier New", monospace;
+}
+
+.gba-loader-status {
+    min-height: 1.3rem;
+    padding: 0.8rem 0.15rem 0.1rem;
+    color: var(--games-muted);
+    font-size: 0.85rem;
+}
+
+.gba-load-panel,
+.gba-controls-panel {
+    padding: clamp(1rem, 3vw, 1.4rem);
+}
+
+.gba-section-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.gba-section-heading h2 {
+    margin: 0;
+    font-size: 1.05rem;
+}
+
+.gba-section-heading > span {
+    color: var(--games-muted);
+    font-size: 0.65rem;
+}
+
+.gba-load-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.8rem;
+}
+
+.gba-file-control,
+.gba-url-control {
+    display: grid;
+    gap: 0.5rem;
+    min-width: 0;
+    color: var(--games-muted);
+    font-size: 0.8rem;
+}
+
+.gba-file-control {
+    position: relative;
+    min-height: 2.75rem;
+    grid-template-columns: 1.5rem minmax(0, 1fr);
+    align-items: center;
+    padding: 0 0.75rem;
+    border: 1px dashed #44516a;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.gba-file-control:hover,
+.gba-file-control:focus-within {
+    border-color: var(--gba-accent);
+    color: var(--games-text);
+}
+
+.gba-file-icon {
+    color: var(--gba-accent);
+    font-size: 1.3rem;
+    text-align: center;
+}
+
+.gba-file-control input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.gba-file-control:focus-within {
+    outline: 2px solid var(--gba-accent);
+    outline-offset: 3px;
+}
+
+.gba-url-control input {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: 0 0.7rem;
+    border: 1px solid #3a465a;
+    border-radius: 5px;
+    background: #0d121b;
+    color: var(--games-text);
+    font: inherit;
+}
+
+.gba-url-control input:focus {
+    border-color: var(--gba-accent);
+    outline: 2px solid rgba(94, 225, 164, 0.18);
+}
+
+.gba-or {
+    padding-bottom: 0.8rem;
+    color: var(--games-muted);
+    font: 700 0.65rem Consolas, "Courier New", monospace;
+}
+
+.gba-start-button {
+    min-height: 2.75rem;
+    white-space: nowrap;
+}
+
+.gba-start-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.gba-load-note {
+    margin: 0.85rem 0 0;
+    color: var(--games-muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.gba-key-list {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.7rem;
+    margin: 0;
+}
+
+.gba-key-list > div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-width: 0;
+    padding: 0.65rem 0.7rem;
+    border: 1px solid var(--games-border);
+    border-radius: 5px;
+    background: var(--games-bg-2);
+}
+
+.gba-key-list dt {
+    color: var(--games-muted);
+    font-size: 0.78rem;
+}
+
+.gba-key-list dd {
+    display: flex;
+    gap: 0.2rem;
+    margin: 0;
+}
+
+.gba-key-list kbd {
+    display: inline-grid;
+    place-items: center;
+    min-width: 1.55rem;
+    min-height: 1.55rem;
+    padding: 0 0.3rem;
+    border: 1px solid #43506a;
+    border-radius: 4px;
+    background: #1b2432;
+    color: var(--games-text);
+    font: 700 0.7rem Consolas, "Courier New", monospace;
+    white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+    .gba-load-form {
+        grid-template-columns: 1fr;
+        align-items: stretch;
+    }
+
+    .gba-or {
+        padding: 0;
+        text-align: center;
+    }
+
+    .gba-key-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 420px) {
+    .gba-player-screen {
+        min-height: 200px;
+    }
+
+    .gba-key-list > div {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

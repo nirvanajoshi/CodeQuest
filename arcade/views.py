@@ -114,6 +114,10 @@ def arcade_home(request):
     return render(request, "arcade/home.html", {"games": GAMES})
 
 
+def gba_player(request):
+    return render(request, "arcade/gba_player.html")
+
+
 def play(request, game):
     game_info = GAME_BY_KEY.get(game)
     if game_info is None:

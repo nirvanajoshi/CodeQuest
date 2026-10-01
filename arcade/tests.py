@@ -9,6 +9,7 @@ class GameHomeAndPlayTests(TestCase):
     def test_home_lists_games_including_pong_and_runner(self):
         response = self.client.get(reverse("arcade_home"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("arcade_gba_player"))
         for game_key in ["snake", "minesweeper", "memory_match", "reaction_time", "pong", "tetris", "geometry_dash", "dinosaur", "blackjack", "solitaire"]:
             self.assertContains(response, reverse("arcade_play", args=[game_key]))
 
@@ -16,6 +17,13 @@ class GameHomeAndPlayTests(TestCase):
         response = self.client.get(reverse("arcade_play", args=["snake"]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'id="arcade-fullscreen"')
+
+    def test_gba_emulator_page_is_accessible_without_login(self):
+        response = self.client.get(reverse("arcade_gba_player"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="gba-player-screen"')
+        self.assertContains(response, "js/gba_player.js")
+        self.assertContains(response, "Keyboard controls")
 
     def test_minesweeper_page_has_three_difficulties(self):
         response = self.client.get(reverse("arcade_play", args=["minesweeper"]))

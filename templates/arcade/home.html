@@ -19,6 +19,10 @@
             earn XP and land on the leaderboard.
         </p>
 
+        <div class="games-controls">
+            <a href="{% url 'arcade_gba_player' %}" class="games-btn games-btn-primary">Play a GBA game</a>
+        </div>
+
         <ul class="games-home-list">
             {% for game in games %}
                 <li class="games-home-card">

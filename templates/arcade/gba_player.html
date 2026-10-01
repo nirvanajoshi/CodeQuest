@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GBA Player — CodeQuest{% endblock %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{% static 'css/games.css' %}">
+    <link rel="stylesheet" href="{% static 'css/gba_player.css' %}">
+{% endblock %}
+
+{% block content %}
+    <div class="games-page gba-page">
+        <div class="games-header">
+            <a class="games-back" href="{% url 'arcade_home' %}">&larr; Back to arcade</a>
+        </div>
+
+        <header class="gba-heading">
+            <p class="gba-kicker">CODEQUEST / HANDHELD</p>
+            <h1 class="games-title">Game Boy Advance</h1>
+            <p class="games-sub">Load a homebrew game you have permission to play.</p>
+        </header>
+
+        <section class="gba-player-shell" aria-label="Game Boy Advance emulator">
+            <div class="gba-player-topline">
+                <span class="gba-live-mark" aria-hidden="true"></span>
+                <span>PLAYER 01</span>
+                <span class="gba-system-tag">GBA</span>
+            </div>
+            <div class="gba-screen-frame">
+                <div id="gba-player-screen" class="gba-player-screen" aria-label="Emulator screen">
+                    <div class="gba-screen-placeholder" id="gba-placeholder">
+                        <span class="gba-placeholder-mark" aria-hidden="true">GBA</span>
+                        <p>Your game will appear here</p>
+                    </div>
+                </div>
+            </div>
+            <div class="gba-loader-status" id="gba-status" role="status" aria-live="polite">
+                Choose a ROM to start the emulator.
+            </div>
+        </section>
+
+        <section class="gba-load-panel" aria-labelledby="gba-load-title">
+            <div class="gba-section-heading">
+                <h2 id="gba-load-title">Load a game</h2>
+                <span>GBA ROM</span>
+            </div>
+            <form id="gba-load-form" class="gba-load-form">
+                <label class="gba-file-control" for="gba-rom-file">
+                    <span class="gba-file-icon" aria-hidden="true">+</span>
+                    <span id="gba-file-label">Choose a .gba or .zip file</span>
+                    <input id="gba-rom-file" name="rom" type="file" accept=".gba,.zip,application/zip,application/x-gba-rom">
+                </label>
+                <span class="gba-or" aria-hidden="true">OR</span>
+                <label class="gba-url-control" for="gba-rom-url">
+                    <span>HTTPS ROM URL</span>
+                    <input id="gba-rom-url" name="rom_url" type="url" inputmode="url" placeholder="https://example.org/homebrew.gba" autocomplete="url">
+                </label>
+                <button class="games-btn games-btn-primary gba-start-button" type="submit" id="gba-start-button">Start game</button>
+            </form>
+            <p class="gba-load-note">Only load games you own or are authorized to use. Remote URLs must allow cross-origin requests.</p>
+        </section>
+
+        <section class="gba-controls-panel" aria-labelledby="gba-controls-title">
+            <div class="gba-section-heading">
+                <h2 id="gba-controls-title">Keyboard controls</h2>
+                <span>DEFAULT LAYOUT</span>
+            </div>
+            <dl class="gba-key-list">
+                <div><dt>Move</dt><dd><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dd></div>
+                <div><dt>A</dt><dd><kbd>Z</kbd></dd></div>
+                <div><dt>B</dt><dd><kbd>X</kbd></dd></div>
+                <div><dt>Start</dt><dd><kbd>Enter</kbd></dd></div>
+                <div><dt>Select</dt><dd><kbd>V</kbd></dd></div>
+            </dl>
+        </section>
+    </div>
+    <script src="{% static 'js/gba_player.js' %}" defer></script>
+{% endblock %}

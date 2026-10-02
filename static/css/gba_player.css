@@ -241,7 +241,7 @@
 
 .gba-key-list {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0.7rem;
     margin: 0;
 }
@@ -258,6 +258,11 @@
     background: var(--games-bg-2);
 }
 
+.gba-key-list .gba-movement-control {
+    grid-column: span 2;
+    justify-content: flex-start;
+}
+
 .gba-key-list dt {
     color: var(--games-muted);
     font-size: 0.78rem;
@@ -267,6 +272,11 @@
     display: flex;
     gap: 0.2rem;
     margin: 0;
+}
+
+.gba-key-list .gba-key-or {
+    color: var(--games-muted);
+    font-size: 0.75rem;
 }
 
 .gba-key-list kbd {

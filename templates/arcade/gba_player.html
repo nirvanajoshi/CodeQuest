@@ -5,7 +5,7 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{% static 'css/games.css' %}">
-    <link rel="stylesheet" href="{% static 'css/gba_player.css' %}">
+    <link rel="stylesheet" href="{% static 'css/gba_player.css' %}?v=2">
 {% endblock %}
 
 {% block content %}
@@ -66,7 +66,12 @@
                 <span>DEFAULT LAYOUT</span>
             </div>
             <dl class="gba-key-list">
-                <div><dt>Move</dt><dd><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dd></div>
+                <div class="gba-movement-control">
+                    <dt>Move</dt>
+                    <dd aria-label="Arrow keys"><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dd>
+                    <dd class="gba-key-or">or</dd>
+                    <dd aria-label="WASD keys"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dd>
+                </div>
                 <div><dt>A</dt><dd><kbd>Z</kbd></dd></div>
                 <div><dt>B</dt><dd><kbd>X</kbd></dd></div>
                 <div><dt>Start</dt><dd><kbd>Enter</kbd></dd></div>

@@ -2,7 +2,86 @@ import datetime
 
 from django.db import transaction
 
-from .models import Badge, UserBadge, XPTransaction
+from challenges.models import Challenge
+from submissions.models import Submission
+
+from .models import Badge, DailyChallenge, UserBadge, XPTransaction
+
+
+def get_daily_challenge_for_user(user, today=None):
+    """Choose a daily challenge for the user and persist it for that day."""
+    if not user or not user.is_authenticated:
+        return None
+
+    day = today or datetime.date.today()
+    existing = (
+        DailyChallenge.objects.filter(user=user, assigned_on=day)
+        .select_related("challenge")
+        .first()
+    )
+    if existing:
+        return existing
+
+    solved_ids = set(
+        Submission.objects.filter(user=user, status=Submission.Status.ACCEPTED)
+        .values_list("challenge_id", flat=True)
+    )
+    candidates = Challenge.objects.filter(is_published=True).exclude(id__in=solved_ids)
+    if not candidates.exists():
+        candidates = Challenge.objects.filter(is_published=True)
+
+    challenge = candidates.order_by("?", "-points").first()
+    return DailyChallenge.objects.create(user=user, challenge=challenge, assigned_on=day)
+
+
+def get_learning_recommendations(user, limit=3):
+    """Return a simple personalized recommendation list for the home page."""
+    if not user or not user.is_authenticated:
+        return []
+
+    solved_ids = set(
+        Submission.objects.filter(user=user, status=Submission.Status.ACCEPTED)
+        .values_list("challenge_id", flat=True)
+    )
+
+    candidates = (
+        Challenge.objects.filter(is_published=True)
+        .exclude(id__in=solved_ids)
+        .select_related("lesson__course")
+        .order_by("difficulty", "-points")
+    )
+
+    recommendations = []
+    seen_ids = set()
+    for challenge in candidates[:limit]:
+        recommendations.append(
+            {
+                "challenge": challenge,
+                "reason": "Continue with this challenge to build momentum in your current course.",
+            }
+        )
+        seen_ids.add(challenge.id)
+
+    if len(recommendations) < limit:
+        remaining = (
+            Challenge.objects.filter(is_published=True)
+            .select_related("lesson__course")
+            .order_by("difficulty", "-points")
+        )
+        for challenge in remaining:
+            if challenge.id in solved_ids or challenge.id in seen_ids:
+                continue
+            recommendations.append(
+                {
+                    "challenge": challenge,
+                    "reason": "A quick next step to keep your streak going.",
+                }
+            )
+            seen_ids.add(challenge.id)
+            if len(recommendations) >= limit:
+                break
+
+    return recommendations
 
 
 def _update_streak(profile, today):

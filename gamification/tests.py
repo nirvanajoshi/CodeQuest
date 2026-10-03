@@ -9,8 +9,13 @@ from courses.models import Course, Lesson
 from quizzes.models import Question, Quiz, QuizAnswer, QuizAttempt
 from submissions.models import Submission
 
-from .models import Badge, UserBadge, XPTransaction
-from .services import record_quiz_attempt, record_solve
+from .models import Badge, DailyChallenge, UserBadge, XPTransaction
+from .services import (
+    get_daily_challenge_for_user,
+    get_learning_recommendations,
+    record_quiz_attempt,
+    record_solve,
+)
 
 
 class RecordSolveTests(TestCase):
@@ -124,3 +129,49 @@ class RecordQuizAttemptTests(TestCase):
         record_quiz_attempt(self.user, attempt)
         self.user.profile.refresh_from_db()
         self.assertEqual(self.user.profile.total_xp, 10)
+
+
+class DailyChallengeFeatureTests(TestCase):
+    def setUp(self):
+        course = Course.objects.create(title="Python Basics", slug="python-basics-3", is_published=True)
+        lesson = Lesson.objects.create(course=course, title="Functions")
+        self.challenge_one = Challenge.objects.create(
+            title="Challenge One",
+            slug="challenge-one",
+            description="First challenge",
+            points=20,
+            lesson=lesson,
+            is_published=True,
+        )
+        self.challenge_two = Challenge.objects.create(
+            title="Challenge Two",
+            slug="challenge-two",
+            description="Second challenge",
+            points=25,
+            lesson=lesson,
+            is_published=True,
+        )
+        self.user = User.objects.create_user(username="daily-user", password="pw12345!")
+
+    def test_daily_challenge_is_created_once_per_day(self):
+        first = get_daily_challenge_for_user(self.user)
+        second = get_daily_challenge_for_user(self.user)
+
+        self.assertIsNotNone(first)
+        self.assertEqual(first.challenge_id, second.challenge_id)
+        self.assertEqual(DailyChallenge.objects.filter(user=self.user).count(), 1)
+
+    def test_recommendations_prioritize_unsolved_challenges(self):
+        Submission.objects.create(
+            user=self.user,
+            challenge=self.challenge_one,
+            language="python",
+            source_code="print('hi')",
+            status=Submission.Status.ACCEPTED,
+            score=100,
+        )
+
+        recommendations = get_learning_recommendations(self.user, limit=3)
+
+        self.assertTrue(recommendations)
+        self.assertEqual(recommendations[0]["challenge"].pk, self.challenge_two.pk)

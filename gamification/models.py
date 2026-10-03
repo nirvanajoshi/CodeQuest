@@ -1,5 +1,28 @@
+import datetime
+
 from django.conf import settings
 from django.db import models
+
+from challenges.models import Challenge
+
+
+class DailyChallenge(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="daily_challenges"
+    )
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, related_name="daily_challenge_assignments")
+    assigned_on = models.DateField(default=datetime.date.today)
+    completed = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    xp_awarded = models.PositiveIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-assigned_on"]
+        unique_together = ("user", "assigned_on")
+
+    def __str__(self):
+        return f"{self.user} - {self.challenge.title} ({self.assigned_on})"
 
 
 class Badge(models.Model):

@@ -13,4 +13,39 @@
         {% endif %}
         <a href="{% url 'games_hub' %}" class="btn-secondary">🎮 Play a game</a>
     </section>
+
+    {% if user.is_authenticated %}
+        <section class="dashboard-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="eyebrow">Daily challenge</span>
+                    <h2>Today’s mission</h2>
+                </div>
+                {% if daily_challenge %}
+                    <div class="challenge-badge">{{ daily_challenge.challenge.get_difficulty_display }} · {{ daily_challenge.challenge.points }} XP</div>
+                    <h3>{{ daily_challenge.challenge.title }}</h3>
+                    <p>{{ daily_challenge.challenge.description|truncatechars:180 }}</p>
+                    <a href="{% url 'challenge_detail' daily_challenge.challenge.slug %}" class="btn">Solve today’s challenge</a>
+                {% else %}
+                    <p>No challenge is available right now. Come back soon.</p>
+                {% endif %}
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="eyebrow">Personalized path</span>
+                    <h2>Continue learning</h2>
+                </div>
+                {% for item in learning_path %}
+                    <div class="recommendation-item">
+                        <h4>{{ item.challenge.title }}</h4>
+                        <p>{{ item.reason }}</p>
+                        <a href="{% url 'challenge_detail' item.challenge.slug %}">Open challenge</a>
+                    </div>
+                {% empty %}
+                    <p>You’ve cleared the available challenges. Try a quiz or a new course.</p>
+                {% endfor %}
+            </div>
+        </section>
+    {% endif %}
 {% endblock %}

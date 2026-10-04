@@ -22,12 +22,18 @@
     <a href="{% url 'discussion_list' course.slug %}">Discussions</a>
 
     <h2>Lessons</h2>
+    {% if can_edit_lessons %}
+        <p><a class="btn" href="{% url 'lesson_create' course.slug %}">Add a lesson</a></p>
+    {% endif %}
     {% if lessons %}
         <ol class="lesson-list">
             {% for lesson in lessons %}
                 <li class="lesson-item">
                     <h3><a href="{% url 'lesson_detail' course.slug lesson.pk %}">{{ lesson.title }}</a></h3>
                     <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
+                    {% if can_edit_lessons %}
+                        <a href="{% url 'lesson_edit' course.slug lesson.pk %}">Edit lesson</a>
+                    {% endif %}
 
                     {% if lesson.challenges.all %}
                         <ul class="challenge-list">

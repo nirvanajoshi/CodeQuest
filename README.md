@@ -38,7 +38,7 @@ Submissions are graded synchronously: the submitted source runs against the chal
 ### Known limitations
 
 - Quiz timers are enforced client-side (JS) only; there's no server-side deadline check at submit time.
-- Course/challenge/quiz content is authored through Django admin — there's no in-app content creation UI for instructors yet.
+- Lesson content can be created and edited in-app by the assigned course instructor; course, challenge, and quiz setup still uses Django admin.
 - Media uploads (avatars, course thumbnails) are served from local disk; a production deployment would need object storage (S3-compatible) since WhiteNoise only handles *static* files, not user uploads.
 - No real-time features (competitions are polling/refresh-based, not WebSocket-driven).
 

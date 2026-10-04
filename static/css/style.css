@@ -517,8 +517,33 @@ a:hover {
     box-shadow: var(--shadow-sm);
 }
 
+.lesson-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1.5rem 0;
+}
+
+.lesson-header p {
+    margin-bottom: 0.35rem;
+}
+
+.lesson-form textarea[name="content"] {
+    min-height: 22rem;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
 .text-muted {
     color: var(--color-muted);
+}
+
+@media (max-width: 600px) {
+    .lesson-header {
+        flex-direction: column;
+    }
 }
 
 .sample-io {

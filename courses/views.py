@@ -1,9 +1,12 @@
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from challenges.models import Challenge
 
+from .forms import LessonForm
 from .models import Course, Lesson
 
 
@@ -23,7 +26,13 @@ def course_detail(request, slug):
     return render(
         request,
         "courses/course_detail.html",
-        {"course": course, "lessons": lessons, "quizzes": quizzes},
+        {
+            "course": course,
+            "lessons": lessons,
+            "quizzes": quizzes,
+            "can_edit_lessons": request.user.is_authenticated
+            and course.instructor_id == request.user.id,
+        },
     )
 
 
@@ -34,5 +43,34 @@ def lesson_detail(request, slug, pk):
     return render(
         request,
         "courses/lesson_detail.html",
-        {"course": course, "lesson": lesson, "challenges": challenges},
+        {
+            "course": course,
+            "lesson": lesson,
+            "challenges": challenges,
+            "can_edit_lessons": request.user.is_authenticated
+            and course.instructor_id == request.user.id,
+        },
+    )
+
+
+@login_required
+def lesson_edit(request, slug, pk=None):
+    course = get_object_or_404(Course, slug=slug, instructor=request.user)
+    lesson = get_object_or_404(Lesson, pk=pk, course=course) if pk else None
+
+    if request.method == "POST":
+        form = LessonForm(request.POST, instance=lesson)
+        if form.is_valid():
+            lesson = form.save(commit=False)
+            lesson.course = course
+            lesson.save()
+            messages.success(request, "Lesson saved.")
+            return redirect("lesson_edit", slug=course.slug, pk=lesson.pk)
+    else:
+        form = LessonForm(instance=lesson)
+
+    return render(
+        request,
+        "courses/lesson_form.html",
+        {"course": course, "lesson": lesson, "form": form},
     )

@@ -5,14 +5,25 @@
 {% block content %}
     <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
 
-    <h1>{{ lesson.title }}</h1>
-    <p class="text-muted">{{ lesson.estimated_minutes }} min</p>
+    <header class="lesson-header">
+        <div>
+            <p class="text-muted">Lesson {{ lesson.order }} · {{ course.title }}</p>
+            <h1>{{ lesson.title }}</h1>
+            <p class="text-muted">{{ lesson.estimated_minutes }} min read</p>
+        </div>
+        {% if can_edit_lessons %}
+            <a class="btn-secondary" href="{% url 'lesson_edit' course.slug lesson.pk %}">Edit lesson</a>
+        {% endif %}
+    </header>
 
-    {% if lesson.content %}
-        <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
-    {% else %}
-        <p class="text-muted">No content has been added to this lesson yet.</p>
-    {% endif %}
+    <section aria-labelledby="lesson-instructions-heading">
+        <h2 id="lesson-instructions-heading">Lesson instructions</h2>
+        {% if lesson.content %}
+            <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
+        {% else %}
+            <p class="text-muted">No instructions have been added to this lesson yet.</p>
+        {% endif %}
+    </section>
 
     <h2>Challenges</h2>
     {% if challenges %}

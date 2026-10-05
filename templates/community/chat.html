@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Community chat — CodeQuest{% endblock %}
+
+{% block content %}
+    <div class="chat-header">
+        <div>
+            <h1>Community chat</h1>
+            <p class="text-muted">Talk coding, share ideas, and help each other learn.</p>
+        </div>
+        <span id="chat-status" class="chat-status" role="status">Connecting…</span>
+    </div>
+
+    <section
+        id="chat-messages"
+        class="chat-messages"
+        role="log"
+        aria-label="Community chat messages"
+        aria-live="polite"
+        data-messages-url="{% url 'community_chat_messages' %}"
+        data-last-message-id="{{ last_message_id }}"
+    >
+        {% for message in chat_messages %}
+            <article class="chat-message" data-message-id="{{ message.pk }}">
+                <div class="chat-message-meta">
+                    <strong>{{ message.author.username }}</strong>
+                    <time datetime="{{ message.created_at|date:'c' }}">{{ message.created_at|date:"M d, H:i" }}</time>
+                </div>
+                <p>{{ message.body }}</p>
+            </article>
+        {% empty %}
+            <p id="chat-empty" class="chat-empty">No messages yet. Start the conversation!</p>
+        {% endfor %}
+    </section>
+
+    {% if user.is_authenticated %}
+        <form method="post" action="{% url 'community_chat_send' %}" class="chat-form">
+            {% csrf_token %}
+            {{ form.body }}
+            {{ form.body.errors }}
+            <button type="submit" class="btn">Send</button>
+        </form>
+        <p class="chat-help text-muted">Messages are limited to 1,000 characters.</p>
+    {% else %}
+        <p class="chat-login-prompt">
+            <a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to join the conversation.
+        </p>
+    {% endif %}
+{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    <script defer>
+        document.addEventListener("DOMContentLoaded", () => {
+            const messageList = document.getElementById("chat-messages");
+            const status = document.getElementById("chat-status");
+            let lastMessageId = Number(messageList.dataset.lastMessageId);
+            let polling = false;
+
+            function appendMessage(message) {
+                document.getElementById("chat-empty")?.remove();
+
+                const article = document.createElement("article");
+                article.className = "chat-message";
+                article.dataset.messageId = message.id;
+
+                const metadata = document.createElement("div");
+                metadata.className = "chat-message-meta";
+                const author = document.createElement("strong");
+                author.textContent = message.username;
+                const timestamp = document.createElement("time");
+                timestamp.dateTime = message.created_at;
+                timestamp.textContent = new Date(message.created_at).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+                metadata.append(author, timestamp);
+
+                const body = document.createElement("p");
+                body.textContent = message.body;
+                article.append(metadata, body);
+                messageList.append(article);
+            }
+
+            async function loadMessages() {
+                if (polling) return;
+                polling = true;
+                try {
+                    const response = await fetch(
+                        `${messageList.dataset.messagesUrl}?after=${lastMessageId}`,
+                        { headers: { Accept: "application/json" }, cache: "no-store" }
+                    );
+                    if (!response.ok) throw new Error(`Chat request failed (${response.status})`);
+                    const data = await response.json();
+                    data.messages.forEach((message) => {
+                        appendMessage(message);
+                        lastMessageId = message.id;
+                    });
+                    status.textContent = "Live";
+                    status.classList.add("is-live");
+                    if (data.messages.length) messageList.scrollTop = messageList.scrollHeight;
+                } catch (error) {
+                    status.textContent = "Reconnecting…";
+                    status.classList.remove("is-live");
+                    console.error("Unable to refresh community chat:", error);
+                } finally {
+                    polling = false;
+                }
+            }
+
+            messageList.scrollTop = messageList.scrollHeight;
+            loadMessages();
+            window.setInterval(loadMessages, 3000);
+        });
+    </script>
+{% endblock %}

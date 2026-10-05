@@ -1,6 +1,13 @@
 from django.contrib import admin
 
-from .models import Comment, Discussion, Report
+from .models import ChatMessage, Comment, Discussion, Report
+
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ("author", "created_at")
+    search_fields = ("author__username", "body")
+    readonly_fields = ("author", "body", "created_at")
 
 
 class CommentInline(admin.TabularInline):

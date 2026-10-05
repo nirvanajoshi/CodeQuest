@@ -21,7 +21,7 @@ A gamified programming education platform. Users solve coding challenges, take q
 | `gamification` | XP transactions, streaks, badges |
 | `leaderboards` | Global and per-course rankings |
 | `competitions` | Scheduled contests with their own point values and leaderboard |
-| `community` | Per-course discussions, comments, comment reports |
+| `community` | Per-course discussions, comments and comment reports, plus a shared chat that refreshes every three seconds |
 | `notifications` | In-app notifications (badge earned, challenge solved, quiz completed, new comment) |
 | `typing_game` | The default game everyone can play — one typing test, five modes: Classic Sprint, Car Race, Boss Battle, Rocket Launch, Word Rain. Playable without an account; logged-in players earn XP (once per mode per day), unlock the "Speed Typer" badge, and appear on the typing leaderboard. |
 | `arcade` | Simple standalone games — Snake, Memory Match, Reaction Time. Same rules as the typing game: playable without an account, XP once per game per day for logged-in players, own leaderboard. |
@@ -40,7 +40,7 @@ Submissions are graded synchronously: the submitted source runs against the chal
 - Quiz timers are enforced client-side (JS) only; there's no server-side deadline check at submit time.
 - Lesson content can be created and edited in-app by the assigned course instructor; course, challenge, and quiz setup still uses Django admin.
 - Media uploads (avatars, course thumbnails) are served from local disk; a production deployment would need object storage (S3-compatible) since WhiteNoise only handles *static* files, not user uploads.
-- No real-time features (competitions are polling/refresh-based, not WebSocket-driven).
+- Community chat uses periodic polling rather than WebSockets; messages are persisted and new messages are picked up within a few seconds.
 
 ## Setup
 

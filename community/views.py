@@ -1,11 +1,98 @@
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_GET
 
 from courses.models import Course
 from notifications.services import notify
 
-from .forms import CommentForm, DiscussionForm
-from .models import Comment, Discussion, Report
+from .forms import ChatMessageForm, CommentForm, DiscussionForm
+from .models import ChatMessage, Comment, Discussion, Report
+
+
+CHAT_HISTORY_LIMIT = 100
+
+
+@require_GET
+def community_chat(request):
+    messages = list(
+        ChatMessage.objects.select_related("author").order_by("-pk")[:CHAT_HISTORY_LIMIT]
+    )
+    messages.reverse()
+    last_message_id = messages[-1].pk if messages else 0
+
+    return render(
+        request,
+        "community/chat.html",
+        {
+            "chat_messages": messages,
+            "last_message_id": last_message_id,
+            "form": ChatMessageForm(),
+        },
+    )
+
+
+@require_GET
+def community_chat_messages(request):
+    try:
+        after_id = int(request.GET.get("after", "0"))
+    except ValueError:
+        return JsonResponse(
+            {"error": "The 'after' parameter must be a non-negative integer."}, status=400
+        )
+
+    if after_id < 0:
+        return JsonResponse(
+            {"error": "The 'after' parameter must be a non-negative integer."}, status=400
+        )
+
+    messages = (
+        ChatMessage.objects.filter(pk__gt=after_id)
+        .select_related("author")
+        .order_by("pk")[:CHAT_HISTORY_LIMIT]
+    )
+    return JsonResponse(
+        {
+            "messages": [
+                {
+                    "id": message.pk,
+                    "username": message.author.get_username(),
+                    "body": message.body,
+                    "created_at": message.created_at.isoformat(),
+                }
+                for message in messages
+            ]
+        }
+    )
+
+
+@login_required
+def community_chat_send(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST requests are required."}, status=405)
+
+    form = ChatMessageForm(request.POST)
+    if form.is_valid():
+        message = form.save(commit=False)
+        message.author = request.user
+        message.save()
+        return redirect("community_chat")
+
+    messages = list(
+        ChatMessage.objects.select_related("author").order_by("-pk")[:CHAT_HISTORY_LIMIT]
+    )
+    messages.reverse()
+    last_message_id = messages[-1].pk if messages else 0
+    return render(
+        request,
+        "community/chat.html",
+        {
+            "chat_messages": messages,
+            "last_message_id": last_message_id,
+            "form": form,
+        },
+        status=400,
+    )
 
 
 def discussion_list(request, course_slug):

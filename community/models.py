@@ -49,3 +49,17 @@ class Report(models.Model):
 
     def __str__(self):
         return f"Report on comment #{self.comment_id}"
+
+
+class ChatMessage(models.Model):
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_messages"
+    )
+    body = models.TextField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["created_at", "pk"]
+
+    def __str__(self):
+        return f"Chat message by {self.author} at {self.created_at}"

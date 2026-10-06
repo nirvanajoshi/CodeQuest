@@ -5,8 +5,8 @@
 {% block content %}
     <div class="chat-header">
         <div>
-            <h1>Community chat</h1>
-            <p class="text-muted">Talk coding, share ideas, and help each other learn.</p>
+            <h1 class="page-title">Community chat</h1>
+            <p class="page-subtitle">Talk coding, share ideas, and help each other learn.</p>
         </div>
         <span id="chat-status" class="chat-status" role="status">Connecting…</span>
     </div>
@@ -38,12 +38,15 @@
             {% csrf_token %}
             {{ form.body }}
             {{ form.body.errors }}
-            <button type="submit" class="btn">Send</button>
+            <button type="submit" class="btn">
+                Send
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            </button>
         </form>
         <p class="chat-help text-muted">Messages are limited to 1,000 characters.</p>
     {% else %}
         <p class="chat-login-prompt">
-            <a href="{% url 'login' %}?next={{ request.path }}">Log in</a> to join the conversation.
+            <a href="{% url 'login' %}?next={{ request.path }}" class="btn">Log in to join the conversation</a>
         </p>
     {% endif %}
 {% endblock %}

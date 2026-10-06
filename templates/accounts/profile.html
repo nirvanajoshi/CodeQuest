@@ -3,48 +3,112 @@
 {% block title %}{{ user.username }}'s Profile — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>{{ user.username }}'s profile</h1>
-    <a href="{% url 'profile_edit' %}">Edit profile</a>
-    <dl class="profile-details">
-        <dt>Skill level</dt><dd>{{ profile.get_skill_level_display }}</dd>
-        <dt>College</dt><dd>{{ profile.college|default:"—" }}</dd>
-        <dt>Bio</dt><dd>{{ profile.bio|default:"—" }}</dd>
-        <dt>Total XP</dt><dd>{{ profile.total_xp }}</dd>
-        <dt>Current streak</dt><dd>{{ profile.current_streak }} day(s)</dd>
-        <dt>Joined</dt><dd>{{ profile.created_at|date:"M d, Y" }}</dd>
-    </dl>
+    <header class="page-header">
+        <div class="profile-head">
+            <span class="profile-avatar" aria-hidden="true">
+                {% if profile.avatar %}
+                    <img src="{{ profile.avatar.url }}" alt="">
+                {% else %}
+                    {{ user.username|first|upper }}
+                {% endif %}
+            </span>
+            <div>
+                <h1 class="page-title">{{ user.username }}'s profile</h1>
+                <div class="challenge-meta">
+                    <span class="badge">{{ profile.get_skill_level_display }}</span>
+                    <span>Joined {{ profile.created_at|date:"M d, Y" }}</span>
+                </div>
+            </div>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'profile_edit' %}" class="btn-secondary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                Edit profile
+            </a>
+        </div>
+    </header>
 
-    <h2>Badges</h2>
-    {% if badges %}
-        <ul class="badge-list">
-            {% for user_badge in badges %}
-                <li class="badge-item" title="{{ user_badge.badge.description }}">
-                    <span class="badge-icon">{{ user_badge.badge.icon }}</span>
-                    <span>{{ user_badge.badge.name }}</span>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-muted">No badges earned yet — solve a challenge to get started.</p>
-    {% endif %}
+    <section class="grid grid-4" aria-label="Your stats">
+        <div class="stat-card accent">
+            <span class="stat-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Total XP
+            </span>
+            <span class="stat-value">{{ profile.total_xp }}</span>
+        </div>
+        <div class="stat-card warning">
+            <span class="stat-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
+                Current streak
+            </span>
+            <span class="stat-value">{{ profile.current_streak }}<span class="stat-unit"> day(s)</span></span>
+        </div>
+        <div class="stat-card success">
+            <span class="stat-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                Badges
+            </span>
+            <span class="stat-value">{{ badges|length }}</span>
+        </div>
+        <div class="stat-card info">
+            <span class="stat-label">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Skill level
+            </span>
+            <span class="stat-value" style="font-size:1.15rem; line-height:2.6;">{{ profile.get_skill_level_display }}</span>
+        </div>
+    </section>
 
-    <h2>Recent XP</h2>
-    {% if xp_transactions %}
-        <table class="submission-table">
-            <thead>
-                <tr><th>Reason</th><th>Amount</th><th>Date</th></tr>
-            </thead>
-            <tbody>
-                {% for tx in xp_transactions %}
-                    <tr>
-                        <td>{{ tx.reason }}</td>
-                        <td>{{ tx.amount }}</td>
-                        <td>{{ tx.created_at|date:"M d, Y H:i" }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% else %}
-        <p class="text-muted">No XP earned yet.</p>
-    {% endif %}
+    <section class="grid grid-2 mt-6">
+        <div class="panel">
+            <h3 class="mt-0">About</h3>
+            <dl class="profile-details" style="border:none; padding:0; box-shadow:none; background:transparent;">
+                <dt>College</dt><dd>{{ profile.college|default:"—" }}</dd>
+                <dt>Bio</dt><dd>{{ profile.bio|default:"—" }}</dd>
+            </dl>
+        </div>
+
+        <div class="panel">
+            <h3 class="mt-0">Badges</h3>
+            {% if badges %}
+                <ul class="badge-list" style="margin-top:0;">
+                    {% for user_badge in badges %}
+                        <li class="badge-item" title="{{ user_badge.badge.description }}">
+                            <span class="badge-icon">{{ user_badge.badge.icon }}</span>
+                            <span>{{ user_badge.badge.name }}</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted mb-0">No badges earned yet — solve a challenge to get started.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="mt-8" aria-labelledby="xp-heading">
+        <h2 id="xp-heading">Recent XP</h2>
+        {% if xp_transactions %}
+            <div class="table-wrap">
+                <table class="submission-table">
+                    <thead>
+                        <tr><th>Reason</th><th class="num">Amount</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for tx in xp_transactions %}
+                            <tr>
+                                <td>{{ tx.reason }}</td>
+                                <td class="num xp-cell">+{{ tx.amount }}</td>
+                                <td>{{ tx.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <h3>No XP yet</h3>
+                <p>No XP earned yet — solve a challenge or play a game to get started.</p>
+            </div>
+        {% endif %}
+    </section>
 {% endblock %}

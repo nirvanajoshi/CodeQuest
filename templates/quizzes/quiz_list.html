@@ -3,24 +3,50 @@
 {% block title %}Quizzes — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>Quizzes</h1>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Quizzes</h1>
+            <p class="page-subtitle">Test what you've learned — timed quizzes with instant scoring.</p>
+        </div>
+    </header>
 
     {% if page_obj %}
         <ul class="challenge-list">
             {% for quiz in page_obj %}
                 <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge">
+                            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            {{ quiz.course.title }}
+                        </span>
+                    </div>
                     <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
                     <div class="challenge-meta">
-                        <span>{{ quiz.course.title }}</span>
-                        <span>{{ quiz.questions.count }} question(s)</span>
-                        <span>{{ quiz.time_limit }} min</span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            {{ quiz.questions.count }} questions
+                        </span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            {{ quiz.time_limit }} min
+                        </span>
                         <span>Pass: {{ quiz.passing_score }}%</span>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'quiz_detail' quiz.pk %}" class="card-link" aria-label="Open quiz {{ quiz.title }}">
+                            Start Quiz
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
         {% include "partials/pagination.html" %}
     {% else %}
-        <p>No quizzes are available yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <h3>No quizzes yet</h3>
+            <p>No quizzes are available right now.</p>
+        </div>
     {% endif %}
 {% endblock %}

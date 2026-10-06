@@ -3,24 +3,38 @@
 {% block title %}Submission #{{ submission.pk }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'submission_list' %}">&larr; Back to my submissions</a>
+    <p><a href="{% url 'submission_list' %}" class="card-link">&larr; Back to my submissions</a></p>
 
-    <h1>{{ submission.challenge.title }}</h1>
-    <div class="challenge-meta">
-        <span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span>
-        <span>{{ submission.get_language_display }}</span>
-        <span>Score: {{ submission.score }}</span>
-        {% if submission.execution_time %}
-            <span>{{ submission.execution_time }}s</span>
-        {% endif %}
-        <span>{{ submission.submitted_at|date:"M d, Y H:i" }}</span>
-    </div>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ submission.challenge.title }}</h1>
+            <div class="challenge-meta">
+                <span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span>
+                <span>{{ submission.get_language_display }}</span>
+                <span class="xp-pill">Score: {{ submission.score }}</span>
+                {% if submission.execution_time %}
+                    <span>{{ submission.execution_time }}s</span>
+                {% endif %}
+                <span>{{ submission.submitted_at|date:"M d, Y H:i" }}</span>
+            </div>
+        </div>
+        <div class="page-actions">
+            <a href="{% url 'challenge_detail' submission.challenge.slug %}" class="btn-secondary">
+                Back to challenge
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </a>
+        </div>
+    </header>
 
     {% if submission.feedback %}
-        <h2>Judge feedback</h2>
-        <pre class="code-block feedback-block">{{ submission.feedback }}</pre>
+        <section aria-labelledby="feedback-heading">
+            <h2 id="feedback-heading">Judge feedback</h2>
+            <pre class="code-block feedback-block">{{ submission.feedback }}</pre>
+        </section>
     {% endif %}
 
-    <h2>Source code</h2>
-    <pre class="code-block">{{ submission.source_code }}</pre>
+    <section aria-labelledby="source-heading">
+        <h2 id="source-heading">Source code</h2>
+        <pre class="code-block">{{ submission.source_code }}</pre>
+    </section>
 {% endblock %}

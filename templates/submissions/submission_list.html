@@ -3,32 +3,44 @@
 {% block title %}My Submissions — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>My submissions</h1>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">My submissions</h1>
+            <p class="page-subtitle">Every solution you've submitted, with judge status and score.</p>
+        </div>
+    </header>
 
     {% if submissions %}
-        <table class="submission-table">
-            <thead>
-                <tr>
-                    <th>Challenge</th>
-                    <th>Language</th>
-                    <th>Status</th>
-                    <th>Score</th>
-                    <th>Submitted</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for submission in submissions %}
+        <div class="table-wrap">
+            <table class="submission-table">
+                <thead>
                     <tr>
-                        <td><a href="{% url 'submission_detail' submission.pk %}">{{ submission.challenge.title }}</a></td>
-                        <td>{{ submission.get_language_display }}</td>
-                        <td><span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span></td>
-                        <td>{{ submission.score }}</td>
-                        <td>{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+                        <th>Challenge</th>
+                        <th>Language</th>
+                        <th>Status</th>
+                        <th class="num">Score</th>
+                        <th>Submitted</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for submission in submissions %}
+                        <tr>
+                            <td><a href="{% url 'submission_detail' submission.pk %}">{{ submission.challenge.title }}</a></td>
+                            <td>{{ submission.get_language_display }}</td>
+                            <td><span class="badge status-{{ submission.status }}">{{ submission.get_status_display }}</span></td>
+                            <td class="num">{{ submission.score }}</td>
+                            <td>{{ submission.submitted_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>You haven't submitted any solutions yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            <h3>No submissions yet</h3>
+            <p>You haven't submitted any solutions yet. Pick a challenge and start coding.</p>
+            <a href="{% url 'challenge_list' %}" class="btn">Browse challenges</a>
+        </div>
     {% endif %}
 {% endblock %}

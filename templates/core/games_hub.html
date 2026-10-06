@@ -3,40 +3,68 @@
 {% block title %}Games — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>🎮 Games</h1>
-    <p class="text-muted">
-        Take a break from the challenges — everyone can play these, no
-        account required. Log in to earn XP, unlock badges, and land on the
-        leaderboards.
-    </p>
+    <header class="page-header">
+        <div>
+            <span class="eyebrow">Arcade</span>
+            <h1 class="page-title">Games</h1>
+            <p class="page-subtitle">
+                Take a break from the challenges — everyone can play these, no account
+                required. Log in to earn XP, unlock badges, and land on the leaderboards.
+            </p>
+        </div>
+    </header>
 
-    <h2>⌨️ Typing Game</h2>
-    <p class="text-muted">One typing test, five ways to play it.</p>
-    <ul class="challenge-list">
-        {% for mode in typing_modes %}
-            <li class="challenge-card">
-                <a href="{% url 'typing_game_play' mode.key %}" class="challenge-title">
-                    <span class="badge-icon">{{ mode.icon }}</span> {{ mode.label }}
-                </a>
-                <p class="text-muted">{{ mode.description }}</p>
-                <a href="{% url 'typing_game_play' mode.key %}" class="btn">Play</a>
-            </li>
-        {% endfor %}
-    </ul>
-    <p><a href="{% url 'typing_leaderboard' %}">Typing leaderboard &rarr;</a></p>
+    <section aria-labelledby="typing-games">
+        <h2 id="typing-games">
+            <span aria-hidden="true">⌨️</span> Typing Game
+            <a href="{% url 'typing_leaderboard' %}" class="card-link" style="font-size: 0.9rem; margin-left: 8px;">Typing leaderboard &rarr;</a>
+        </h2>
+        <p class="text-muted">One typing test, five ways to play it.</p>
 
-    <h2>🕹️ Arcade</h2>
-    <p class="text-muted">Quick, simple games — no coding required.</p>
-    <ul class="challenge-list">
-        {% for game in arcade_games %}
-            <li class="challenge-card">
-                <a href="{% url 'arcade_play' game.key %}" class="challenge-title">
-                    <span class="badge-icon">{{ game.icon }}</span> {{ game.label }}
-                </a>
-                <p class="text-muted">{{ game.description }}</p>
-                <a href="{% url 'arcade_play' game.key %}" class="btn">Play</a>
-            </li>
-        {% endfor %}
-    </ul>
-    <p><a href="{% url 'arcade_leaderboard' %}">Arcade leaderboard &rarr;</a></p>
+        <ul class="challenge-list">
+            {% for mode in typing_modes %}
+                <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge-icon" aria-hidden="true" style="font-size: 1.6rem;">{{ mode.icon }}</span>
+                    </div>
+                    <a href="{% url 'typing_game_play' mode.key %}" class="challenge-title">{{ mode.label }}</a>
+                    <p class="challenge-desc">{{ mode.description }}</p>
+                    <div class="card-footer">
+                        <a href="{% url 'typing_game_play' mode.key %}" class="card-link" aria-label="Play {{ mode.label }}">
+                            Play now
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </a>
+                        <a href="{% url 'typing_leaderboard' %}?mode={{ mode.key }}" class="card-link text-muted" aria-label="Stats for {{ mode.label }}">Stats</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="mt-8" aria-labelledby="arcade-games">
+        <h2 id="arcade-games">
+            <span aria-hidden="true">🕹️</span> Arcade
+            <a href="{% url 'arcade_leaderboard' %}" class="card-link" style="font-size: 0.9rem; margin-left: 8px;">Arcade leaderboard &rarr;</a>
+        </h2>
+        <p class="text-muted">Quick, simple games — no coding required.</p>
+
+        <ul class="challenge-list">
+            {% for game in arcade_games %}
+                <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge-icon" aria-hidden="true" style="font-size: 1.6rem;">{{ game.icon }}</span>
+                    </div>
+                    <a href="{% url 'arcade_play' game.key %}" class="challenge-title">{{ game.label }}</a>
+                    <p class="challenge-desc">{{ game.description|truncatechars:110 }}</p>
+                    <div class="card-footer">
+                        <a href="{% url 'arcade_play' game.key %}" class="card-link" aria-label="Play {{ game.label }}">
+                            Play now
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </a>
+                        <a href="{% url 'arcade_leaderboard' %}?game={{ game.key }}" class="card-link text-muted" aria-label="Stats for {{ game.label }}">Stats</a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    </section>
 {% endblock %}

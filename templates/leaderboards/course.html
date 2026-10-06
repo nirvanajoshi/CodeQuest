@@ -3,26 +3,40 @@
 {% block title %}{{ course.title }} Leaderboard — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
+    <p><a href="{% url 'course_detail' course.slug %}" class="card-link">&larr; Back to {{ course.title }}</a></p>
 
-    <h1>{{ course.title }} leaderboard</h1>
+    <header class="page-header">
+        <div>
+            <span class="eyebrow">Rankings</span>
+            <h1 class="page-title">{{ course.title }} leaderboard</h1>
+            <p class="page-subtitle">Ranked by best score on each of this course's challenges.</p>
+        </div>
+    </header>
 
     {% if rankings %}
-        <table class="submission-table">
-            <thead>
-                <tr><th>Rank</th><th>User</th><th>Points</th></tr>
-            </thead>
-            <tbody>
-                {% for row in rankings %}
-                    <tr class="{% if row.profile.user == user %}leaderboard-me{% endif %}">
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ row.profile.user.username }}</td>
-                        <td>{{ row.points }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-wrap">
+            <table class="submission-table">
+                <thead>
+                    <tr><th>Rank</th><th>User</th><th class="num">Points</th></tr>
+                </thead>
+                <tbody>
+                    {% for row in rankings %}
+                        <tr class="{% if row.profile.user == user %}leaderboard-me{% endif %}{% if forloop.counter <= 3 %} rank-{{ forloop.counter }}{% endif %}">
+                            <td><span class="rank-cell">#{{ forloop.counter }}</span></td>
+                            <td>
+                                <span class="rank-username">{{ row.profile.user.username }}</span>
+                                {% if row.profile.user == user %}<span class="badge" style="margin-left:8px;">You</span>{% endif %}
+                            </td>
+                            <td class="num xp-cell">{{ row.points }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No submissions for this course's challenges yet.</p>
+        <div class="empty-state">
+            <h3>No submissions yet</h3>
+            <p>No submissions for this course's challenges yet.</p>
+        </div>
     {% endif %}
 {% endblock %}

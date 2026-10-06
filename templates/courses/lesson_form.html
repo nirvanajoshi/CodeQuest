@@ -3,18 +3,25 @@
 {% block title %}{% if lesson %}Edit {{ lesson.title }}{% else %}Add a lesson{% endif %} — {{ course.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
-    <h1>{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
-    <p class="text-muted">Create clear instructions and examples for learners in {{ course.title }}.</p>
+    <p><a href="{% url 'course_detail' course.slug %}" class="card-link">&larr; Back to {{ course.title }}</a></p>
 
-    <form method="post" class="form lesson-form">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{% if lesson %}Edit lesson{% else %}Add a lesson{% endif %}</h1>
+            <p class="page-subtitle">Create clear instructions and examples for learners in {{ course.title }}.</p>
+        </div>
+    </header>
+
+    <form method="post" class="form lesson-form panel" style="max-width: 760px;">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn">Save lesson</button>
-        {% if lesson %}
-            <a class="btn-secondary" href="{% url 'lesson_detail' course.slug lesson.pk %}">Cancel</a>
-        {% else %}
-            <a class="btn-secondary" href="{% url 'course_detail' course.slug %}">Cancel</a>
-        {% endif %}
+        <div class="actions-row mt-4">
+            <button type="submit" class="btn">Save lesson</button>
+            {% if lesson %}
+                <a class="btn-secondary" href="{% url 'lesson_detail' course.slug lesson.pk %}">Cancel</a>
+            {% else %}
+                <a class="btn-secondary" href="{% url 'course_detail' course.slug %}">Cancel</a>
+            {% endif %}
+        </div>
     </form>
 {% endblock %}

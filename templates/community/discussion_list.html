@@ -3,15 +3,24 @@
 {% block title %}Discussions — {{ course.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
+    <p><a href="{% url 'course_detail' course.slug %}" class="card-link">&larr; Back to {{ course.title }}</a></p>
 
-    <h1>Discussions — {{ course.title }}</h1>
-
-    {% if user.is_authenticated %}
-        <a href="{% url 'discussion_create' course.slug %}" class="btn">Start a discussion</a>
-    {% else %}
-        <p><a href="{% url 'login' %}">Login</a> to start a discussion.</p>
-    {% endif %}
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Discussions</h1>
+            <p class="page-subtitle">Questions and conversations for {{ course.title }}.</p>
+        </div>
+        <div class="page-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'discussion_create' course.slug %}" class="btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Start a discussion
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn">Log in to start a discussion</a>
+            {% endif %}
+        </div>
+    </header>
 
     {% if discussions %}
         <ul class="challenge-list">
@@ -21,14 +30,30 @@
                         {{ discussion.title }}
                     </a>
                     <div class="challenge-meta">
-                        <span>by {{ discussion.author.username }}</span>
-                        <span>{{ discussion.comments.count }} comment(s)</span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            by {{ discussion.author.username }}
+                        </span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            {{ discussion.comments.count }} comment(s)
+                        </span>
                         <span>{{ discussion.created_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{% url 'discussion_detail' discussion.pk %}" class="card-link" aria-label="Open discussion {{ discussion.title }}">
+                            Join discussion
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No discussions yet — be the first to start one.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <h3>No discussions yet</h3>
+            <p>Be the first to start one.</p>
+        </div>
     {% endif %}
 {% endblock %}

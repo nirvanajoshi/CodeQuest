@@ -3,12 +3,21 @@
 {% block title %}Edit Profile — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'profile' %}">&larr; Back to profile</a>
+    <p><a href="{% url 'profile' %}" class="card-link">&larr; Back to profile</a></p>
 
-    <h1>Edit profile</h1>
-    <form method="post" enctype="multipart/form-data" class="form">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Edit profile</h1>
+            <p class="page-subtitle">Update your avatar, bio, and other details.</p>
+        </div>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="form panel" style="max-width: 640px;">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn">Save</button>
+        <div class="actions-row">
+            <button type="submit" class="btn">Save changes</button>
+            <a href="{% url 'profile' %}" class="btn-secondary">Cancel</a>
+        </div>
     </form>
 {% endblock %}

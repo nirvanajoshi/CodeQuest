@@ -3,15 +3,29 @@
 {% block title %}About — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>About CodeQuest</h1>
-    <p>
-        CodeQuest is a gamified programming education platform where students learn
-        through coding challenges, quizzes, and competitions — earning XP, badges,
-        and streaks along the way.
-    </p>
-    <p>
-        Solve challenges to earn points, take quizzes to test your understanding,
-        climb the leaderboard, and compete in scheduled competitions against other
-        learners.
-    </p>
+    <header class="page-header">
+        <div>
+            <span class="eyebrow">About</span>
+            <h1 class="page-title">About CodeQuest</h1>
+        </div>
+    </header>
+
+    <section class="grid grid-2">
+        <div class="panel">
+            <h3 class="mt-0">The platform</h3>
+            <p class="text-secondary mb-0">
+                CodeQuest is a gamified programming education platform where students learn
+                through coding challenges, quizzes, and competitions — earning XP, badges,
+                and streaks along the way.
+            </p>
+        </div>
+        <div class="panel">
+            <h3 class="mt-0">How it works</h3>
+            <p class="text-secondary mb-0">
+                Solve challenges to earn points, take quizzes to test your understanding,
+                climb the leaderboard, and compete in scheduled competitions against other
+                learners.
+            </p>
+        </div>
+    </section>
 {% endblock %}

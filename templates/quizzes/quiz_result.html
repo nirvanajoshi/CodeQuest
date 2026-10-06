@@ -3,29 +3,39 @@
 {% block title %}Result — {{ attempt.quiz.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'quiz_detail' attempt.quiz.pk %}">&larr; Back to {{ attempt.quiz.title }}</a>
+    <p><a href="{% url 'quiz_detail' attempt.quiz.pk %}" class="card-link">&larr; Back to {{ attempt.quiz.title }}</a></p>
 
-    <h1>{{ attempt.quiz.title }} — results</h1>
-    <div class="challenge-meta">
-        <span class="badge {% if attempt.passed %}status-accepted{% else %}status-wrong_answer{% endif %}">
-            {{ attempt.score }}% &middot; {% if attempt.passed %}Passed{% else %}Failed{% endif %}
-        </span>
-        <span>Pass mark: {{ attempt.quiz.passing_score }}%</span>
-    </div>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ attempt.quiz.title }} — results</h1>
+            <div class="challenge-meta">
+                <span class="badge {% if attempt.passed %}status-accepted{% else %}status-wrong_answer{% endif %}">
+                    {{ attempt.score }}% &middot; {% if attempt.passed %}Passed{% else %}Failed{% endif %}
+                </span>
+                <span>Pass mark: {{ attempt.quiz.passing_score }}%</span>
+            </div>
+        </div>
+    </header>
 
-    <h2>Answers</h2>
-    <ol class="lesson-list">
-        {% for answer in answers %}
-            <li class="lesson-item">
-                <p>{{ answer.question.question_text }}</p>
-                <p>Your answer: {{ answer.selected_option|upper }}) {{ answer.selected_option_text }}</p>
-                {% if answer.is_correct %}
-                    <span class="badge status-accepted">Correct</span>
-                {% else %}
-                    <span class="badge status-wrong_answer">Incorrect</span>
-                    — correct answer: {{ answer.question.correct_option|upper }}) {{ answer.question.correct_answer_text }}
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ol>
+    <section aria-labelledby="quiz-answers">
+        <h2 id="quiz-answers">Answers</h2>
+        <ol class="lesson-list">
+            {% for answer in answers %}
+                <li class="lesson-item panel">
+                    <p class="mt-0"><strong>{{ answer.question.question_text }}</strong></p>
+                    <p class="text-secondary mb-0">
+                        Your answer: {{ answer.selected_option|upper }}) {{ answer.selected_option_text }}
+                    </p>
+                    {% if answer.is_correct %}
+                        <p class="mt-4 mb-0"><span class="badge status-accepted">Correct</span></p>
+                    {% else %}
+                        <p class="mt-4 mb-0">
+                            <span class="badge status-wrong_answer">Incorrect</span>
+                            <span class="text-muted">— correct answer: {{ answer.question.correct_option|upper }}) {{ answer.question.correct_answer_text }}</span>
+                        </p>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ol>
+    </section>
 {% endblock %}

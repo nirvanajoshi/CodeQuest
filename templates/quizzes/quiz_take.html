@@ -3,15 +3,27 @@
 {% block title %}{{ quiz.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>{{ quiz.title }}</h1>
-    <p>Time limit: {{ quiz.time_limit }} minute(s) &middot; <span id="time-remaining"></span></p>
+    <div style="max-width: 820px; margin: 0 auto;">
+        <header class="page-header">
+            <div>
+                <h1 class="page-title">{{ quiz.title }}</h1>
+                <div class="challenge-meta">
+                    <span class="badge">
+                        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Time limit: {{ quiz.time_limit }} minute(s)
+                    </span>
+                    <span id="time-remaining" class="xp-pill" role="timer" aria-live="polite"></span>
+                </div>
+            </div>
+        </header>
 
-    <form method="post" class="form" id="quiz-form">
-        {% csrf_token %}
-        <input type="hidden" name="attempt_id" value="{{ attempt.pk }}">
-        {{ form.as_p }}
-        <button type="submit" class="btn">Submit quiz</button>
-    </form>
+        <form method="post" class="form panel" id="quiz-form">
+            {% csrf_token %}
+            <input type="hidden" name="attempt_id" value="{{ attempt.pk }}">
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-lg">Submit quiz</button>
+        </form>
+    </div>
 
     <script>
         (function () {

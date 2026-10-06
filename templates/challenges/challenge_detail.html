@@ -3,57 +3,70 @@
 {% block title %}{{ challenge.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'challenge_list' %}">&larr; Back to challenges</a>
+    <p><a href="{% url 'challenge_list' %}" class="card-link">&larr; Back to challenges</a></p>
 
-    <h1>{{ challenge.title }}</h1>
-    <div class="challenge-meta">
-        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
-        <span>{{ challenge.points }} pts</span>
-        <span>{{ challenge.lesson.course.title }} &middot; {{ challenge.lesson.title }}</span>
-    </div>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">{{ challenge.title }}</h1>
+            <div class="challenge-meta">
+                <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                <span class="xp-pill">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {{ challenge.points }} XP
+                </span>
+                <span>{{ challenge.lesson.course.title }} &middot; {{ challenge.lesson.title }}</span>
+            </div>
+        </div>
+        <div class="page-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'submit_solution' challenge.slug %}" class="btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    Submit a solution
+                </a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn">Log in to submit a solution</a>
+            {% endif %}
+        </div>
+    </header>
 
-    {% if user.is_authenticated %}
-        <a href="{% url 'submit_solution' challenge.slug %}" class="btn">Submit a solution</a>
-    {% else %}
-        <p><a href="{% url 'login' %}">Login</a> to submit a solution.</p>
-    {% endif %}
-
-    <section>
-        <h2>Description</h2>
-        <p>{{ challenge.description|linebreaks }}</p>
+    <section class="panel" aria-labelledby="ch-description">
+        <h2 id="ch-description" class="mt-0">Description</h2>
+        <p class="text-secondary">{{ challenge.description|linebreaks }}</p>
     </section>
 
-    {% if challenge.input_format %}
-        <section>
-            <h2>Input format</h2>
-            <p>{{ challenge.input_format|linebreaks }}</p>
-        </section>
-    {% endif %}
+    <div class="grid grid-2 mt-6">
+        {% if challenge.input_format %}
+            <section class="panel" aria-labelledby="ch-input">
+                <h3 id="ch-input" class="mt-0">Input format</h3>
+                <p class="text-secondary">{{ challenge.input_format|linebreaks }}</p>
+            </section>
+        {% endif %}
 
-    {% if challenge.output_format %}
-        <section>
-            <h2>Output format</h2>
-            <p>{{ challenge.output_format|linebreaks }}</p>
-        </section>
-    {% endif %}
+        {% if challenge.output_format %}
+            <section class="panel" aria-labelledby="ch-output">
+                <h3 id="ch-output" class="mt-0">Output format</h3>
+                <p class="text-secondary">{{ challenge.output_format|linebreaks }}</p>
+            </section>
+        {% endif %}
+    </div>
 
     {% if challenge.constraints %}
-        <section>
-            <h2>Constraints</h2>
-            <p>{{ challenge.constraints|linebreaks }}</p>
+        <section class="panel mt-6" aria-labelledby="ch-constraints">
+            <h3 id="ch-constraints" class="mt-0">Constraints</h3>
+            <p class="text-secondary">{{ challenge.constraints|linebreaks }}</p>
         </section>
     {% endif %}
 
     {% if challenge.sample_input or challenge.sample_output %}
-        <section>
-            <h2>Sample</h2>
+        <section class="mt-6" aria-labelledby="ch-sample">
+            <h2 id="ch-sample">Sample</h2>
             <div class="sample-io">
-                <div>
-                    <h3>Input</h3>
+                <div class="panel">
+                    <h4 class="mt-0 text-muted">Input</h4>
                     <pre>{{ challenge.sample_input }}</pre>
                 </div>
-                <div>
-                    <h3>Output</h3>
+                <div class="panel">
+                    <h4 class="mt-0 text-muted">Output</h4>
                     <pre>{{ challenge.sample_output }}</pre>
                 </div>
             </div>

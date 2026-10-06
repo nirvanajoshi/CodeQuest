@@ -3,77 +3,150 @@
 {% block title %}{{ course.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'course_list' %}">&larr; Back to courses</a>
+    <p><a href="{% url 'course_list' %}" class="card-link">&larr; Back to courses</a></p>
 
-    <h1>{{ course.title }}</h1>
-    <div class="challenge-meta">
-        <span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
-        {% if course.instructor %}
-            <span>by {{ course.instructor.username }}</span>
-        {% endif %}
-    </div>
-
-    {% if course.description %}
-        <p>{{ course.description|linebreaks }}</p>
-    {% endif %}
-
-    <a href="{% url 'course_leaderboard' course.slug %}">View course leaderboard</a>
-    &middot;
-    <a href="{% url 'discussion_list' course.slug %}">Discussions</a>
-
-    <h2>Lessons</h2>
-    {% if can_edit_lessons %}
-        <p><a class="btn" href="{% url 'lesson_create' course.slug %}">Add a lesson</a></p>
-    {% endif %}
-    {% if lessons %}
-        <ol class="lesson-list">
-            {% for lesson in lessons %}
-                <li class="lesson-item">
-                    <h3><a href="{% url 'lesson_detail' course.slug lesson.pk %}">{{ lesson.title }}</a></h3>
-                    <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
-                    {% if can_edit_lessons %}
-                        <a href="{% url 'lesson_edit' course.slug lesson.pk %}">Edit lesson</a>
-                    {% endif %}
-
-                    {% if lesson.challenges.all %}
-                        <ul class="challenge-list">
-                            {% for challenge in lesson.challenges.all %}
-                                <li class="challenge-card">
-                                    <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
-                                        {{ challenge.title }}
-                                    </a>
-                                    <div class="challenge-meta">
-                                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
-                                        <span>{{ challenge.points }} pts</span>
-                                    </div>
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">No challenges in this lesson yet.</p>
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ol>
-    {% else %}
-        <p>No lessons have been added to this course yet.</p>
-    {% endif %}
-
-    <h2>Quizzes</h2>
-    {% if quizzes %}
-        <ul class="challenge-list">
-            {% for quiz in quizzes %}
-                <li class="challenge-card">
-                    <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
+    <div class="detail-layout">
+        <div class="detail-main">
+            <header class="page-header">
+                <div>
+                    <h1 class="page-title">{{ course.title }}</h1>
                     <div class="challenge-meta">
-                        <span>{{ quiz.questions.count }} question(s)</span>
-                        <span>{{ quiz.time_limit }} min</span>
-                        <span>Pass: {{ quiz.passing_score }}%</span>
+                        <span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
+                        {% if course.instructor %}
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                by {{ course.instructor.username }}
+                            </span>
+                        {% endif %}
                     </div>
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-muted">No quizzes for this course yet.</p>
-    {% endif %}
+                </div>
+            </header>
+
+            {% if course.description %}
+                <p class="text-secondary">{{ course.description|linebreaks }}</p>
+            {% endif %}
+
+            <div class="actions-row mt-4">
+                <a href="{% url 'course_leaderboard' course.slug %}" class="btn-secondary btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+                    Course leaderboard
+                </a>
+                <a href="{% url 'discussion_list' course.slug %}" class="btn-secondary btn-sm">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Discussions
+                </a>
+            </div>
+
+            <section class="mt-8" aria-labelledby="course-lessons">
+                <h2 id="course-lessons">Lessons</h2>
+
+                {% if can_edit_lessons %}
+                    <p class="mt-4"><a class="btn" href="{% url 'lesson_create' course.slug %}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        Add a lesson
+                    </a></p>
+                {% endif %}
+
+                {% if lessons %}
+                    <ol class="lesson-list">
+                        {% for lesson in lessons %}
+                            <li class="lesson-item panel">
+                                <h3>
+                                    <a href="{% url 'lesson_detail' course.slug lesson.pk %}">{{ lesson.title }}</a>
+                                </h3>
+                                <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
+                                {% if can_edit_lessons %}
+                                    &middot; <a href="{% url 'lesson_edit' course.slug lesson.pk %}" class="card-link">Edit lesson</a>
+                                {% endif %}
+
+                                {% if lesson.challenges.all %}
+                                    <ul class="challenge-list">
+                                        {% for challenge in lesson.challenges.all %}
+                                            <li class="challenge-card">
+                                                <div class="card-top">
+                                                    <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                                                    <span class="xp-pill">
+                                                        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                                                        {{ challenge.points }} XP
+                                                    </span>
+                                                </div>
+                                                <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
+                                                    {{ challenge.title }}
+                                                </a>
+                                                <div class="card-footer">
+                                                    <a href="{% url 'challenge_detail' challenge.slug %}" class="card-link" aria-label="Open challenge {{ challenge.title }}">
+                                                        View Challenge
+                                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                                    </a>
+                                                </div>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-muted">No challenges in this lesson yet.</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ol>
+                {% else %}
+                    <div class="empty-state">
+                        <h3>No lessons yet</h3>
+                        <p>No lessons have been added to this course yet.</p>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="mt-8" aria-labelledby="course-quizzes">
+                <h2 id="course-quizzes">Quizzes</h2>
+                {% if quizzes %}
+                    <ul class="challenge-list">
+                        {% for quiz in quizzes %}
+                            <li class="challenge-card">
+                                <a href="{% url 'quiz_detail' quiz.pk %}" class="challenge-title">{{ quiz.title }}</a>
+                                <div class="challenge-meta">
+                                    <span>{{ quiz.questions.count }} question(s)</span>
+                                    <span>{{ quiz.time_limit }} min</span>
+                                    <span>Pass: {{ quiz.passing_score }}%</span>
+                                </div>
+                                <div class="card-footer">
+                                    <a href="{% url 'quiz_detail' quiz.pk %}" class="card-link" aria-label="Open quiz {{ quiz.title }}">
+                                        View quiz
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No quizzes for this course yet.</p>
+                {% endif %}
+            </section>
+        </div>
+
+        <aside class="sidebar-card" aria-label="Course information">
+            <h3>Course info</h3>
+            <dl class="meta-list">
+                <div><dt>Difficulty</dt><dd><span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span></dd></div>
+                {% if course.instructor %}
+                    <div><dt>Instructor</dt><dd>{{ course.instructor.username }}</dd></div>
+                {% endif %}
+                <div><dt>Lessons</dt><dd>{{ lessons|length }}</dd></div>
+                <div><dt>Quizzes</dt><dd>{{ quizzes|length }}</dd></div>
+            </dl>
+
+            {% if lessons %}
+                <h3 class="mt-6">Lessons in this course</h3>
+                <ul class="sidebar-list">
+                    {% for lesson in lessons %}
+                        <li>
+                            <a href="{% url 'lesson_detail' course.slug lesson.pk %}">
+                                <span>{{ lesson.title }}</span>
+                                <span class="lesson-minutes">{{ lesson.estimated_minutes }} min</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </aside>
+    </div>
 {% endblock %}

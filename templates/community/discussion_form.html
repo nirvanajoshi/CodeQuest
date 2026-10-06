@@ -3,10 +3,16 @@
 {% block title %}New Discussion — {{ course.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'discussion_list' course.slug %}">&larr; Back to discussions</a>
+    <p><a href="{% url 'discussion_list' course.slug %}" class="card-link">&larr; Back to discussions</a></p>
 
-    <h1>Start a discussion</h1>
-    <form method="post" class="form">
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Start a discussion</h1>
+            <p class="page-subtitle">Ask a question or share something interesting with the class.</p>
+        </div>
+    </header>
+
+    <form method="post" class="form panel" style="max-width: 720px;">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit" class="btn">Post</button>

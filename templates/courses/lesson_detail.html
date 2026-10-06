@@ -3,13 +3,16 @@
 {% block title %}{{ lesson.title }} — {{ course.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'course_detail' course.slug %}">&larr; Back to {{ course.title }}</a>
+    <p><a href="{% url 'course_detail' course.slug %}" class="card-link">&larr; Back to {{ course.title }}</a></p>
 
     <header class="lesson-header">
         <div>
-            <p class="text-muted">Lesson {{ lesson.order }} · {{ course.title }}</p>
-            <h1>{{ lesson.title }}</h1>
-            <p class="text-muted">{{ lesson.estimated_minutes }} min read</p>
+            <p class="text-muted mt-0">Lesson {{ lesson.order }} &middot; {{ course.title }}</p>
+            <h1 class="page-title">{{ lesson.title }}</h1>
+            <p class="text-muted">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-2px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {{ lesson.estimated_minutes }} min read
+            </p>
         </div>
         {% if can_edit_lessons %}
             <a class="btn-secondary" href="{% url 'lesson_edit' course.slug lesson.pk %}">Edit lesson</a>
@@ -19,7 +22,7 @@
     <section aria-labelledby="lesson-instructions-heading">
         <h2 id="lesson-instructions-heading">Lesson instructions</h2>
         {% if lesson.content %}
-            <div class="lesson-content">{{ lesson.content|linebreaks }}</div>
+            <div class="lesson-content text-secondary">{{ lesson.content|linebreaks }}</div>
         {% else %}
             <p class="text-muted">No instructions have been added to this lesson yet.</p>
         {% endif %}
@@ -30,17 +33,29 @@
         <ul class="challenge-list">
             {% for challenge in challenges %}
                 <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                        <span class="xp-pill">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            {{ challenge.points }} XP
+                        </span>
+                    </div>
                     <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
                         {{ challenge.title }}
                     </a>
-                    <div class="challenge-meta">
-                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
-                        <span>{{ challenge.points }} pts</span>
+                    <div class="card-footer">
+                        <a href="{% url 'challenge_detail' challenge.slug %}" class="card-link" aria-label="Open challenge {{ challenge.title }}">
+                            View Challenge
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p class="text-muted">No challenges in this lesson yet.</p>
+        <div class="empty-state">
+            <h3>No challenges yet</h3>
+            <p>No challenges in this lesson yet.</p>
+        </div>
     {% endif %}
 {% endblock %}

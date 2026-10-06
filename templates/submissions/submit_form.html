@@ -3,14 +3,27 @@
 {% block title %}Submit — {{ challenge.title }} — CodeQuest{% endblock %}
 
 {% block content %}
-    <a href="{% url 'challenge_detail' challenge.slug %}">&larr; Back to {{ challenge.title }}</a>
+    <p><a href="{% url 'challenge_detail' challenge.slug %}" class="card-link">&larr; Back to {{ challenge.title }}</a></p>
 
-    <h1>Submit a solution</h1>
-    <p class="text-muted">{{ challenge.title }} &middot; {{ challenge.points }} pts</p>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Submit a solution</h1>
+            <div class="challenge-meta">
+                <span>{{ challenge.title }}</span>
+                <span class="xp-pill">
+                    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    {{ challenge.points }} XP
+                </span>
+            </div>
+        </div>
+    </header>
 
-    <form method="post" class="form">
+    <form method="post" class="form" style="max-width: 860px;">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn">Submit</button>
+        <button type="submit" class="btn btn-lg">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Submit solution
+        </button>
     </form>
 {% endblock %}

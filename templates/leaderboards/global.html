@@ -3,24 +3,39 @@
 {% block title %}Leaderboard — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>Global leaderboard</h1>
+    <header class="page-header">
+        <div>
+            <span class="eyebrow">Rankings</span>
+            <h1 class="page-title">Global leaderboard</h1>
+            <p class="page-subtitle">The top 50 learners ranked by total XP. Solve challenges, quizzes, and games to climb.</p>
+        </div>
+    </header>
 
     {% if rankings %}
-        <table class="submission-table">
-            <thead>
-                <tr><th>Rank</th><th>User</th><th>XP</th></tr>
-            </thead>
-            <tbody>
-                {% for profile in rankings %}
-                    <tr class="{% if profile.user == user %}leaderboard-me{% endif %}">
-                        <td>{{ forloop.counter }}</td>
-                        <td>{{ profile.user.username }}</td>
-                        <td>{{ profile.total_xp }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="table-wrap">
+            <table class="submission-table">
+                <thead>
+                    <tr><th>Rank</th><th>User</th><th class="num">XP</th></tr>
+                </thead>
+                <tbody>
+                    {% for profile in rankings %}
+                        <tr class="{% if profile.user == user %}leaderboard-me{% endif %}{% if forloop.counter <= 3 %} rank-{{ forloop.counter }}{% endif %}">
+                            <td><span class="rank-cell">#{{ forloop.counter }}</span></td>
+                            <td>
+                                <span class="rank-username">{{ profile.user.username }}</span>
+                                {% if profile.user == user %}<span class="badge" style="margin-left:8px;">You</span>{% endif %}
+                            </td>
+                            <td class="num xp-cell">{{ profile.total_xp }} XP</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
-        <p>No one has earned any XP yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            <h3>Nobody on the board yet</h3>
+            <p>No one has earned any XP yet. Be the first to solve a challenge.</p>
+        </div>
     {% endif %}
 {% endblock %}

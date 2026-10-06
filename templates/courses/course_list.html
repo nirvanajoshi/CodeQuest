@@ -3,29 +3,49 @@
 {% block title %}Courses — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>Courses</h1>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Courses</h1>
+            <p class="page-subtitle">Structured learning paths — read the lessons, then prove your skills with challenges.</p>
+        </div>
+    </header>
 
     {% if page_obj %}
         <ul class="challenge-list">
             {% for course in page_obj %}
                 <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
+                    </div>
                     <a href="{% url 'course_detail' course.slug %}" class="challenge-title">
                         {{ course.title }}
                     </a>
                     <div class="challenge-meta">
-                        <span class="badge badge-{{ course.difficulty }}">{{ course.get_difficulty_display }}</span>
                         {% if course.instructor %}
-                            <span>by {{ course.instructor.username }}</span>
+                            <span>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                                by {{ course.instructor.username }}
+                            </span>
                         {% endif %}
                     </div>
                     {% if course.description %}
-                        <p>{{ course.description|truncatewords:30 }}</p>
+                        <p class="challenge-desc">{{ course.description|truncatewords:28 }}</p>
                     {% endif %}
+                    <div class="card-footer">
+                        <a href="{% url 'course_detail' course.slug %}" class="card-link" aria-label="Open course {{ course.title }}">
+                            Start learning
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
         {% include "partials/pagination.html" %}
     {% else %}
-        <p>No courses are available yet.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <h3>No courses yet</h3>
+            <p>No courses are available right now. Check back soon.</p>
+        </div>
     {% endif %}
 {% endblock %}

@@ -3,36 +3,63 @@
 {% block title %}Challenges — CodeQuest{% endblock %}
 
 {% block content %}
-    <h1>Challenges</h1>
+    <header class="page-header">
+        <div>
+            <h1 class="page-title">Challenges</h1>
+            <p class="page-subtitle">Test your skills, solve problems, and climb the leaderboard.</p>
+        </div>
+    </header>
 
-    <form method="get" class="filter-form">
-        <input type="text" name="q" placeholder="Search challenges…" value="{{ query }}">
-        <select name="difficulty">
-            <option value="">All difficulties</option>
+    <form method="get" class="filter-form" role="search" aria-label="Filter challenges">
+        <input type="text" name="q" placeholder="Search challenges…" value="{{ query }}" aria-label="Search challenges">
+        <select name="difficulty" aria-label="Filter by difficulty">
+            <option value="">All Difficulties</option>
             {% for value, label in difficulty_choices %}
                 <option value="{{ value }}" {% if difficulty == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        <button type="submit" class="btn">Filter</button>
+        <button type="submit" class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+            Filter
+        </button>
     </form>
 
     {% if page_obj %}
         <ul class="challenge-list">
             {% for challenge in page_obj %}
                 <li class="challenge-card">
+                    <div class="card-top">
+                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
+                        <span class="xp-pill">
+                            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                            {{ challenge.points }} XP
+                        </span>
+                    </div>
                     <a href="{% url 'challenge_detail' challenge.slug %}" class="challenge-title">
                         {{ challenge.title }}
                     </a>
                     <div class="challenge-meta">
-                        <span class="badge badge-{{ challenge.difficulty }}">{{ challenge.get_difficulty_display }}</span>
-                        <span>{{ challenge.points }} pts</span>
-                        <span>{{ challenge.lesson.course.title }}</span>
+                        <span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                            {{ challenge.lesson.course.title }}
+                        </span>
+                    </div>
+                    <p class="challenge-desc">{{ challenge.description|truncatechars:120 }}</p>
+                    <div class="card-footer">
+                        <a href="{% url 'challenge_detail' challenge.slug %}" class="card-link" aria-label="Open challenge {{ challenge.title }}">
+                            View Challenge
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </a>
                     </div>
                 </li>
             {% endfor %}
         </ul>
         {% include "partials/pagination.html" %}
     {% else %}
-        <p>No challenges match your search.</p>
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <h3>No challenges found</h3>
+            <p>No challenges match your search. Try adjusting the filters.</p>
+        </div>
     {% endif %}
 {% endblock %}
